@@ -57,38 +57,32 @@ load_dotenv()
 # ---------------------------
 
 OPERATOR_CATALOG = [
-    # Generic / cross-domain operators
-    "PARSE_GIVENS",          # extract givens/unknowns/targets
-    "NORMALIZE_SYMBOLS",     # introduce consistent variable names
-    "CHOOSE_FRAMEWORK",      # pick approach: Newton/Energy/Equilibrium/Kinematics/etc.
-    "STATE_LAWS",            # state relevant laws/principles/equations
-    "MODEL_ASSUMPTIONS",     # idealizations/constraints
-    "SETUP_EQUATIONS",       # translate model to equations
-    "SUBSTITUTE",            # plug in values/relations
-    "SOLVE",                 # algebraic solve for target
-    "CHECK_DIMENSIONS",      # units/dimension check
-    "SANITY_CHECK",          # limiting cases, magnitude check
-    "FINAL_ANSWER",          # present final result succinctly
-
-    # Physics-leaning (you can prune/add)
-    "DRAW_FBD",              # free-body diagram verbalization
-    "APPLY_NEWTON_2",        # F=ma setup
-    "APPLY_ENERGY",          # conservation of energy / work-energy
-    "APPLY_MOMENTUM",        # impulse/momentum
-    "APPLY_KINEMATICS",      # kinematics relations
-    "APPLY_CIRCULAR",        # centripetal relations
-    "APPLY_ELECTROSTATICS",  # Coulomb / field / potential
-    "APPLY_CIRCUITS",        # KCL/KVL/equivalent resistance, etc.
-    "APPLY_THERMODYNAMICS",  # 1st law / PV work, etc.
+    "ESTABLISH_FRAMEWORK",   # diagrams, frames, approximations, representations
+    "IDENTIFY_RELATION",     # pre-existing law/theorem/definition/algorithm
+    "APPLY_RELATION",        # substitute/transform/solve using a relation
+    "SAVE_RESULT",           # store an intermediate quantity/relationship/constraint
+    "APPLY_RESULT",          # reuse a previously saved result
 ]
+
 
 # Skeleton step JSON schema we instruct the model to output:
 # {
 #   "op": "<OPERATOR_NAME>",
-#   "in": { ... },     # inputs / referenced variables
+#   "in": { ... },     # inputs / referenced variables / context
 #   "out": { ... },    # outputs produced by this step
-#   "note": "short human-readable note"
+#   "note": "short human-readable note (<= 20 words)",
+#   "difficulty": {
+#       "identify": int | null,   # 1–10, only for IDENTIFY_RELATION
+#       "apply": int | null       # 1–10, only for APPLY_RELATION
+#   }
 # }
+#
+# Additional required structure:
+# - For IDENTIFY_RELATION: out MUST include "relation_name" (short canonical name),
+#   and MAY include "relation_form" (symbolic form).
+# - For SAVE_RESULT: out MUST include "result_type" in {"quantity","relationship","constraint","definition","lemma"},
+#   and SHOULD include "result_name".
+
 
 
 # ---------------------------
@@ -164,30 +158,53 @@ def build_prompt(question: str, solution: str) -> str:
     ops = ", ".join(OPERATOR_CATALOG)
     return f"""You convert worked solutions into *operatorized solution skeletons*.
 
-Rules:
-- Output MUST be valid JSON (no markdown).
+OUTPUT FORMAT:
+- Output MUST be valid JSON (no markdown, no trailing comments).
 - Output MUST match the schema:
   {{
     "operators_used": ["OP1", "OP2", ...],
     "skeleton": [
-      {{"op": "OP_NAME", "in": {{}}, "out": {{}}, "note": "..." }},
+      {{
+        "op": "OP_NAME",
+        "in": {{}},
+        "out": {{}},
+        "note": "...",
+        "difficulty": {{"identify": int|null, "apply": int|null}}
+      }},
       ...
     ],
-    "final": {{"target": "...", "value": "...", "units": "...", "expression": "..."}}
+    "final": {{"target": "...", "value": "...", "expression": "..."}}
   }}
 
-Operator constraints:
+OPERATOR CONSTRAINTS:
 - Each skeleton step MUST use an operator from this allowed list:
   [{ops}]
 - Use as FEW steps as possible while preserving the logical pathway.
-- Prefer "SETUP_EQUATIONS" then "SOLVE" instead of many micro-steps.
-- "in" and "out" should be small dictionaries with symbolic names (e.g., m, k, v0).
-- "note" should be short (<= 20 words).
-- Include CHECK_DIMENSIONS and SANITY_CHECK when appropriate (esp. physics).
+- "note" should be short (<= 20 words), specific, and not verbose.
 
-Interpretation:
-- The question provides the target.
-- The worked solution provides the method; you must *abstract it* into operators.
+SEMANTICS:
+- ESTABLISH_FRAMEWORK: diagrams/frames/assumptions/approximations/representation choices.
+- IDENTIFY_RELATION: cite a *pre-existing* law/theorem/definition/algorithm.
+    - out MUST include:
+        - "relation_name": a canonical, specific short name (e.g., "Raoult's Law", "Michaelis–Menten kinetics", "Bayes' Theorem").
+    - out MAY include:
+        - "relation_form": concise symbolic form (e.g., "P_i = x_i P_i^0").
+    - difficulty.identify MUST be an integer 1–10; difficulty.apply MUST be null.
+- APPLY_RELATION: compute/derive by applying a relation (substitute, transform, solve).
+    - difficulty.apply MUST be an integer 1–10; difficulty.identify MUST be null.
+- SAVE_RESULT: store a problem-specific derived fact (NOT a law).
+    - out MUST include:
+        - "result_type": one of ["quantity","relationship","constraint","definition","lemma"]
+    - out SHOULD include:
+        - "result_name": short label (e.g., "x_eq", "rate_expression", "V_final")
+    - note MUST start with exactly: "Save <result_type>:" where <result_type> == out.result_type (e.g., "Save quantity: x_eq").
+    - difficulty fields MUST be null.
+- APPLY_RESULT: reuse a previously saved result.
+    - difficulty fields MUST be null.
+
+IMPORTANT DISTINCTION:
+- Laws/relationships are global, pre-existing knowledge.
+- Results are problem-local derived facts and MUST NOT be promoted into laws.
 
 QUESTION:
 {question}
@@ -195,6 +212,7 @@ QUESTION:
 WORKED SOLUTION:
 {solution}
 """
+
 
 
 # ---------------------------
@@ -255,16 +273,99 @@ def validate_skeleton(obj: Dict[str, Any]) -> Tuple[bool, str]:
         return False, "Top-level is not an object."
     if "skeleton" not in obj or not isinstance(obj["skeleton"], list):
         return False, "Missing or invalid 'skeleton' list."
+
+    allowed_result_types = {"quantity", "relationship", "constraint", "definition", "lemma"}
+
     for i, step in enumerate(obj["skeleton"]):
         if not isinstance(step, dict):
             return False, f"Step {i} is not an object."
+
         op = step.get("op")
         if op not in OPERATOR_CATALOG:
             return False, f"Step {i} has invalid operator: {op}"
+
         if "in" not in step or "out" not in step:
             return False, f"Step {i} missing 'in' or 'out'."
+
+        # Difficulty rules
+        diff = step.get("difficulty", {})
+        id_diff = diff.get("identify") if isinstance(diff, dict) else None
+        ap_diff = diff.get("apply") if isinstance(diff, dict) else None
+
+        if op == "IDENTIFY_RELATION":
+            out = step.get("out", {})
+            if not isinstance(out, dict):
+                return False, f"Step {i} out must be an object."
+            rn = out.get("relation_name")
+            if not isinstance(rn, str) or not rn.strip() or len(rn.strip()) > 60:
+                return False, f"Step {i} IDENTIFY_RELATION requires short out.relation_name."
+            if not isinstance(id_diff, int) or not (1 <= id_diff <= 10):
+                return False, f"Step {i} IDENTIFY_RELATION requires difficulty.identify 1–10."
+            if ap_diff is not None:
+                return False, f"Step {i} IDENTIFY_RELATION must have difficulty.apply = null."
+        elif op == "APPLY_RELATION":
+            if not isinstance(ap_diff, int) or not (1 <= ap_diff <= 10):
+                return False, f"Step {i} APPLY_RELATION requires difficulty.apply 1–10."
+            if id_diff is not None:
+                return False, f"Step {i} APPLY_RELATION must have difficulty.identify = null."
+        elif op == "SAVE_RESULT":
+            out = step.get("out", {})
+            if not isinstance(out, dict):
+                return False, f"Step {i} out must be an object."
+            rt = out.get("result_type")
+            if rt not in allowed_result_types:
+                return False, f"Step {i} SAVE_RESULT requires out.result_type in {sorted(allowed_result_types)}."
+            # note should indicate kind of result saved
+            note = step.get("note", "")
+            if not isinstance(note, str) or not note.strip():
+                return False, f"Step {i} SAVE_RESULT requires a non-empty note."
+            normalized = note.strip().lower()
+            if not normalized.startswith(f"save {rt}:"):
+                return False, f"Step {i} SAVE_RESULT note must start with \"Save {rt}:\"."
+            if id_diff is not None or ap_diff is not None:
+                return False, f"Step {i} SAVE_RESULT must have difficulty fields null."
+        else:
+            # Other ops: difficulty must be null
+            if id_diff is not None or ap_diff is not None:
+                return False, f"Step {i} '{op}' must have difficulty fields null."
+
     return True, "ok"
 
+
+
+
+def postprocess_skeleton(obj: Dict[str, Any]) -> Dict[str, Any]:
+    """Light deterministic fixes to satisfy strict formatting requirements."""
+    if not isinstance(obj, dict):
+        return obj
+    sk = obj.get("skeleton")
+    if not isinstance(sk, list):
+        return obj
+    for step in sk:
+        if not isinstance(step, dict):
+            continue
+        if step.get("op") != "SAVE_RESULT":
+            continue
+        out = step.get("out")
+        if not isinstance(out, dict):
+            continue
+        rt = out.get("result_type")
+        if not isinstance(rt, str):
+            continue
+        note = step.get("note")
+        normalized = note.strip().lower() if isinstance(note, str) else ""
+        if not normalized.startswith(f"save {rt}:"):
+            rn = out.get("result_name")
+            rn_str = rn.strip() if isinstance(rn, str) and rn.strip() else "result"
+            step["note"] = f"Save {rt}: {rn_str}"
+        # Ensure difficulty nulls for SAVE_RESULT
+        diff = step.get("difficulty")
+        if not isinstance(diff, dict):
+            step["difficulty"] = {"identify": None, "apply": None}
+        else:
+            diff["identify"] = None
+            diff["apply"] = None
+    return obj
 
 def force_repair_prompt(bad_json_text: str) -> str:
     ops = ", ".join(OPERATOR_CATALOG)
@@ -322,6 +423,7 @@ def process_items(
                     prompt=prompt,
                     seed=seed,
                 )
+                obj = postprocess_skeleton(obj)
                 ok, msg = validate_skeleton(obj)
                 if not ok:
                     raise ValueError(f"Skeleton failed validation: {msg}")
