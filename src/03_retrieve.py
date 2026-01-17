@@ -1,25 +1,35 @@
 #!/usr/bin/env python3
 """
-03_retrieve.py  (ANCHOR-CENTERED SAMPLING)
+03_retrieve.py  (DUAL-RAG, SEMI-CONVERGENT)
 
 Goal:
-  Anchors define centers of the skeleton manifold.
-  Retrieval samples near-but-not-too-near (annulus) for faithfulness without copying,
-  plus optional tail exploration for rare/hard/weird-but-valid.
+  1) Sample TARGET SKELETONS from the skeleton manifold using anchors:
+     - annulus sampling (near-but-not-too-near) for faithfulness without copying
+     - optional tail sampling for rare/hard/weird-but-valid regions
+  2) For each target skeleton, retrieve EXEMPLARS from the QUESTION/CHOICE manifold:
+     - pick neighbors in question-embedding space using the *corresponding* question embedding (same id),
+       which is the simplest "semi-convergent" bridge without learning a cross-space mapper.
+     - attach exemplar question text + *compressed solution traces* (skeleton_text) for mapping.
 
-Outputs JSONL "targets" that will be used for generation.
-Important: We do NOT output exemplar question text. We only output skeleton specs + control metadata.
+Output JSONL "targets" with:
+  {
+    id, mode, anchor_id, anchor_distance,
+    skeleton_text, skeleton (optional),
+    topic, difficulty,
+    exemplars: [{id, question_text, skeleton_text, topic, difficulty}, ...]
+  }
 """
 
 import argparse
 import json
-from typing import Dict, List, Tuple
+import random
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
 
-def read_jsonl(path: str) -> List[Dict]:
-    out = []
+def read_jsonl(path: str) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -33,127 +43,233 @@ def l2_normalize(mat: np.ndarray) -> np.ndarray:
     return mat / denom
 
 
-def cosine_dist_matrix(A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    # assumes both normalized
-    sims = A @ B.T
-    return 1.0 - sims
+def topk_cosine_sim(query: np.ndarray, mat: np.ndarray, k: int) -> List[int]:
+    """
+    query: (d,) normalized
+    mat: (n,d) normalized
+    returns indices of top-k by similarity
+    """
+    sims = mat @ query
+    if k >= len(sims):
+        return list(np.argsort(-sims))
+    idx = np.argpartition(-sims, k)[:k]
+    idx = idx[np.argsort(-sims[idx])]
+    return idx.tolist()
 
 
-def main():
+def mmr_select(
+    query: np.ndarray,
+    cand_idx: List[int],
+    mat: np.ndarray,
+    k: int,
+    lambda_mult: float = 0.7,
+) -> List[int]:
+    """
+    Maximal Marginal Relevance selection on cosine similarity.
+    query, mat assumed normalized.
+    """
+    if not cand_idx:
+        return []
+    selected: List[int] = []
+    cand_set = set(cand_idx)
+
+    sims_q = {i: float(mat[i] @ query) for i in cand_idx}
+
+    while len(selected) < k and cand_set:
+        if not selected:
+            best = max(cand_set, key=lambda i: sims_q[i])
+            selected.append(best)
+            cand_set.remove(best)
+            continue
+
+        def score(i: int) -> float:
+            sim_to_query = sims_q[i]
+            sim_to_sel = max(float(mat[i] @ mat[j]) for j in selected)
+            return lambda_mult * sim_to_query - (1 - lambda_mult) * sim_to_sel
+
+        best = max(cand_set, key=score)
+        selected.append(best)
+        cand_set.remove(best)
+
+    return selected
+
+
+def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--skeleton_embedded", required=True, help="skeleton_embedded.jsonl from step 02")
-    ap.add_argument("--anchors", required=True, help="anchors.json from step 02")
-    ap.add_argument("-n", type=int, default=25, help="How many target skeletons to sample")
-    ap.add_argument("--p_tail", type=float, default=0.20, help="Probability of tail (rare/hard) sampling")
-    ap.add_argument("--band_lo", type=float, default=0.10, help="Lower distance quantile from anchor (avoid near-duplicates)")
-    ap.add_argument("--band_hi", type=float, default=0.35, help="Upper distance quantile from anchor (keep faithfulness)")
-    ap.add_argument("--strip_embedding", action="store_true", help="Do not include embedding vectors in output")
+    ap.add_argument("--question_embedded", required=True, help="question_embedded.jsonl from step 02")
+    ap.add_argument("--anchors", required=True, help="anchors.json (list of skeleton ids or {id:...} objects)")
+    ap.add_argument("-n", "--num_targets", type=int, default=25)
+    ap.add_argument("--annulus_min", type=float, default=0.10, help="min cosine distance from anchor")
+    ap.add_argument("--annulus_max", type=float, default=0.28, help="max cosine distance from anchor")
+    ap.add_argument("--tail_frac", type=float, default=0.20, help="fraction sampled from far tail")
+    ap.add_argument("--tail_min", type=float, default=0.35, help="min cosine distance for tail sampling")
+    ap.add_argument("--k_exemplars", type=int, default=4, help="question exemplars per target")
+    ap.add_argument("--mmr_lambda", type=float, default=0.7, help="MMR lambda for exemplar selection")
+    ap.add_argument("--match_topic", action="store_true", help="filter exemplars to same topic when possible")
+    ap.add_argument("--match_difficulty", action="store_true", help="filter exemplars to same difficulty when possible")
+    ap.add_argument("--strip_embedding", action="store_true", help="omit embeddings in output targets")
+    ap.add_argument("--seed", type=int, default=0, help="random seed (0 means random)")
     args = ap.parse_args()
 
-    sk = read_jsonl(args.skeleton_embedded)
-    with open(args.anchors, "r", encoding="utf-8") as f:
-        anchor_blob = json.load(f)
+    if args.seed:
+        random.seed(args.seed)
+        np.random.seed(args.seed)
 
-    id_to_idx = {r["id"]: i for i, r in enumerate(sk)}
+    skel_rows = read_jsonl(args.skeleton_embedded)
+    q_rows = read_jsonl(args.question_embedded)
 
-    anchor_ids = [a["id"] for a in anchor_blob["anchors"]]
-    anchor_dens = np.array([a["density"] for a in anchor_blob["anchors"]], dtype=np.float64)
+    # Build id maps
+    skel_by_id: Dict[str, Dict[str, Any]] = {r["id"]: r for r in skel_rows if "id" in r}
+    q_by_id: Dict[str, Dict[str, Any]] = {r["id"]: r for r in q_rows if "id" in r}
 
-    # density-weighted anchor pick (softmax-ish)
-    # (shift for numerical stability)
-    w = anchor_dens - anchor_dens.max()
-    w = np.exp(w)
-    w = w / (w.sum() + 1e-12)
+    # Matrices
+    skel_ids = [r["id"] for r in skel_rows]
+    skel_mat = np.array([r["embedding"] for r in skel_rows], dtype=np.float32)
+    skel_mat = l2_normalize(skel_mat)
 
-    # embeddings
-    X = np.array([r["embedding"] for r in sk], dtype=np.float32)
-    Xn = l2_normalize(X)
+    q_ids = [r["id"] for r in q_rows]
+    q_mat = np.array([r["embedding"] for r in q_rows], dtype=np.float32)
+    q_mat = l2_normalize(q_mat)
 
-    # global density proxy for tail sampling: use mean kNN distance approx via similarities
-    # brute force: use average distance to top 20 neighbors
-    sims = Xn @ Xn.T
-    np.fill_diagonal(sims, -1.0)
-    k = min(20, len(sk) - 1)
-    topk = np.partition(sims, -k, axis=1)[:, -k:]
-    mean_dist = (1.0 - topk).mean(axis=1)
-    # low-density = large mean_dist
-    tail_rank = np.argsort(-mean_dist)  # descending mean_dist => rarer
+    # Index lookups
+    skel_index_by_id = {sid: i for i, sid in enumerate(skel_ids)}
+    q_index_by_id = {qid: i for i, qid in enumerate(q_ids)}
 
-    rng = np.random.default_rng()
+    # Load anchors as list of ids (preferred). If anchors contain objects, accept {"id":...}
+    # Supports both JSON (single list) and JSONL (one object per line) formats
+    try:
+        with open(args.anchors, "r", encoding="utf-8") as f:
+            anchors_obj = json.load(f)
+        # Try JSON format first (single object/list)
+        if not isinstance(anchors_obj, list):
+            raise ValueError("anchors file must contain a list or be JSONL format")
+    except json.JSONDecodeError:
+        # If JSON parsing fails, try JSONL format
+        anchors_obj = read_jsonl(args.anchors)
+    
+    anchor_ids = []
+    for a in anchors_obj:
+        if isinstance(a, str):
+            anchor_ids.append(a)
+        elif isinstance(a, dict) and "id" in a:
+            anchor_ids.append(a["id"])
+    anchor_ids = [aid for aid in anchor_ids if aid in skel_by_id]
 
-    selected_ids = []
-    used = set()
+    if not anchor_ids:
+        raise RuntimeError("No valid anchors found (ids not present in skeleton index).")
 
-    for _ in range(args.n):
-        do_tail = (rng.random() < args.p_tail)
+    # Precompute anchor vectors in skeleton space
+    anchor_vecs: List[Tuple[str, np.ndarray]] = []
+    for aid in anchor_ids:
+        anchor_vecs.append((aid, skel_mat[skel_index_by_id[aid]]))
 
-        if do_tail:
-            # pick one from top of tail_rank, with mild randomness
-            # sample from first ~25% of tail list
-            cap = max(5, int(0.25 * len(tail_rank)))
-            idx = int(rng.integers(0, cap))
-            cand_i = int(tail_rank[idx])
-            rid = sk[cand_i]["id"]
-            if rid in used:
-                # fallback linear scan
-                for cand_i in tail_rank[:cap]:
-                    rid = sk[int(cand_i)]["id"]
-                    if rid not in used:
-                        break
-            mode = "tail"
-            anchor_id = None
-            anchor_dist = None
+    def sample_from_anchor(aid: str, avec: np.ndarray, mode: str) -> Tuple[str, float]:
+        """
+        Returns (picked_skeleton_id, anchor_distance)
+        """
+        sims = skel_mat @ avec
+        dists = 1.0 - sims
 
+        if mode == "annulus":
+            mask = (dists >= args.annulus_min) & (dists <= args.annulus_max)
+        else:  # tail
+            mask = dists >= args.tail_min
+
+        idxs = np.where(mask)[0].tolist()
+        if not idxs:
+            # fallback: nearest non-self
+            idxs = np.argsort(dists).tolist()
+            idxs = [i for i in idxs if skel_ids[i] != aid][:50]
+
+        pick_i = random.choice(idxs)
+        pick_id = skel_ids[pick_i]
+        return pick_id, float(dists[pick_i])
+
+    def pick_exemplars_for_target(target_id: str, k: int) -> List[Dict[str, Any]]:
+        """
+        Semi-convergent mapping:
+          use the target's *own* question embedding (same id) to find neighboring question stems.
+        """
+        if k <= 0:
+            return []
+
+        target_skel = skel_by_id.get(target_id, {})
+        topic = target_skel.get("topic")
+        diff = target_skel.get("difficulty")
+
+        # Query embedding in question space: same id if available
+        if target_id in q_index_by_id:
+            q_query = q_mat[q_index_by_id[target_id]]
         else:
-            # manifold mode: pick anchor (weighted), then sample candidate in an annulus around it
-            anchor_id = rng.choice(anchor_ids, p=w)
-            a_i = id_to_idx[anchor_id]
+            q_query = q_mat[random.randrange(len(q_mat))]
 
-            d = 1.0 - (Xn @ Xn[a_i])  # cosine distance to anchor (vector)
-            # exclude anchor itself
-            d[a_i] = np.inf
+        # Candidate pool indices with optional filters
+        cand = list(range(len(q_ids)))
+        if args.match_topic and topic is not None:
+            cand2 = [i for i in cand if q_rows[i].get("topic") == topic]
+            if len(cand2) >= max(k * 2, 10):
+                cand = cand2
+        if args.match_difficulty and diff is not None:
+            cand2 = [i for i in cand if q_rows[i].get("difficulty") == diff]
+            if len(cand2) >= max(k * 2, 10):
+                cand = cand2
 
-            # choose distance band by quantiles
-            lo = float(np.quantile(d[np.isfinite(d)], args.band_lo))
-            hi = float(np.quantile(d[np.isfinite(d)], args.band_hi))
-            band = np.where((d >= lo) & (d <= hi))[0]
-            if len(band) == 0:
-                # fallback: nearest non-self
-                cand_i = int(np.argmin(d))
-            else:
-                cand_i = int(rng.choice(band))
+        # Top candidates by similarity, exclude self, then MMR for diversity
+        cand_top_local = topk_cosine_sim(q_query, q_mat[cand], k=min(50, len(cand)))
+        cand_top_idx = [cand[i] for i in cand_top_local]
+        cand_top_idx = [i for i in cand_top_idx if q_ids[i] != target_id]
 
-            rid = sk[cand_i]["id"]
-            if rid in used:
-                # quick fallback: pick another in band
-                for _try in range(20):
-                    cand_i = int(rng.choice(band)) if len(band) else int(np.argmin(d))
-                    rid = sk[cand_i]["id"]
-                    if rid not in used:
-                        break
+        chosen = mmr_select(q_query, cand_top_idx, q_mat, k=k, lambda_mult=args.mmr_lambda)
 
-            mode = "manifold"
-            anchor_dist = float(d[cand_i])
+        exemplars: List[Dict[str, Any]] = []
+        for i in chosen:
+            ex_id = q_ids[i]
+            ex_q = q_rows[i]
+            ex_s = skel_by_id.get(ex_id, {})
+            exemplars.append(
+                {
+                    "id": ex_id,
+                    "question_text": ex_q.get("question_text") or ex_q.get("question") or "",
+                    "skeleton_text": ex_s.get("skeleton_text") or "",
+                    "topic": ex_q.get("topic"),
+                    "difficulty": ex_q.get("difficulty"),
+                }
+            )
+        return exemplars
 
-        used.add(rid)
-        selected_ids.append((rid, mode, anchor_id, anchor_dist))
+    used_targets: set = set()
 
-    # output targets
-    for rid, mode, anchor_id, anchor_dist in selected_ids:
-        r = sk[id_to_idx[rid]]
-        out = {
-            "id": r["id"],
+    for _ in range(args.num_targets):
+        mode = "tail" if random.random() < args.tail_frac else "annulus"
+        aid, avec = random.choice(anchor_vecs)
+        picked_id, adist = sample_from_anchor(aid, avec, mode=mode)
+
+        # Avoid duplicates if possible
+        tries = 0
+        while picked_id in used_targets and tries < 10:
+            aid, avec = random.choice(anchor_vecs)
+            picked_id, adist = sample_from_anchor(aid, avec, mode=mode)
+            tries += 1
+        used_targets.add(picked_id)
+
+        r = skel_by_id[picked_id]
+        out: Dict[str, Any] = {
+            "id": picked_id,
             "mode": mode,
-            "anchor_id": anchor_id,
-            "anchor_distance": anchor_dist,
+            "anchor_id": aid,
+            "anchor_distance": adist,
             "skeleton": r.get("skeleton"),
             "skeleton_text": r.get("skeleton_text"),
-            # include optional metadata
             "topic": r.get("topic"),
             "difficulty": r.get("difficulty"),
+            # Attach exemplars (question/choice manifold) + compressed traces (mapping)
+            "exemplars": pick_exemplars_for_target(picked_id, args.k_exemplars),
         }
+
         if not args.strip_embedding:
             out["embedding"] = r.get("embedding")
+
         print(json.dumps(out, ensure_ascii=False))
 
 
