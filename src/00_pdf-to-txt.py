@@ -27,7 +27,7 @@ def extract_page_text_blocks(page) -> str:
     return "\n".join(b[4] for b in blocks if isinstance(b[4], str))
 
 
-def render_question_crop(page, qnum: int, page_idx: int, out_dir: Path) -> List[str]:
+def render_question_crop(page, qnum: int, page_idx: int, out_dir: Path, name_prefix: str) -> List[str]:
     """Render a clipped region around the question number to avoid full-page images."""
     hits = page.search_for(f"{qnum}.")
     if not hits:
@@ -44,7 +44,7 @@ def render_question_crop(page, qnum: int, page_idx: int, out_dir: Path) -> List[
     if rect.is_empty:
         return []
 
-    name = f"page{page_idx+1:02d}_q{qnum:02d}.png"
+    name = f"{name_prefix}_page{page_idx+1:02d}_q{qnum:02d}.png"
     out_path = out_dir / name
     pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), clip=rect)
     pix.save(out_path)
@@ -52,7 +52,7 @@ def render_question_crop(page, qnum: int, page_idx: int, out_dir: Path) -> List[
     return [name]
 
 
-def extract_page_images(doc, page_idx: int, out_dir: Path) -> List[str]:
+def extract_page_images(doc, page_idx: int, out_dir: Path, name_prefix: str) -> List[str]:
     page = doc.load_page(page_idx)
     image_paths = []
 
@@ -63,7 +63,7 @@ def extract_page_images(doc, page_idx: int, out_dir: Path) -> List[str]:
         if pix.n > 4:  # CMYK → RGB
             pix = fitz.Pixmap(fitz.csRGB, pix)
 
-        name = f"page{page_idx+1:02d}_img{img_idx+1}.png"
+        name = f"{name_prefix}_page{page_idx+1:02d}_img{img_idx+1}.png"
         out_path = out_dir / name
         pix.save(out_path)
         pix = None
@@ -92,13 +92,10 @@ def split_questions(full_text: str) -> List[Dict]:
     return questions
 
 
-def parse_pdf(pdf_path: Path, out_root: Path):
+def parse_pdf(pdf_path: Path, text_fh, jsonl_fh, image_dir: Path):
     doc = fitz.open(pdf_path)
 
-    txt_out = out_root / (pdf_path.stem + ".txt")
-    jsonl_out = out_root / (pdf_path.stem + ".jsonl")
-    fig_dir = out_root / (pdf_path.stem + "_figures")
-    fig_dir.mkdir(parents=True, exist_ok=True)
+    name_prefix = pdf_path.stem
 
     page_texts = []
     page_figures = {}
@@ -109,7 +106,7 @@ def parse_pdf(pdf_path: Path, out_root: Path):
         page_text = extract_page_text_blocks(page)
         page_texts.append(page_text)
 
-        figs = extract_page_images(doc, p, fig_dir)
+        figs = extract_page_images(doc, p, image_dir, name_prefix)
         page_figures[p] = figs
 
     full_text = "\n\n".join(page_texts)
@@ -123,7 +120,9 @@ def parse_pdf(pdf_path: Path, out_root: Path):
         if i < len(page_texts) - 1:
             cursor += 2  # account for the "\n\n" joiner
 
-    txt_out.write_text(full_text, encoding="utf-8")
+    text_fh.write(f"\n\n### source: {pdf_path.name}\n")
+    text_fh.write(full_text)
+    text_fh.flush()
 
     # ---- split into questions ----
     questions = split_questions(full_text)
@@ -150,15 +149,17 @@ def parse_pdf(pdf_path: Path, out_root: Path):
             if not attached_figs:
                 for p_idx in question_pages:
                     page = doc.load_page(p_idx)
-                    crop_imgs = render_question_crop(page, q["question_number"], p_idx, fig_dir)
+                    crop_imgs = render_question_crop(
+                        page, q["question_number"], p_idx, image_dir, name_prefix
+                    )
                     attached_figs.extend(crop_imgs)
 
             # As a final fallback, render full pages for coverage (still avoids missing diagrams)
             if not attached_figs:
                 for p_idx in question_pages:
                     page = doc.load_page(p_idx)
-                    name = f"page{p_idx+1:02d}_render.png"
-                    out_path = fig_dir / name
+                    name = f"{name_prefix}_page{p_idx+1:02d}_render.png"
+                    out_path = image_dir / name
                     if not out_path.exists():
                         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
                         pix.save(out_path)
@@ -175,9 +176,9 @@ def parse_pdf(pdf_path: Path, out_root: Path):
         })
 
     # ---- write JSONL ----
-    with jsonl_out.open("w", encoding="utf-8") as f:
-        for row in enriched:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    for row in enriched:
+        jsonl_fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    jsonl_fh.flush()
 
     doc.close()
 
@@ -196,11 +197,17 @@ def main():
     pdf_dir = Path(args.pdf_dir)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    image_dir = out_dir / "figures"
+    image_dir.mkdir(parents=True, exist_ok=True)
 
     pdfs = pdf_dir.rglob("*.pdf") if args.recursive else pdf_dir.glob("*.pdf")
 
-    for pdf in pdfs:
-        parse_pdf(pdf, out_dir)
+    all_text_path = out_dir / "all_text.txt"
+    all_jsonl_path = out_dir / "all_questions.jsonl"
+    with all_text_path.open("w", encoding="utf-8") as text_fh, \
+            all_jsonl_path.open("w", encoding="utf-8") as jsonl_fh:
+        for pdf in pdfs:
+            parse_pdf(pdf, text_fh, jsonl_fh, image_dir)
 
     print("Done.")
 
