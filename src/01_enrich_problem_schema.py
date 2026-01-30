@@ -1,24 +1,28 @@
 #!/usr/bin/env python3
 """
-enrich_problem_schema.py
+01_enrich_problem_schema_paper.py  (PAPER-FAITHFUL SCHEMA ENRICHMENT + OPERATOR LIMITING)
 
-Given "raw" problem JSON objects like:
-{
-  "id": "...",
-  "question_number": 2,
-  "question_text": "2. ... (A) ...",
-  "has_diagram": false,
-  "diagram_files": [],
-  "source_pdf": "exam1-2015-1-8.pdf"
-}
+Input:  raw JSONL from 00_pdf-to-txt.py
+Output: enriched JSONL with:
+  - problem.stem + problem.choices
+  - analysis.skeleton: structured object
+  - analysis.* tags (concepts/skills/difficulty/structure_tags)
+  - IMPORTANT: operator set is LIMITED + normalized to a fixed ontology
 
-This script:
-- parses stem + choices (MCQ)
-- builds the normalized schema (problem + analysis + checks-lite)
-- calls an LLM to produce a structured solution skeleton + concepts/tags/difficulty
-- (optionally) produces a short "final form" expression and quick validation flags
+Why this exists:
+- Your draft paper claims a predefined operator set and skeletons that are compact, comparable,
+  and retrieval-friendly. This script enforces that contract.
 
-It does NOT store embeddings in the JSON (by design).
+Operator ontology (default):
+  IDENTIFY_GIVENS
+  IDENTIFY_RELATION
+  APPLY_RELATION
+  SAVE_RESULT
+  CHECK
+
+You can adjust:
+  --allowed_ops IDENTIFY_GIVENS,IDENTIFY_RELATION,APPLY_RELATION,SAVE_RESULT,CHECK
+  --max_steps 8
 """
 
 from __future__ import annotations
@@ -27,19 +31,16 @@ import argparse
 import json
 import os
 import re
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Load environment variables from .env file
 load_dotenv()
-
-# Check that API key is set
 if not os.environ.get("OPENAI_API_KEY"):
-    raise RuntimeError("OPENAI_API_KEY is not set. Please set it in .env file or environment variable.")
+    raise RuntimeError("OPENAI_API_KEY is not set. Please set it in .env or environment variables.")
+
 
 # ----------------------------
 # Heuristics / parsing
@@ -49,42 +50,31 @@ CHOICE_RE = re.compile(
     r"\(\s*([A-E])\s*\)\s*(.+?)(?=(?:\n\s*\(\s*[A-E]\s*\)\s)|\Z)",
     re.DOTALL,
 )
-
 LEADING_QNUM_RE = re.compile(r"^\s*\d+\.\s*", re.DOTALL)
-
 FOOTER_JUNK_RE = re.compile(
     r"(Copyright.*?$|F\s*=\s*ma Exam.*?$|\n\s*\d+\s*$)",
     re.IGNORECASE | re.MULTILINE,
 )
-
 FIGURE_HINT_RE = re.compile(r"(figure|diagram|shown|shown below)", re.IGNORECASE)
 
 
 def clean_question_text(qtext: str) -> str:
-    # remove common footer/header junk and trailing page numbers
-    s = qtext.replace("\r\n", "\n").replace("\r", "\n")
+    s = (qtext or "").replace("\r\n", "\n").replace("\r", "\n")
     s = FOOTER_JUNK_RE.sub("", s)
-    s = s.strip()
-    return s
+    return s.strip()
 
 
 def split_stem_and_choices(qtext: str) -> Tuple[str, List[str], Optional[str]]:
-    """
-    Returns: (stem, choices_list, answer_key_if_in_text)
-    We assume answer key is NOT present in the question_text; so answer_key is None.
-    """
     s = clean_question_text(qtext)
     s = LEADING_QNUM_RE.sub("", s).strip()
 
     matches = list(CHOICE_RE.finditer(s))
     if not matches:
-        # not MCQ or parsing failed; treat entire thing as stem
         return s.strip(), [], None
 
     first_choice_start = matches[0].start()
     stem = s[:first_choice_start].strip()
 
-    # Build choice strings in original order A..E as present
     choices = []
     for m in matches:
         letter = m.group(1).strip()
@@ -95,16 +85,78 @@ def split_stem_and_choices(qtext: str) -> Tuple[str, List[str], Optional[str]]:
 
 
 def infer_domain(raw: Dict[str, Any]) -> str:
-    # minimal heuristic: you can override by adding raw["domain"]
-    if "domain" in raw and raw["domain"]:
+    if raw.get("domain"):
         d = str(raw["domain"]).lower()
         if d in ("fma", "usnco"):
             return d
     src = (raw.get("source_pdf") or "").lower()
     if "f" in src and "ma" in src:
         return "fma"
-    # fallback default
     return "fma"
+
+
+# ----------------------------
+# Operator limiting / normalization
+# ----------------------------
+
+def _kw(s: str) -> str:
+    return re.sub(r"[^a-z]+", " ", (s or "").lower()).strip()
+
+def normalize_op(op: str, allowed: List[str]) -> str:
+    """
+    Map arbitrary model ops -> allowed ontology.
+    Conservative, keyword-based.
+    """
+    a = set(allowed)
+    o = (op or "").strip()
+
+    if o in a:
+        return o
+
+    k = _kw(o)
+    if any(w in k for w in ["given", "known", "assume", "define", "set up", "setup", "identify given"]):
+        return "IDENTIFY_GIVENS" if "IDENTIFY_GIVENS" in a else allowed[0]
+    if any(w in k for w in ["law", "relation", "equation", "principle", "use", "identify relation", "choose equation"]):
+        return "IDENTIFY_RELATION" if "IDENTIFY_RELATION" in a else allowed[0]
+    if any(w in k for w in ["apply", "compute", "solve", "substitute", "plug", "derive", "combine", "manipulate"]):
+        return "APPLY_RELATION" if "APPLY_RELATION" in a else allowed[0]
+    if any(w in k for w in ["result", "final", "conclude", "answer", "save", "select choice"]):
+        return "SAVE_RESULT" if "SAVE_RESULT" in a else allowed[0]
+    if any(w in k for w in ["check", "units", "sanity", "dimension", "limit", "sign"]):
+        return "CHECK" if "CHECK" in a else allowed[0]
+
+    # fallback: safest "APPLY_RELATION" if present, else first allowed
+    return "APPLY_RELATION" if "APPLY_RELATION" in a else allowed[0]
+
+
+def compress_steps(steps: List[Dict[str, Any]], allowed_ops: List[str], max_steps: int) -> List[Dict[str, Any]]:
+    """
+    - normalize op values into a fixed operator set
+    - collapse consecutive duplicate ops (keep the first, concatenate text)
+    - truncate to max_steps
+    """
+    cleaned: List[Dict[str, Any]] = []
+    prev_op: Optional[str] = None
+
+    for st in steps or []:
+        if not isinstance(st, dict):
+            continue
+        op = normalize_op(str(st.get("op", "")), allowed_ops)
+        txt = str(st.get("text", "")).strip()
+        if not txt:
+            continue
+
+        if cleaned and prev_op == op:
+            cleaned[-1]["text"] = (cleaned[-1]["text"].rstrip(".") + "; " + txt).strip()
+        else:
+            cleaned.append({"op": op, "text": txt})
+            prev_op = op
+
+        if len(cleaned) >= max_steps:
+            break
+
+    # Ensure at least 3 steps when possible (paper-friendly)
+    return cleaned
 
 
 # ----------------------------
@@ -113,11 +165,10 @@ def infer_domain(raw: Dict[str, Any]) -> str:
 
 SYSTEM = """You are an expert STEM competition solution analyst.
 
-Given a problem stem and choices, produce a STRUCTURED solution skeleton (no full arithmetic),
-plus concept tags and structural tags. Keep it concise, but complete enough to uniquely define
-the solution pathway.
+Return ONLY strict JSON.
 
-Return ONLY valid JSON matching the requested keys.
+You MUST use ONLY the allowed operator set for each step's `op`.
+You MUST keep the number of steps short and abstract (no full arithmetic, no long derivations).
 """
 
 USER_TMPL = """Domain: {domain}
@@ -131,24 +182,28 @@ Choices:
 Diagrams present: {has_diagram}
 Diagram files: {diagram_files}
 
+ALLOWED_OPS (you MUST use one of these exact strings for every step.op):
+{allowed_ops_block}
+
 Return JSON with keys:
 - skeleton: object with keys:
-  - givens: list of strings
+  - givens: list of strings (0-8)
   - target: string
-  - steps: list of objects {{op: string, text: string}}
-  - final_form: string (final expression or computation plan; no plugging numbers if avoidable)
+  - laws: list of strings (0-6) (very short names like "work-energy", "ideal gas", "torque balance")
+  - steps: list of objects {{op: string, text: string}} (3-{max_steps} steps)
+  - final_form: string (final expression or computation plan; keep abstract)
 - concepts: list of short strings (2-8)
 - skills: list of short strings (0-8)
 - difficulty: integer 1-10
 - structure_tags: list of short strings (0-8)
 - units_expected: boolean
 - diagram_required: boolean
-- quick_checks: list of short strings (0-6)  (e.g., "avg speed must be < 80 and > 50")
+- quick_checks: list of short strings (0-6)
 
 Guidelines:
-- If domain=fma: use physics language (kinematics/dynamics/energy/etc.).
-- For multiple-choice numeric: units_expected=true.
-- diagram_required should be true ONLY if the solution depends on diagram information not fully described in text.
+- Do not compute numeric answers; keep it symbolic/structural.
+- steps.text should be <= 25 words each on average.
+- diagram_required true ONLY if information is missing without the figure.
 """
 
 client = OpenAI()
@@ -161,6 +216,8 @@ def llm_enrich(
     has_diagram: bool,
     diagram_files: List[str],
     model: str,
+    allowed_ops: List[str],
+    max_steps: int,
 ) -> Dict[str, Any]:
     choices_block = "\n".join(choices) if choices else "(none)"
     user = USER_TMPL.format(
@@ -169,7 +226,10 @@ def llm_enrich(
         choices_block=choices_block,
         has_diagram=str(bool(has_diagram)).lower(),
         diagram_files=json.dumps(diagram_files),
+        allowed_ops_block="\n".join(f"- {o}" for o in allowed_ops),
+        max_steps=max_steps,
     )
+
     resp = client.responses.create(
         model=model,
         input=[
@@ -179,8 +239,6 @@ def llm_enrich(
         temperature=0.2,
     )
     text = resp.output_text
-
-    # tolerant JSON parse: take first {...} block
     i, j = text.find("{"), text.rfind("}")
     if i < 0 or j < 0 or j <= i:
         raise ValueError(f"Model did not return JSON. Output was:\n{text}")
@@ -191,17 +249,10 @@ def llm_enrich(
 # Schema builder
 # ----------------------------
 
-def build_schema(
-    raw: Dict[str, Any],
-    *,
-    corpus_name: str = "unknown",
-    year: Optional[int] = None,
-    variant: Optional[str] = None,
-) -> Dict[str, Any]:
+def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Optional[int] = None, variant: Optional[str] = None) -> Dict[str, Any]:
     domain = infer_domain(raw)
     stem, choices, answer_key = split_stem_and_choices(raw.get("question_text", ""))
 
-    # diagram object list (we don't have bbox yet in your raw JSON, so store file + page=None)
     diagrams = []
     for f in raw.get("diagram_files", []) or []:
         diagrams.append(
@@ -215,7 +266,7 @@ def build_schema(
             }
         )
 
-    out = {
+    return {
         "id": raw["id"],
         "domain": domain,
         "source": {
@@ -223,145 +274,114 @@ def build_schema(
             "year": year,
             "variant": variant,
             "pdf": raw.get("source_pdf"),
-            "page_range": None,  # fill later if you capture page numbers
+            "page_range": None,
         },
         "problem": {
             "stem": stem,
             "choices": choices,
-            "answer_key": answer_key,  # usually None at this stage
-            "units_expected": None,    # filled by LLM
+            "answer_key": answer_key,
+            "units_expected": None,
             "diagrams": diagrams,
         },
         "analysis": {
-            "skeleton": None,          # filled by LLM (structured object)
+            "skeleton": None,
             "concepts": [],
             "skills": [],
             "difficulty": None,
             "structure_tags": [],
             "diagram_required": bool(raw.get("has_diagram")) or bool(FIGURE_HINT_RE.search(stem)),
         },
-        # keep only lightweight checks/flags here
-        "checks": {
-            "quick_checks": [],
-            "validators": [],
-            "flags": [],
-        },
-        # pointers only; embeddings live elsewhere
+        "checks": {"quick_checks": [], "validators": [], "flags": []},
         "retrieval": {
             "embed_views": {
                 "question": "stem + choices",
-                "skeleton": "analysis.skeleton (string-joined)",
-                "diagram_alt": "problem.diagrams[].alt_text (joined)",
+                "skeleton": "analysis.skeleton (operator-limited, linearizable)",
             },
             "embedding_ref": None,
         },
     }
-    return out
 
 
-def skeleton_to_joined_text(skel_obj: Dict[str, Any]) -> str:
-    # Useful later for embedding the skeleton in a stable way
-    givens = skel_obj.get("givens", [])
-    target = skel_obj.get("target", "")
-    steps = skel_obj.get("steps", [])
-    final_form = skel_obj.get("final_form", "")
-    lines = []
-    if givens:
-        lines.append("GIVENS: " + "; ".join(givens))
-    if target:
-        lines.append("TARGET: " + target)
-    if steps:
-        for s in steps:
-            op = s.get("op", "").strip()
-            tx = s.get("text", "").strip()
-            if op and tx:
-                lines.append(f"{op}: {tx}")
-            elif tx:
-                lines.append(tx)
-    if final_form:
-        lines.append("FINAL_FORM: " + final_form)
-    return "\n".join(lines).strip()
-
-
-def enrich_one(raw: Dict[str, Any], model: str, corpus_name: str) -> Dict[str, Any]:
-    doc = build_schema(raw, corpus_name=corpus_name)
-
-    llm = llm_enrich(
-        domain=doc["domain"],
-        stem=doc["problem"]["stem"],
-        choices=doc["problem"]["choices"],
-        has_diagram=bool(doc["problem"]["diagrams"]),
-        diagram_files=[d["file"] for d in doc["problem"]["diagrams"]],
-        model=model,
-    )
-
-    # Fill schema from LLM
-    doc["analysis"]["skeleton"] = llm["skeleton"]
-    doc["analysis"]["concepts"] = llm.get("concepts", [])
-    doc["analysis"]["skills"] = llm.get("skills", [])
-    doc["analysis"]["difficulty"] = llm.get("difficulty", None)
-    doc["analysis"]["structure_tags"] = llm.get("structure_tags", [])
-    doc["problem"]["units_expected"] = llm.get("units_expected", None)
-    doc["analysis"]["diagram_required"] = llm.get("diagram_required", doc["analysis"]["diagram_required"])
-    doc["checks"]["quick_checks"] = llm.get("quick_checks", [])
-
-    # Light validators suggestions based on domain
-    if doc["domain"] == "fma":
-        doc["checks"]["validators"] = ["dimensional", "sanity_bounds"]
-    else:
-        doc["checks"]["validators"] = ["sanity_bounds"]
-
-    # Optional: store a canonical skeleton text for embedding later (still not embeddings)
-    doc["analysis"]["_skeleton_text"] = skeleton_to_joined_text(doc["analysis"]["skeleton"])
-
-    return doc
-
-
-# ----------------------------
-# CLI
-# ----------------------------
-
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--in", dest="in_path", required=True, help="Input JSONL or single JSON file")
-    ap.add_argument("--out", dest="out_path", required=True, help="Output JSONL")
-    ap.add_argument("--model", default="gpt-4.1-mini", help="LLM model for skeleton/tagging")
-    ap.add_argument("--corpus", default="unknown", help="Corpus name to store in source.corpus")
-    args = ap.parse_args()
-
-    in_path = Path(args.in_path)
-    out_path = Path(args.out_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Load input: either a single JSON object or JSONL
-    raws: List[Dict[str, Any]] = []
-    txt = in_path.read_text(encoding="utf-8").strip()
-    lines = txt.splitlines()
-    
-    # If there's only one line, try parsing as single JSON
-    # Otherwise, treat as JSONL (one JSON object per line)
-    if len(lines) == 1:
-        try:
-            raws = [json.loads(txt)]
-        except json.JSONDecodeError:
-            # If single JSON parse fails, treat as JSONL anyway
-            for line in lines:
-                line = line.strip()
-                if line:
-                    raws.append(json.loads(line))
-    else:
-        # Multiple lines = JSONL format
-        for line in lines:
+def read_jsonl(path: str) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
             line = line.strip()
             if line:
-                raws.append(json.loads(line))
+                rows.append(json.loads(line))
+    return rows
 
-    with out_path.open("w", encoding="utf-8") as f:
-        for raw in raws:
-            enriched = enrich_one(raw, model=args.model, corpus_name=args.corpus)
-            f.write(json.dumps(enriched, ensure_ascii=False) + "\n")
 
-    print(f"Done. Wrote: {out_path}")
+def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--input", required=True, help="raw JSONL from 00_pdf-to-txt.py")
+    ap.add_argument("--out", default="enriched.jsonl")
+    ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument("--corpus", default="unknown")
+    ap.add_argument("--year", type=int, default=0)
+    ap.add_argument("--variant", default="")
+    ap.add_argument("--max_steps", type=int, default=8)
+    ap.add_argument("--allowed_ops", default="IDENTIFY_GIVENS,IDENTIFY_RELATION,APPLY_RELATION,SAVE_RESULT,CHECK")
+    ap.add_argument("--limit", type=int, default=0, help="0 = no limit")
+    args = ap.parse_args()
+
+    allowed_ops = [s.strip() for s in args.allowed_ops.split(",") if s.strip()]
+    if not allowed_ops:
+        raise ValueError("allowed_ops must be a non-empty comma-separated list.")
+
+    rows = read_jsonl(args.input)
+    if args.limit and args.limit > 0:
+        rows = rows[: args.limit]
+
+    out_rows: List[Dict[str, Any]] = []
+    for raw in rows:
+        schema = build_schema(raw, corpus_name=args.corpus, year=(args.year or None), variant=(args.variant or None))
+        domain = schema["domain"]
+        stem = schema["problem"]["stem"]
+        choices = schema["problem"]["choices"]
+        has_diagram = bool(raw.get("has_diagram"))
+        diagram_files = raw.get("diagram_files", []) or []
+
+        enrich = llm_enrich(
+            domain=domain,
+            stem=stem,
+            choices=choices,
+            has_diagram=has_diagram,
+            diagram_files=diagram_files,
+            model=args.model,
+            allowed_ops=allowed_ops,
+            max_steps=args.max_steps,
+        )
+
+        sk = enrich.get("skeleton") or {}
+        steps = sk.get("steps") or []
+        sk["steps"] = compress_steps(steps, allowed_ops=allowed_ops, max_steps=args.max_steps)
+        # enforce laws short list
+        laws = sk.get("laws") or []
+        if isinstance(laws, list):
+            sk["laws"] = [str(x).strip()[:80] for x in laws[:6] if str(x).strip()]
+        else:
+            sk["laws"] = []
+
+        schema["analysis"]["skeleton"] = sk
+        schema["analysis"]["concepts"] = enrich.get("concepts") or []
+        schema["analysis"]["skills"] = enrich.get("skills") or []
+        schema["analysis"]["difficulty"] = enrich.get("difficulty")
+        schema["analysis"]["structure_tags"] = enrich.get("structure_tags") or []
+        schema["problem"]["units_expected"] = enrich.get("units_expected")
+        schema["analysis"]["diagram_required"] = bool(enrich.get("diagram_required"))
+        schema["checks"]["quick_checks"] = enrich.get("quick_checks") or []
+
+        out_rows.append(schema)
+
+    write_jsonl(args.out, out_rows)
+    print(f"Wrote {len(out_rows)} enriched rows -> {args.out}")
 
 
 if __name__ == "__main__":

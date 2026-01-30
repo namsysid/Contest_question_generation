@@ -5,7 +5,7 @@
 Outputs:
   - skeleton_embedded.jsonl  (id + skeleton fields + embedding)
   - question_embedded.jsonl  (id + question fields + embedding)
-  - anchors.json             (top-density anchor ids; NOT to be shown to the model)
+  - anchors.jsonl            (top-density anchor ids; NOT to be shown to the model)
 
 Anchor idea:
   High-density skeletons define the manifold center.
@@ -184,7 +184,7 @@ def main():
     ap.add_argument("--k_density", type=int, default=20, help="kNN size for density proxy")
     ap.add_argument("--out_skel", default="skeleton_embedded.jsonl")
     ap.add_argument("--out_q", default="question_embedded.jsonl")
-    ap.add_argument("--out_anchors", default="anchors.json")
+    ap.add_argument("--out_anchors", default="anchors.jsonl")
     args = ap.parse_args()
 
     load_dotenv()
@@ -254,14 +254,7 @@ def main():
             "density": float(dens[i]),
         })
 
-    with open(args.out_anchors, "w", encoding="utf-8") as f:
-        json.dump({
-            "anchor_frac": args.anchor_frac,
-            "k_density": args.k_density,
-            "n_total": n,
-            "n_anchors": n_anchor,
-            "anchors": anchors
-        }, f, ensure_ascii=False, indent=2)
+    write_jsonl(args.out_anchors, anchors)
 
     print(f"Wrote: {args.out_skel}, {args.out_q}, {args.out_anchors}")
     print(f"Anchors: {n_anchor}/{n} ({args.anchor_frac:.2%})")
