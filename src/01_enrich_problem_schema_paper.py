@@ -31,6 +31,8 @@ import argparse
 import json
 import os
 import re
+import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -206,7 +208,7 @@ Guidelines:
 - diagram_required true ONLY if information is missing without the figure.
 """
 
-client = OpenAI()
+client = OpenAI(timeout=20.0, max_retries=3)
 
 
 def llm_enrich(
@@ -230,15 +232,17 @@ def llm_enrich(
         max_steps=max_steps,
     )
 
-    resp = client.responses.create(
+    resp = client.chat.completions.create(
         model=model,
-        input=[
+        messages=[
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": user},
         ],
         temperature=0.2,
     )
-    text = resp.output_text
+    text = resp.choices[0].message.content
+    if text is None:
+        raise ValueError("Model returned empty content")
     i, j = text.find("{"), text.rfind("}")
     if i < 0 or j < 0 or j <= i:
         raise ValueError(f"Model did not return JSON. Output was:\n{text}")
@@ -318,6 +322,11 @@ def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
+def write_jsonl_line(f, row: Dict[str, Any]) -> None:
+    f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    f.flush()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True, help="raw JSONL from 00_pdf-to-txt.py")
@@ -329,6 +338,7 @@ def main() -> None:
     ap.add_argument("--max_steps", type=int, default=8)
     ap.add_argument("--allowed_ops", default="IDENTIFY_GIVENS,IDENTIFY_RELATION,APPLY_RELATION,SAVE_RESULT,CHECK")
     ap.add_argument("--limit", type=int, default=0, help="0 = no limit")
+    ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
 
     allowed_ops = [s.strip() for s in args.allowed_ops.split(",") if s.strip()]
@@ -339,49 +349,68 @@ def main() -> None:
     if args.limit and args.limit > 0:
         rows = rows[: args.limit]
 
-    out_rows: List[Dict[str, Any]] = []
-    for raw in rows:
-        schema = build_schema(raw, corpus_name=args.corpus, year=(args.year or None), variant=(args.variant or None))
-        domain = schema["domain"]
-        stem = schema["problem"]["stem"]
-        choices = schema["problem"]["choices"]
-        has_diagram = bool(raw.get("has_diagram"))
-        diagram_files = raw.get("diagram_files", []) or []
+    total = len(rows)
+    if args.debug:
+        print(f"[write] open (truncate): {args.out}", file=sys.stderr, flush=True)
+    with open(args.out, "w", encoding="utf-8") as out_f:
+        for i, raw in enumerate(rows, start=1):
+            schema = build_schema(raw, corpus_name=args.corpus, year=(args.year or None), variant=(args.variant or None))
+            domain = schema["domain"]
+            stem = schema["problem"]["stem"]
+            choices = schema["problem"]["choices"]
+            has_diagram = bool(raw.get("has_diagram"))
+            diagram_files = raw.get("diagram_files", []) or []
 
-        enrich = llm_enrich(
-            domain=domain,
-            stem=stem,
-            choices=choices,
-            has_diagram=has_diagram,
-            diagram_files=diagram_files,
-            model=args.model,
-            allowed_ops=allowed_ops,
-            max_steps=args.max_steps,
-        )
+            if args.debug:
+                rid = raw.get("id", "?")
+                print(f"[{i}/{total}] id={rid} calling model={args.model}", file=sys.stderr, flush=True)
+                t0 = time.time()
 
-        sk = enrich.get("skeleton") or {}
-        steps = sk.get("steps") or []
-        sk["steps"] = compress_steps(steps, allowed_ops=allowed_ops, max_steps=args.max_steps)
-        # enforce laws short list
-        laws = sk.get("laws") or []
-        if isinstance(laws, list):
-            sk["laws"] = [str(x).strip()[:80] for x in laws[:6] if str(x).strip()]
-        else:
-            sk["laws"] = []
+            if args.debug:
+                print(f"[{i}/{total}] id={raw.get('id','?')} parsing model response", file=sys.stderr, flush=True)
 
-        schema["analysis"]["skeleton"] = sk
-        schema["analysis"]["concepts"] = enrich.get("concepts") or []
-        schema["analysis"]["skills"] = enrich.get("skills") or []
-        schema["analysis"]["difficulty"] = enrich.get("difficulty")
-        schema["analysis"]["structure_tags"] = enrich.get("structure_tags") or []
-        schema["problem"]["units_expected"] = enrich.get("units_expected")
-        schema["analysis"]["diagram_required"] = bool(enrich.get("diagram_required"))
-        schema["checks"]["quick_checks"] = enrich.get("quick_checks") or []
+            enrich = llm_enrich(
+                domain=domain,
+                stem=stem,
+                choices=choices,
+                has_diagram=has_diagram,
+                diagram_files=diagram_files,
+                model=args.model,
+                allowed_ops=allowed_ops,
+                max_steps=args.max_steps,
+            )
 
-        out_rows.append(schema)
+            if args.debug:
+                dt = time.time() - t0
+                print(f"[{i}/{total}] id={raw.get('id','?')} model done in {dt:.2f}s", file=sys.stderr, flush=True)
+                print(f"[{i}/{total}] id={raw.get('id','?')} post-process start", file=sys.stderr, flush=True)
 
-    write_jsonl(args.out, out_rows)
-    print(f"Wrote {len(out_rows)} enriched rows -> {args.out}")
+            sk = enrich.get("skeleton") or {}
+            steps = sk.get("steps") or []
+            sk["steps"] = compress_steps(steps, allowed_ops=allowed_ops, max_steps=args.max_steps)
+            # enforce laws short list
+            laws = sk.get("laws") or []
+            if isinstance(laws, list):
+                sk["laws"] = [str(x).strip()[:80] for x in laws[:6] if str(x).strip()]
+            else:
+                sk["laws"] = []
+
+            schema["analysis"]["skeleton"] = sk
+            schema["analysis"]["concepts"] = enrich.get("concepts") or []
+            schema["analysis"]["skills"] = enrich.get("skills") or []
+            schema["analysis"]["difficulty"] = enrich.get("difficulty")
+            schema["analysis"]["structure_tags"] = enrich.get("structure_tags") or []
+            schema["problem"]["units_expected"] = enrich.get("units_expected")
+            schema["analysis"]["diagram_required"] = bool(enrich.get("diagram_required"))
+            schema["checks"]["quick_checks"] = enrich.get("quick_checks") or []
+
+            write_jsonl_line(out_f, schema)
+            if args.debug:
+                print(f"[{i}/{total}] id={raw.get('id','?')} wrote", file=sys.stderr, flush=True)
+
+    if args.debug:
+        print(f"[write] done: {args.out}", file=sys.stderr, flush=True)
+    print(f"Wrote {total} enriched rows -> {args.out}")
 
 
 if __name__ == "__main__":

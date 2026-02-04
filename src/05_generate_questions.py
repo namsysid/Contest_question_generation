@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import time
 from typing import Any, Dict, List, Optional
 
@@ -75,6 +76,10 @@ def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
+def write_jsonl_line(f, row: Dict[str, Any]) -> None:
+    f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    f.flush()
+
 def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: float = 0.2) -> Dict[str, Any]:
     resp = client.chat.completions.create(
         model=model,
@@ -107,21 +112,23 @@ def build_prompt(bundle: Dict[str, Any], target_skeleton_text: str, max_q_ex: in
 
     return f"""You are given:
 
-1) TARGET_SKELETON_TEXT (authoritative reasoning plan; must follow):
+1) TARGET_SKELETON_TEXT (authoritative reasoning plan; must be assisted by):
 {target_skeleton_text}
 
 2) QUESTION EXEMPLARS (question space; style/semantics priors ONLY; must not be copied):
 {q_section}
 
-3) PAIRED EXEMPLARS (mapping demonstrations; must not be copied):
+3) PAIRED EXEMPLARS (mapping demonstrations between solutions and problems; must not be copied):
 {p_section}
 
 TASK:
-Generate ONE NEW multiple-choice problem that is faithful to TARGET_SKELETON_TEXT.
-- Invent a NEW scenario and NEW wording (no copying).
+Generate ONE NEW hard f=ma multiple-choice problem that is largely faithful to TARGET_SKELETON_TEXT. The problems must be complex, difficult, and interesting.
+- Invent a NEW, hard scenario and NEW wording (no copying).
 - Use different variable names than any exemplars.
 - Exactly 5 choices A-E (confusable distractors).
 - Include at least 2 distractors corresponding to common mistakes implied by the skeleton (missing factor, sign, wrong component, etc.).
+- When writing the question, assume the reader does not know anything of the solution path. Do not expose more than what is absolutely necessary to solve the problem. Keep concepts that can get inferred, even with some challenge, up to the reader.
+- The question should follow the rough pipeline of the solution skeleton. You can deviate to make the problem more complex, interesting, and difficult
 
 OUTPUT strict JSON schema:
 {{
@@ -194,9 +201,10 @@ def main() -> None:
     ap.add_argument("--verify_model", default="", help="gatekeeper model (defaults to --model)")
     ap.add_argument("--max_q_exemplars", type=int, default=4)
     ap.add_argument("--max_paired_exemplars", type=int, default=3)
-    ap.add_argument("--repair_max", type=int, default=2)
+    ap.add_argument("--repair_max", type=int, default=1)
     ap.add_argument("--sleep", type=float, default=0.0)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
 
     verify_model = args.verify_model or args.model
@@ -209,51 +217,77 @@ def main() -> None:
         bundles = bundles[: args.limit]
 
     client = OpenAI()
-    out_rows: List[Dict[str, Any]] = []
+    total = len(bundles)
 
-    for b in bundles:
-        bid = b.get("bundle_id")
-        sk = sk_by_bundle.get(bid, {})
-        target_skeleton_text = sk.get("skeleton_text") or ""
+    if args.debug:
+        print(f"[write] open (truncate): {args.out}", file=sys.stderr, flush=True)
+    with open(args.out, "w", encoding="utf-8") as out_f:
+        for i, b in enumerate(bundles, start=1):
+            bid = b.get("bundle_id")
+            sk = sk_by_bundle.get(bid, {})
+            target_skeleton_text = sk.get("skeleton_text") or ""
 
-        prompt = build_prompt(b, target_skeleton_text, args.max_q_exemplars, args.max_paired_exemplars)
-        cand = llm_json(client, args.model, SYSTEM_GEN, prompt, temperature=0.25)
+            if args.debug:
+                print(f"[{i}/{total}] bundle_id={bid} building prompt", file=sys.stderr, flush=True)
 
-        repairs: List[Dict[str, Any]] = []
-        gate: Optional[Dict[str, Any]] = None
+            prompt = build_prompt(b, target_skeleton_text, args.max_q_exemplars, args.max_paired_exemplars)
 
-        # lightweight repair loop
-        for _ in range(max(0, args.repair_max) + 1):
-            if not is_basic_schema_ok(cand):
-                gate = {"verdict":"FAIL","issues":["Basic schema invalid"],"required_fixes":["Fix JSON schema to match required keys and 5 choices A-E"],"answer_consistency":{"answer_claimed":cand.get("answer",""),"answer_verified":"UNKNOWN","notes":"schema invalid"}}
-            else:
-                gate = llm_json(client, verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_skeleton_text, cand), temperature=0.0)
+            if args.debug:
+                print(f"[{i}/{total}] bundle_id={bid} calling gen model={args.model}", file=sys.stderr, flush=True)
+                t0 = time.time()
 
-            if gate.get("verdict") == "PASS":
-                break
+            cand = llm_json(client, args.model, SYSTEM_GEN, prompt, temperature=0.25)
 
-            repairs.append({"gatekeeper": gate, "candidate": cand})
-            # repair
-            cand = llm_json(client, args.model, SYSTEM_GEN, build_repair_prompt(target_skeleton_text, cand, gate), temperature=0.2)
+            if args.debug:
+                dt = time.time() - t0
+                print(f"[{i}/{total}] bundle_id={bid} gen done in {dt:.2f}s", file=sys.stderr, flush=True)
 
-        out_rows.append({
-            **cand,
-            "_meta": {
-                "bundle_id": bid,
-                "seed_id": b.get("seed_id"),
-                "mode": b.get("mode"),
-                "anchor_id": b.get("anchor_id"),
-                "anchor_distance": b.get("anchor_distance"),
-            },
-            "_gatekeeper": gate,
-            "_repairs": repairs,
-        })
+            repairs: List[Dict[str, Any]] = []
+            gate: Optional[Dict[str, Any]] = None
 
-        if args.sleep:
-            time.sleep(args.sleep)
+            # lightweight repair loop
+            for r_i in range(max(0, args.repair_max) + 1):
+                if not is_basic_schema_ok(cand):
+                    gate = {"verdict":"FAIL","issues":["Basic schema invalid"],"required_fixes":["Fix JSON schema to match required keys and 5 choices A-E"],"answer_consistency":{"answer_claimed":cand.get("answer",""),"answer_verified":"UNKNOWN","notes":"schema invalid"}}
+                else:
+                    if args.debug:
+                        print(f"[{i}/{total}] bundle_id={bid} gatekeeper call {r_i+1} model={verify_model}", file=sys.stderr, flush=True)
+                    gate = llm_json(client, verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_skeleton_text, cand), temperature=0.0)
 
-    write_jsonl(args.out, out_rows)
-    print(f"Wrote {len(out_rows)} generated problems -> {args.out}")
+                if gate.get("verdict") == "PASS":
+                    if args.debug:
+                        print(f"[{i}/{total}] bundle_id={bid} gatekeeper PASS", file=sys.stderr, flush=True)
+                    break
+
+                repairs.append({"gatekeeper": gate, "candidate": cand})
+                # repair
+                if args.debug:
+                    print(f"[{i}/{total}] bundle_id={bid} repair {r_i+1} calling model={args.model}", file=sys.stderr, flush=True)
+                cand = llm_json(client, args.model, SYSTEM_GEN, build_repair_prompt(target_skeleton_text, cand, gate), temperature=0.2)
+
+            out_row = {
+                **cand,
+                "_meta": {
+                    "bundle_id": bid,
+                    "seed_id": b.get("seed_id"),
+                    "mode": b.get("mode"),
+                    "anchor_id": b.get("anchor_id"),
+                    "anchor_distance": b.get("anchor_distance"),
+                },
+                "_gatekeeper": gate,
+                "_repairs": repairs,
+            }
+
+            write_jsonl_line(out_f, out_row)
+            if args.debug:
+                print(f"[{i}/{total}] bundle_id={bid} wrote", file=sys.stderr, flush=True)
+
+            if args.sleep:
+                time.sleep(args.sleep)
+
+    if args.debug:
+        print(f"[write] done: {args.out}", file=sys.stderr, flush=True)
+    print(f"Wrote {total} generated problems -> {args.out}")
 
 if __name__ == "__main__":
     main()

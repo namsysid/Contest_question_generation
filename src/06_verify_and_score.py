@@ -29,7 +29,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from typing import Any, Dict, List
+import sys
+import time
+from typing import Any, Dict, Iterable, List, Optional
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -40,7 +42,8 @@ if not os.environ.get("OPENAI_API_KEY"):
 
 SYSTEM = """You are an expert evaluator of Olympiad-style STEM multiple-choice problems.
 
-You will receive a single problem JSON with: question, choices, answer, solution, skeleton_text.
+You will receive a single problem JSON with: question, choices, and answer.
+You also receive exemplars of real f=ma problems and solutions for comparison.
 
 Return ONLY strict JSON with keys:
 {
@@ -67,11 +70,58 @@ Scoring rubrics (1-5):
 - clarity: statement & solution clarity; 5 = very clear, minimal ambiguity
 - olympiad_similarity: 5 = indistinguishable from real contest problems
 
-Difficulty score:
-1 = very easy; 3 = medium; 5 = very hard (Olympiad-level for target contest).
+Competition Appropriateness Rubric (1-5) for holistic f=ma judgment:
+1 - Not Appropriate: Poorly posed, unclear, trivial, gimmicky, or unlike contest problems.
+2 - Weakly Appropriate: Coherent but lacks contest realism; feels like a textbook exercise or has awkward structure.
+3 - Moderately Appropriate: Contest-like topic/structure but missing depth/elegance/polish; acceptable only as low-quality practice.
+4 - Highly Appropriate: Matches real contest problems in structure/reasoning/clarity; fair, educational; high-quality practice.
+5 - Excellent / Contest-Ready: Indistinguishable from real Olympiad problems; clean, fair, conceptually rich, elegant.
+Notes: Focus on structure and reasoning over wording; multiple valid solution paths are fine; novelty is preferred over rehashed templates.
 
-Be conservative: if the solution does not convincingly support the answer, gatekeeper.pass=false.
+Difficulty Assessment Rubric (1-5):
+1 - Very Easy: Single obvious idea or direct application of a basic fact.
+2 - Easy: Basic reasoning beyond recall; quick once the main idea is found.
+3 - Medium: Multiple steps or careful case analysis; mid-tier contest difficulty.
+4 - Hard: Deep understanding or clever insight; upper-tier contest difficulty.
+5 - Very Hard / Olympiad-Level: Sustained multi-step reasoning and significant insight; hardest major-contest level.
+Notes: Judge minimum required reasoning, not solution length; ignore rare shortcuts unless they trivialize the problem;
+assume a well-prepared contest participant.
+
+Make sure to run through the problem and evaluate it holistically. Don't just delve into semantics.
 """
+
+def load_exemplars(paths: Iterable[str], limit: int, max_chars: int) -> List[str]:
+    exemplars: List[str] = []
+    for path in paths:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if len(exemplars) >= limit:
+                        return exemplars
+                    line = line.strip()
+                    if not line:
+                        continue
+                    obj = json.loads(line)
+                    text = (obj.get("question_text") or "").strip()
+                    if not text:
+                        continue
+                    # Keep only reasonably sized, choice-based items.
+                    if len(text) > max_chars:
+                        continue
+                    if "(A)" not in text or "(B)" not in text or "(C)" not in text:
+                        continue
+                    exemplars.append(text)
+        except FileNotFoundError:
+            continue
+    return exemplars
+
+def build_system_with_exemplars(exemplars: List[str]) -> str:
+    if not exemplars:
+        return SYSTEM
+    chunks = ["\n\nEXEMPLARS (real F=ma problems; use as style reference, not to copy):"]
+    for i, ex in enumerate(exemplars, start=1):
+        chunks.append(f"\n---\nEXEMPLAR {i}:\n{ex}")
+    return SYSTEM + "".join(chunks)
 
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
     out = []
@@ -87,6 +137,10 @@ def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
+def write_jsonl_line(f, row: Dict[str, Any]) -> None:
+    f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    f.flush()
+
 def llm_json(client: OpenAI, model: str, system: str, user: str) -> Dict[str, Any]:
     resp = client.chat.completions.create(
         model=model,
@@ -101,7 +155,16 @@ def main() -> None:
     ap.add_argument("--input", required=True, help="generated_problems.jsonl from 05_generate_questions.py")
     ap.add_argument("--out", default="scored.jsonl")
     ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument(
+        "--exemplars",
+        nargs="*",
+        default=["data/text/exam1-2015-1-8.jsonl"],
+        help="one or more jsonl files with real F=ma problems (question_text)",
+    )
+    ap.add_argument("--exemplar-limit", type=int, default=3)
+    ap.add_argument("--exemplar-max-chars", type=int, default=1200)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
 
     rows = read_jsonl(args.input)
@@ -109,27 +172,46 @@ def main() -> None:
         rows = rows[: args.limit]
 
     client = OpenAI()
-    out_rows: List[Dict[str, Any]] = []
+    total = len(rows)
+    exemplars = load_exemplars(args.exemplars, args.exemplar_limit, args.exemplar_max_chars)
+    system = build_system_with_exemplars(exemplars)
 
-    for r in rows:
-        user = "PROBLEM_JSON:\n" + json.dumps({
-            "id": r.get("id"),
-            "question": r.get("question"),
-            "choices": r.get("choices"),
-            "answer": r.get("answer"),
-            "solution": r.get("solution"),
-            "skeleton_text": r.get("skeleton_text"),
-        }, ensure_ascii=False)
+    if args.debug:
+        print(f"[write] open (truncate): {args.out}", file=sys.stderr, flush=True)
+    with open(args.out, "w", encoding="utf-8") as out_f:
+        for i, r in enumerate(rows, start=1):
+            if args.debug:
+                rid = r.get("id", "?")
+                print(f"[{i}/{total}] id={rid} calling model={args.model}", file=sys.stderr, flush=True)
+                t0 = time.time()
 
-        score = llm_json(client, args.model, SYSTEM, user)
-        out_rows.append({
-            "id": r.get("id"),
-            **score,
-            "_meta": r.get("_meta") or {},
-        })
+            user = "PROBLEM_JSON:\n" + json.dumps({
+                "id": r.get("id"),
+                "question": r.get("question"),
+                "choices": r.get("choices"),
+                "answer": r.get("answer"),
+                "solution": r.get("solution"),
+                "skeleton_text": r.get("skeleton_text"),
+            }, ensure_ascii=False)
 
-    write_jsonl(args.out, out_rows)
-    print(f"Wrote {len(out_rows)} scored rows -> {args.out}")
+            score = llm_json(client, args.model, system, user)
+
+            if args.debug:
+                dt = time.time() - t0
+                print(f"[{i}/{total}] id={r.get('id','?')} model done in {dt:.2f}s", file=sys.stderr, flush=True)
+
+            out_row = {
+                "id": r.get("id"),
+                **score,
+                "_meta": r.get("_meta") or {},
+            }
+            write_jsonl_line(out_f, out_row)
+            if args.debug:
+                print(f"[{i}/{total}] id={r.get('id','?')} wrote", file=sys.stderr, flush=True)
+
+    if args.debug:
+        print(f"[write] done: {args.out}", file=sys.stderr, flush=True)
+    print(f"Wrote {total} scored rows -> {args.out}")
 
 if __name__ == "__main__":
     main()

@@ -1,24 +1,26 @@
-python 01_enrich_problem_schema_paper.py --input raw.jsonl --out enriched.jsonl \
+python3 src/01_enrich_problem_schema_paper.py --input data/text/exams.txt/all_questions.jsonl --out data/enriched_schemae/enriched.jsonl \
   --model gpt-4.1-mini \
   --max_steps 8 \
-  --allowed_ops IDENTIFY_GIVENS,IDENTIFY_RELATION,APPLY_RELATION,SAVE_RESULT,CHECK
+  --allowed_ops IDENTIFY_GIVENS,IDENTIFY_RELATION,APPLY_RELATION,INTRODUCE_AUX,CONSTRAINT_COUPLING,CASEWORK/REGIME,INVARIANT/SYMMETRY,CHECK/SANITY
 
-python 02_embed_and_index.py --input enriched.jsonl \
-  --out_skel skeleton_embedded.jsonl \
-  --out_q question_embedded.jsonl \
-  --out_anchors anchors.jsonl
+python src/02_embed_and_index.py --input data/enriched_schemae/enriched.jsonl \
+  --out_skel data/skeleton_embedded.jsonl \
+  --out_q data/question_embedded.jsonl \
+  --out_anchors data/anchors.jsonl
 
-python 03_retrieve_paper.py \
-  --skeleton_embedded skeleton_embedded.jsonl \
-  --question_embedded question_embedded.jsonl \
-  --anchors anchors.jsonl \
+python3 src/03_retrieve.py \
+  --skeleton_embedded data/skeleton_embedded.jsonl \
+  --question_embedded data/question_embedded.jsonl \
+  --anchors data/anchors.jsonl \
+  --enriched data/enriched_schemae/enriched.jsonl \
+  --require_skeleton_text \
   --out retrieval_bundles.jsonl
 
-python 04_generate_skeletons.py --bundles retrieval_bundles.jsonl --out generated_skeletons.jsonl
+python src/04_generate_skeletons.py --bundles retrieval_bundles.jsonl --out generated_skeletons.jsonl
 
-python 05_generate_questions.py \
+python src/05_generate_questions.py \
   --bundles retrieval_bundles.jsonl \
   --skeletons generated_skeletons.jsonl \
   --out generated_problems.jsonl
 
-python 06_verify_and_score.py --input generated_problems.jsonl --out scored.jsonl
+python src/06_verify_and_score.py --input data/text/exam1-2015-1-8.jsonl --out scored.jsonl
