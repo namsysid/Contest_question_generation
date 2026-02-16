@@ -40,10 +40,10 @@ load_dotenv()
 if not os.environ.get("OPENAI_API_KEY"):
     raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
 
-SYSTEM = """You are an expert evaluator of Olympiad-style STEM multiple-choice problems.
+SYSTEM_TEMPLATE = """You are an expert evaluator of Olympiad-style STEM multiple-choice problems.
 
 You will receive a single problem JSON with: question, choices, and answer.
-You also receive exemplars of real f=ma problems and solutions for comparison.
+You also receive exemplars of real __COMPETITION_LABEL__ problems and solutions for comparison.
 
 Return ONLY strict JSON with keys:
 {
@@ -70,7 +70,7 @@ Scoring rubrics (1-5):
 - clarity: statement & solution clarity; 5 = very clear, minimal ambiguity
 - olympiad_similarity: 5 = indistinguishable from real contest problems
 
-Competition Appropriateness Rubric (1-5) for holistic f=ma judgment:
+Competition Appropriateness Rubric (1-5) for holistic __COMPETITION_LABEL__ judgment:
 1 - Not Appropriate: Poorly posed, unclear, trivial, gimmicky, or unlike contest problems.
 2 - Weakly Appropriate: Coherent but lacks contest realism; feels like a textbook exercise or has awkward structure.
 3 - Moderately Appropriate: Contest-like topic/structure but missing depth/elegance/polish; acceptable only as low-quality practice.
@@ -87,7 +87,8 @@ Difficulty Assessment Rubric (1-5):
 Notes: Judge minimum required reasoning, not solution length; ignore rare shortcuts unless they trivialize the problem;
 assume a well-prepared contest participant.
 
-Make sure to run through the problem and evaluate it holistically. Don't just delve into semantics.
+Make sure to run through the problem and evaluate it holistically. Don't just delve into semantics. Run through the problems as if you were a competitor, evaluating the entire problem.
+You must look at exemplars provided from the competition to base your judgement from.
 """
 
 def load_exemplars(paths: Iterable[str], limit: int, max_chars: int) -> List[str]:
@@ -115,13 +116,13 @@ def load_exemplars(paths: Iterable[str], limit: int, max_chars: int) -> List[str
             continue
     return exemplars
 
-def build_system_with_exemplars(exemplars: List[str]) -> str:
+def build_system_with_exemplars(system_base: str, exemplars: List[str], competition_label: str) -> str:
     if not exemplars:
-        return SYSTEM
-    chunks = ["\n\nEXEMPLARS (real F=ma problems; use as style reference, not to copy):"]
+        return system_base
+    chunks = [f"\n\nEXEMPLARS (real {competition_label} problems; use as style reference, not to copy):"]
     for i, ex in enumerate(exemplars, start=1):
         chunks.append(f"\n---\nEXEMPLAR {i}:\n{ex}")
-    return SYSTEM + "".join(chunks)
+    return system_base + "".join(chunks)
 
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
     out = []
@@ -155,11 +156,13 @@ def main() -> None:
     ap.add_argument("--input", required=True, help="generated_problems.jsonl from 05_generate_questions.py")
     ap.add_argument("--out", default="scored.jsonl")
     ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument("--subject", default="Chem", help="subject label, e.g., Chem or Phys")
+    ap.add_argument("--competition", default="USNCO", help="competition label, e.g., USNCO or F=ma")
     ap.add_argument(
         "--exemplars",
         nargs="*",
         default=["data/text/exam1-2015-1-8.jsonl"],
-        help="one or more jsonl files with real F=ma problems (question_text)",
+        help="one or more jsonl files with real competition problems (question_text)",
     )
     ap.add_argument("--exemplar-limit", type=int, default=3)
     ap.add_argument("--exemplar-max-chars", type=int, default=1200)
@@ -173,8 +176,12 @@ def main() -> None:
 
     client = OpenAI()
     total = len(rows)
+    competition_label = " & ".join(p for p in [args.subject, args.competition] if p)
+    if not competition_label:
+        competition_label = "Olympiad"
+    system_base = SYSTEM_TEMPLATE.replace("__COMPETITION_LABEL__", competition_label)
     exemplars = load_exemplars(args.exemplars, args.exemplar_limit, args.exemplar_max_chars)
-    system = build_system_with_exemplars(exemplars)
+    system = build_system_with_exemplars(system_base, exemplars, competition_label)
 
     if args.debug:
         print(f"[write] open (truncate): {args.out}", file=sys.stderr, flush=True)

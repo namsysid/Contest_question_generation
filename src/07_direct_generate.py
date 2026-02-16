@@ -44,7 +44,7 @@ load_dotenv()
 if not os.environ.get("OPENAI_API_KEY"):
     raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
 
-SYSTEM_GEN = """You generate contest-faithful STEM multiple-choice problems (e.g., F=ma / USNCO style).
+SYSTEM_GEN = """You generate contest-faithful Chemistry multiple-choice problems (e.g., USNCO style).
 
 Hard constraints:
 - You MUST produce a novel scenario and novel phrasing.

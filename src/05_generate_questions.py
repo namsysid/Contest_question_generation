@@ -129,6 +129,7 @@ Generate ONE NEW hard f=ma multiple-choice problem that is largely faithful to T
 - Include at least 2 distractors corresponding to common mistakes implied by the skeleton (missing factor, sign, wrong component, etc.).
 - When writing the question, assume the reader does not know anything of the solution path. Do not expose more than what is absolutely necessary to solve the problem. Keep concepts that can get inferred, even with some challenge, up to the reader.
 - The question should follow the rough pipeline of the solution skeleton. You can deviate to make the problem more complex, interesting, and difficult
+- Make sure that the problem has complexity and depth of reasoning, assisted by the solution skeleton, and more. Make sure to make hidden assumptions in the problem, and require a large depth of reasoning.
 
 OUTPUT strict JSON schema:
 {{
