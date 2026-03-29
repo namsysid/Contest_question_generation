@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 """
-04_generate_skeletons_v3.py
+04_generate_skeletons.py  (STAGE-1 GRAPH GENERATION)
 
-Stage-1 skeleton generation with enforced insight operator usage.
-Requires:
-- laws >= 2
-- steps >= 6
-- at least one INSIGHT op in steps
-
-INSIGHT_OPS default:
-  INTRODUCE_AUX, CONSTRAINT_COUPLING, INVARIANT_SYMMETRY, CASEWORK_REGIME, CHECK
+Generates one new typed latent problem graph per retrieval bundle.
+Backward compatibility:
+- output file still named like generated_skeletons.jsonl
+- includes `skeleton_text` alias equal to `graph_text`
 """
-
 from __future__ import annotations
-import argparse, json, os, re, sys, time
+import argparse, json, os, sys, time
 from typing import Any, Dict, List
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -22,48 +17,45 @@ load_dotenv()
 if not os.environ.get("OPENAI_API_KEY"):
     raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
 
-SYSTEM = """You generate STRUCTURED solution skeletons (schemas) for Olympiad-style STEM problems.
+NODE_TYPES = ["Given", "Target", "Law", "State", "Constraint", "Auxiliary", "Trap", "Distractor"]
+EDGE_TYPES = ["supports", "depends_on", "derived_from", "couples", "rules_out", "produces_distractor"]
+
+SYSTEM = """You generate STRUCTURED typed latent problem graphs for Olympiad-style STEM problems.
 
 Hard constraints:
-- Do NOT copy any exemplar skeleton verbatim.
-- Use ONLY the allowed operator set for every step.op.
+- Do NOT copy any exemplar graph verbatim.
 - Keep it abstract: no full arithmetic, no long derivations.
-- The skeleton MUST be Olympiad-like (not one-equation).
-
-Difficulty constraints (must satisfy):
-- laws list length >= 2.
-- Include at least ONE INSIGHT operator in the steps.
-- Include >= 6 steps.
+- The graph MUST be Olympiad-like and nontrivial, not one-equation.
+- Include at least 1 Target node, at least 2 Law/Constraint nodes total, at least 2 State nodes.
+- Include at least one nontrivial feature: Auxiliary or Trap or Constraint coupling.
 Return strict JSON only.
 """
 
 USER_TMPL = """Domain: {domain}
 
-SEED_SKELETON_TEXT (style prior; do not copy; be at least as complex):
-{seed_skel}
+SEED_GRAPH_TEXT (style prior; do not copy; be at least as complex):
+{seed_graph}
 
 SOLUTION EXEMPLARS (do not copy):
 {solution_exemplars_block}
 
-ALLOWED_OPS:
-{allowed_ops_block}
+Allowed node types:
+{node_types_block}
 
-INSIGHT_OPS (at least one step.op MUST be one of these):
-{insight_ops_block}
+Allowed edge types:
+{edge_types_block}
 
 TASK:
-Generate ONE NEW solution skeleton (schema) that is contest-faithful and nontrivial.
+Generate ONE NEW typed latent problem graph that is contest-faithful and nontrivial.
 
 Return strict JSON with keys:
-- skeleton: object with keys:
-  - givens: list of strings (0-8)
-  - target: string
-  - laws: list of strings (2-6) (short names)
-  - steps: list of objects {{op: string, text: string}} (6-{max_steps} steps)
-  - final_form: string
+- problem_graph: object with keys:
+  - nodes: list of objects {{id: string, type: string, label: string, importance: "primary"|"secondary"|"optional"}}
+  - edges: list of objects {{src: string, dst: string, type: string, note: string}}
 - topic: short string or null
 - difficulty: integer 1-10 or null
 """
+
 
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
     out=[]
@@ -74,27 +66,11 @@ def read_jsonl(path: str) -> List[Dict[str, Any]]:
                 out.append(json.loads(line))
     return out
 
-def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
-    with open(path,"w",encoding="utf-8") as f:
-        for r in rows:
-            f.write(json.dumps(r, ensure_ascii=False)+"\n")
 
 def write_jsonl_line(f, row: Dict[str, Any]) -> None:
     f.write(json.dumps(row, ensure_ascii=False) + "\n")
     f.flush()
 
-def safe_skeleton_text(sk: Any) -> str:
-    if isinstance(sk,str): return sk.strip()
-    if isinstance(sk,dict):
-        laws=sk.get("laws") or []
-        steps=sk.get("steps") or []
-        parts=[]
-        if laws:
-            parts.append("LAWS: " + ", ".join(map(str,laws)))
-        if steps:
-            parts.append("STEPS: " + " | ".join(f'{s.get("op")}:{s.get("text")}' for s in steps if isinstance(s,dict)))
-        return "\n".join(parts).strip()
-    return str(sk).strip()
 
 def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: float=0.25) -> Dict[str, Any]:
     resp = client.chat.completions.create(
@@ -105,16 +81,83 @@ def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: fl
     )
     return json.loads(resp.choices[0].message.content)
 
-def parse_ops_from_skeleton_text(st: str) -> List[str]:
-    m=re.search(r"STEPS:\s*(.+)", st or "", re.DOTALL)
-    if not m:
-        return []
-    ops=[]
-    for p in m.group(1).split("|"):
-        p=p.strip()
-        if ":" in p:
-            ops.append(p.split(":",1)[0].strip())
-    return ops
+
+def normalize_graph(graph: Any) -> Dict[str, Any]:
+    if not isinstance(graph, dict):
+        return {"nodes": [], "edges": []}
+    nodes=[]; seen=set()
+    for idx, n in enumerate(graph.get("nodes") or [], start=1):
+        if not isinstance(n, dict):
+            continue
+        nid = str(n.get("id") or f"n{idx}").strip()[:40]
+        if not nid or nid in seen:
+            nid = f"n{idx}"
+        seen.add(nid)
+        ntype = str(n.get("type") or "State").strip()
+        if ntype not in NODE_TYPES:
+            ntype = "State"
+        label = " ".join(str(n.get("label") or "").split())[:160]
+        if not label:
+            continue
+        importance = str(n.get("importance") or "primary").strip().lower()
+        if importance not in {"primary", "secondary", "optional"}:
+            importance = "primary"
+        nodes.append({"id": nid, "type": ntype, "label": label, "importance": importance})
+    valid = {n["id"] for n in nodes}
+    edges=[]
+    for e in graph.get("edges") or []:
+        if not isinstance(e, dict):
+            continue
+        src = str(e.get("src") or "").strip()[:40]
+        dst = str(e.get("dst") or "").strip()[:40]
+        etype = str(e.get("type") or "supports").strip()
+        if src not in valid or dst not in valid:
+            continue
+        if etype not in EDGE_TYPES:
+            etype = "supports"
+        row={"src": src, "dst": dst, "type": etype}
+        note = " ".join(str(e.get("note") or "").split())[:160]
+        if note:
+            row["note"] = note
+        edges.append(row)
+    return {"nodes": nodes, "edges": edges}
+
+
+def graph_text(graph: Dict[str, Any]) -> str:
+    nodes = graph.get("nodes") or []
+    edges = graph.get("edges") or []
+    groups = {t: [] for t in NODE_TYPES}
+    labels = {}
+    for n in nodes:
+        groups[n["type"]].append(f"{n['id']}:{n['label']}")
+        labels[n["id"]] = n["label"]
+    parts=[]
+    for t in NODE_TYPES:
+        if groups[t]:
+            parts.append(f"{t.upper()}S: " + " | ".join(groups[t]))
+    if edges:
+        parts.append("EDGES: " + " | ".join(
+            f"{e['src']}[{labels.get(e['src'], e['src'])}] -{e['type']}-> {e['dst']}[{labels.get(e['dst'], e['dst'])}]" + (f" ({e['note']})" if e.get("note") else "")
+            for e in edges
+        ))
+    return "\n".join(parts).strip()
+
+
+def graph_ok(graph: Dict[str, Any]) -> bool:
+    nodes = graph.get("nodes") or []
+    edges = graph.get("edges") or []
+    counts = {t: 0 for t in NODE_TYPES}
+    for n in nodes:
+        if isinstance(n, dict) and n.get("type") in counts:
+            counts[n["type"]] += 1
+    return (
+        counts["Target"] >= 1 and
+        (counts["Law"] + counts["Constraint"]) >= 2 and
+        counts["State"] >= 2 and
+        (counts["Auxiliary"] >= 1 or counts["Trap"] >= 1 or counts["Constraint"] >= 2) and
+        len(edges) >= 4
+    )
+
 
 def main():
     ap=argparse.ArgumentParser()
@@ -122,15 +165,9 @@ def main():
     ap.add_argument("--out", default="generated_skeletons.jsonl")
     ap.add_argument("--model", default="gpt-4.1-mini")
     ap.add_argument("--domain", default="fma")
-    ap.add_argument("--max_steps", type=int, default=10)
-    ap.add_argument("--allowed_ops", default="IDENTIFY_GIVENS,IDENTIFY_RELATION,APPLY_RELATION,INTRODUCE_AUX,CONSTRAINT_COUPLING,INVARIANT_SYMMETRY,CASEWORK_REGIME,CHECK,SAVE_RESULT")
-    ap.add_argument("--insight_ops", default="INTRODUCE_AUX,CONSTRAINT_COUPLING,INVARIANT_SYMMETRY,CASEWORK_REGIME,CHECK")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args=ap.parse_args()
-
-    allowed_ops=[s.strip() for s in args.allowed_ops.split(",") if s.strip()]
-    insight_ops=set(s.strip() for s in args.insight_ops.split(",") if s.strip())
 
     rows=read_jsonl(args.bundles)
     if args.limit and args.limit>0:
@@ -144,20 +181,19 @@ def main():
     with open(args.out, "w", encoding="utf-8") as out_f:
         for i, b in enumerate(rows, start=1):
             domain=b.get("domain") or args.domain
-            seed_skel=b.get("seed_skeleton_text") or ""
+            seed_graph=b.get("seed_graph_text") or b.get("seed_skeleton_text") or ""
             sol_ex=b.get("solution_exemplars") or []
             ex_blocks=[]
             for j,ex in enumerate(sol_ex[:8], start=1):
-                ex_blocks.append(f"EX {j}:\n{ex.get('skeleton_text','')}")
+                ex_blocks.append(f"EX {j}:\n{ex.get('graph_text') or ex.get('skeleton_text','')}")
             sol_block="\n\n".join(ex_blocks) if ex_blocks else "(none)"
 
             user=USER_TMPL.format(
                 domain=domain,
-                seed_skel=seed_skel,
+                seed_graph=seed_graph,
                 solution_exemplars_block=sol_block,
-                allowed_ops_block="\n".join(f"- {o}" for o in allowed_ops),
-                insight_ops_block="\n".join(f"- {o}" for o in sorted(insight_ops)),
-                max_steps=args.max_steps
+                node_types_block="\n".join(f"- {o}" for o in NODE_TYPES),
+                edge_types_block="\n".join(f"- {o}" for o in EDGE_TYPES),
             )
 
             if args.debug:
@@ -168,18 +204,16 @@ def main():
             best=None
             for k in range(3):
                 js=llm_json(client, args.model, SYSTEM, user, temperature=0.25)
-                sk=(js.get("skeleton") or {})
-                st=safe_skeleton_text(sk)
-                ops=set(parse_ops_from_skeleton_text(st))
-                laws=sk.get("laws") or []
-                ok = isinstance(laws,list) and len(laws) >= 2 and any(op in insight_ops for op in ops) and isinstance(sk.get("steps"), list) and len(sk.get("steps")) >= 6
-                best=(js, sk, st, ok)
+                graph = normalize_graph(js.get("problem_graph") or {})
+                gt = graph_text(graph)
+                ok = graph_ok(graph)
+                best=(js, graph, gt, ok)
                 if ok:
                     break
                 if args.debug:
                     print(f"[{i}/{total}] bundle_id={b.get('bundle_id','?')} retry {k+1} constraints_satisfied={bool(ok)}", file=sys.stderr, flush=True)
 
-            js, sk, st, ok = best
+            js, graph, gt, ok = best
 
             if args.debug:
                 dt=time.time()-t0
@@ -187,8 +221,10 @@ def main():
 
             out_row={
                 "bundle_id": b.get("bundle_id"),
-                "generated_skeleton": sk,
-                "skeleton_text": st,
+                "generated_graph": graph,
+                "problem_graph": graph,
+                "graph_text": gt,
+                "skeleton_text": gt,
                 "topic": js.get("topic"),
                 "difficulty": js.get("difficulty"),
                 "_meta": {"seed_id": b.get("seed_id"), "mode": b.get("mode"), "anchor_id": b.get("anchor_id"), "anchor_distance": b.get("anchor_distance")},
@@ -200,7 +236,7 @@ def main():
 
     if args.debug:
         print(f"[write] done: {args.out}", file=sys.stderr, flush=True)
-    print(f"Wrote {total} generated skeletons -> {args.out}")
+    print(f"Wrote {total} generated graphs -> {args.out}")
 
 if __name__=="__main__":
     main()

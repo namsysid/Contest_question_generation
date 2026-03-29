@@ -1,23 +1,10 @@
 #!/usr/bin/env python3
 """
-05_generate_questions.py  (STAGE-2: QUESTION GENERATION CONDITIONED ON GENERATED SKELETONS)
+05_generate_questions.py  (STAGE-2: QUESTION GENERATION CONDITIONED ON GENERATED GRAPHS)
 
-Paper-faithful:
-- Uses generated skeletons (stage 1) as authoritative TARGET_SKELETON_TEXT
-- Uses TWO independent exemplar sets:
-  * question_exemplars (question space)
-  * paired_exemplars (question + skeleton) to demonstrate mapping
-
-Optional: gatekeeper verification + auto-repair (kept lightweight here; rubric scoring is in 06).
-
-Inputs:
-  --bundles retrieval_bundles.jsonl   (from 03_retrieve_paper.py)
-  --skeletons generated_skeletons.jsonl (from 04_generate_skeletons.py)
-
-Output:
-  generated_problems.jsonl
+Uses generated typed problem graphs as the authoritative structural target.
+Backward compatibility: retains `skeleton_text` field as alias of `graph_text`.
 """
-
 from __future__ import annotations
 
 import argparse
@@ -39,19 +26,18 @@ SYSTEM_GEN = """You generate contest-faithful STEM multiple-choice problems (e.g
 Hard constraints:
 - Do NOT copy, paraphrase, or minimally edit any exemplar scenario, wording, variable names, or numbers.
 - You MUST produce a novel scenario and novel phrasing.
-- Stay faithful to the TARGET_SKELETON_TEXT's reasoning structure (operators/laws/structure), but you may choose
-  new symbols and a new context.
+- Stay faithful to the TARGET_GRAPH_TEXT's dependency structure, law interactions, hidden states, and trap profile, but you may choose new symbols and a new context.
 - Provide exactly 5 answer choices (A)-(E) with plausible, confusable distractors.
 - Keep the problem self-contained and solvable without outside references.
 Return strict JSON only (no markdown).
 """
 
 SYSTEM_GATEKEEP = """You are a strict gatekeeper verifier for contest-style multiple-choice STEM problems.
-Given TARGET_SKELETON_TEXT and a CANDIDATE_JSON, determine if the candidate is:
+Given TARGET_GRAPH_TEXT and a CANDIDATE_JSON, determine if the candidate is:
 - properly formatted (5 choices A-E, answer in A-E)
 - self-contained and solvable
 - solution logically supports the claimed answer
-- faithful to TARGET_SKELETON_TEXT at a high level
+- faithful to TARGET_GRAPH_TEXT at a high level
 Return strict JSON only:
 {
   "verdict": "PASS"|"FAIL",
@@ -62,6 +48,7 @@ Return strict JSON only:
 If you cannot verify answer correctness from the solution, mark FAIL.
 """
 
+
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
     out = []
     with open(path, "r", encoding="utf-8") as f:
@@ -71,14 +58,11 @@ def read_jsonl(path: str) -> List[Dict[str, Any]]:
                 out.append(json.loads(line))
     return out
 
-def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        for r in rows:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 def write_jsonl_line(f, row: Dict[str, Any]) -> None:
     f.write(json.dumps(row, ensure_ascii=False) + "\n")
     f.flush()
+
 
 def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: float = 0.2) -> Dict[str, Any]:
     resp = client.chat.completions.create(
@@ -89,11 +73,13 @@ def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: fl
     )
     return json.loads(resp.choices[0].message.content)
 
+
 def _truncate(s: str, n: int) -> str:
     s = s or ""
     return s if len(s) <= n else s[:n] + "…"
 
-def build_prompt(bundle: Dict[str, Any], target_skeleton_text: str, max_q_ex: int, max_paired: int) -> str:
+
+def build_prompt(bundle: Dict[str, Any], target_graph_text: str, max_q_ex: int, max_paired: int) -> str:
     q_ex = (bundle.get("question_exemplars") or [])[:max_q_ex]
     p_ex = (bundle.get("paired_exemplars") or [])[:max_paired]
 
@@ -106,30 +92,30 @@ def build_prompt(bundle: Dict[str, Any], target_skeleton_text: str, max_q_ex: in
     for i, ex in enumerate(p_ex, start=1):
         p_blocks.append(
             f"PAIRED EXEMPLAR {i} QUESTION:\n{_truncate(ex.get('question_text',''), 1200)}\n\n"
-            f"PAIRED EXEMPLAR {i} SKELETON_TEXT:\n{_truncate(ex.get('skeleton_text',''), 900)}"
+            f"PAIRED EXEMPLAR {i} GRAPH_TEXT:\n{_truncate(ex.get('graph_text') or ex.get('skeleton_text',''), 1200)}"
         )
     p_section = "\n\n".join(p_blocks) if p_blocks else "(none)"
 
     return f"""You are given:
 
-1) TARGET_SKELETON_TEXT (authoritative reasoning plan; must be assisted by):
-{target_skeleton_text}
+1) TARGET_GRAPH_TEXT (authoritative latent dependency plan):
+{target_graph_text}
 
 2) QUESTION EXEMPLARS (question space; style/semantics priors ONLY; must not be copied):
 {q_section}
 
-3) PAIRED EXEMPLARS (mapping demonstrations between solutions and problems; must not be copied):
+3) PAIRED EXEMPLARS (mapping demonstrations between dependency graphs and problems; must not be copied):
 {p_section}
 
 TASK:
-Generate ONE NEW hard f=ma multiple-choice problem that is largely faithful to TARGET_SKELETON_TEXT. The problems must be complex, difficult, and interesting.
+Generate ONE NEW hard contest-style multiple-choice problem that is largely faithful to TARGET_GRAPH_TEXT.
 - Invent a NEW, hard scenario and NEW wording (no copying).
 - Use different variable names than any exemplars.
 - Exactly 5 choices A-E (confusable distractors).
-- Include at least 2 distractors corresponding to common mistakes implied by the skeleton (missing factor, sign, wrong component, etc.).
-- When writing the question, assume the reader does not know anything of the solution path. Do not expose more than what is absolutely necessary to solve the problem. Keep concepts that can get inferred, even with some challenge, up to the reader.
-- The question should follow the rough pipeline of the solution skeleton. You can deviate to make the problem more complex, interesting, and difficult
-- Make sure that the problem has complexity and depth of reasoning, assisted by the solution skeleton, and more. Make sure to make hidden assumptions in the problem, and require a large depth of reasoning.
+- Include at least 2 distractors corresponding to traps or common mistakes implied by the graph.
+- Do not reveal the full solution path in the statement.
+- Preserve the high-level dependency backbone: what hidden states matter, which laws/constraints couple, and what sort of trap profile exists.
+- The final wording should still feel natural, not like a graph dump.
 
 OUTPUT strict JSON schema:
 {{
@@ -138,7 +124,8 @@ OUTPUT strict JSON schema:
   "choices": {{"A":"...", "B":"...", "C":"...", "D":"...", "E":"..."}},
   "answer": "A|B|C|D|E",
   "solution": "<clear solution; may include equations>",
-  "skeleton_text": "<compressed trace you actually used>",
+  "graph_text": "<compressed graph trace you actually used>",
+  "skeleton_text": "<same as graph_text or shorter alias>",
   "anti_copy_report": {{
      "novel_scenario_summary": "<1-2 sentences>",
      "differences_from_exemplars": ["...", "..."],
@@ -147,25 +134,27 @@ OUTPUT strict JSON schema:
 }}
 """
 
-def build_gatekeeper_prompt(target_skeleton_text: str, candidate: Dict[str, Any]) -> str:
-    return f"""TARGET_SKELETON_TEXT:
-{target_skeleton_text}
+
+def build_gatekeeper_prompt(target_graph_text: str, candidate: Dict[str, Any]) -> str:
+    return f"""TARGET_GRAPH_TEXT:
+{target_graph_text}
 
 CANDIDATE_JSON:
 {json.dumps(candidate, ensure_ascii=False)}
 """
 
-def build_repair_prompt(target_skeleton_text: str, candidate: Dict[str, Any], gate: Dict[str, Any]) -> str:
+
+def build_repair_prompt(target_graph_text: str, candidate: Dict[str, Any], gate: Dict[str, Any]) -> str:
     return f"""Your candidate FAILED gatekeeper verification.
 
-TARGET_SKELETON_TEXT (must remain faithful):
-{target_skeleton_text}
+TARGET_GRAPH_TEXT (must remain faithful):
+{target_graph_text}
 
 REQUIRED_FIXES:
-{json.dumps(gate.get("required_fixes", []), ensure_ascii=False)}
+{json.dumps(gate.get('required_fixes', []), ensure_ascii=False)}
 
 ISSUES:
-{json.dumps(gate.get("issues", []), ensure_ascii=False)}
+{json.dumps(gate.get('issues', []), ensure_ascii=False)}
 
 FAILED_CANDIDATE_JSON:
 {json.dumps(candidate, ensure_ascii=False)}
@@ -173,11 +162,12 @@ FAILED_CANDIDATE_JSON:
 TASK:
 Revise the candidate to address ALL required fixes while preserving:
 - Novel scenario (no copying)
-- Faithfulness to TARGET_SKELETON_TEXT
+- Faithfulness to TARGET_GRAPH_TEXT
 - Exactly 5 confusable choices A-E
 
 Return strict JSON in the SAME schema.
 """
+
 
 def is_basic_schema_ok(obj: Dict[str, Any]) -> bool:
     if not isinstance(obj, dict):
@@ -193,13 +183,14 @@ def is_basic_schema_ok(obj: Dict[str, Any]) -> bool:
         return False
     return True
 
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--bundles", required=True, help="retrieval_bundles.jsonl from 03_retrieve_paper.py")
-    ap.add_argument("--skeletons", required=True, help="generated_skeletons.jsonl from 04_generate_skeletons.py")
+    ap.add_argument("--bundles", required=True)
+    ap.add_argument("--skeletons", required=True)
     ap.add_argument("--out", default="generated_problems.jsonl")
     ap.add_argument("--model", default="gpt-4.1-mini")
-    ap.add_argument("--verify_model", default="", help="gatekeeper model (defaults to --model)")
+    ap.add_argument("--verify_model", default="")
     ap.add_argument("--max_q_exemplars", type=int, default=4)
     ap.add_argument("--max_paired_exemplars", type=int, default=3)
     ap.add_argument("--repair_max", type=int, default=1)
@@ -226,18 +217,22 @@ def main() -> None:
         for i, b in enumerate(bundles, start=1):
             bid = b.get("bundle_id")
             sk = sk_by_bundle.get(bid, {})
-            target_skeleton_text = sk.get("skeleton_text") or ""
+            target_graph_text = sk.get("graph_text") or sk.get("skeleton_text") or ""
 
             if args.debug:
                 print(f"[{i}/{total}] bundle_id={bid} building prompt", file=sys.stderr, flush=True)
 
-            prompt = build_prompt(b, target_skeleton_text, args.max_q_exemplars, args.max_paired_exemplars)
+            prompt = build_prompt(b, target_graph_text, args.max_q_exemplars, args.max_paired_exemplars)
 
             if args.debug:
                 print(f"[{i}/{total}] bundle_id={bid} calling gen model={args.model}", file=sys.stderr, flush=True)
                 t0 = time.time()
 
             cand = llm_json(client, args.model, SYSTEM_GEN, prompt, temperature=0.25)
+            if "graph_text" not in cand and target_graph_text:
+                cand["graph_text"] = target_graph_text
+            if "skeleton_text" not in cand:
+                cand["skeleton_text"] = cand.get("graph_text", "")
 
             if args.debug:
                 dt = time.time() - t0
@@ -246,14 +241,13 @@ def main() -> None:
             repairs: List[Dict[str, Any]] = []
             gate: Optional[Dict[str, Any]] = None
 
-            # lightweight repair loop
             for r_i in range(max(0, args.repair_max) + 1):
                 if not is_basic_schema_ok(cand):
                     gate = {"verdict":"FAIL","issues":["Basic schema invalid"],"required_fixes":["Fix JSON schema to match required keys and 5 choices A-E"],"answer_consistency":{"answer_claimed":cand.get("answer",""),"answer_verified":"UNKNOWN","notes":"schema invalid"}}
                 else:
                     if args.debug:
                         print(f"[{i}/{total}] bundle_id={bid} gatekeeper call {r_i+1} model={verify_model}", file=sys.stderr, flush=True)
-                    gate = llm_json(client, verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_skeleton_text, cand), temperature=0.0)
+                    gate = llm_json(client, verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_graph_text, cand), temperature=0.0)
 
                 if gate.get("verdict") == "PASS":
                     if args.debug:
@@ -261,10 +255,13 @@ def main() -> None:
                     break
 
                 repairs.append({"gatekeeper": gate, "candidate": cand})
-                # repair
                 if args.debug:
                     print(f"[{i}/{total}] bundle_id={bid} repair {r_i+1} calling model={args.model}", file=sys.stderr, flush=True)
-                cand = llm_json(client, args.model, SYSTEM_GEN, build_repair_prompt(target_skeleton_text, cand, gate), temperature=0.2)
+                cand = llm_json(client, args.model, SYSTEM_GEN, build_repair_prompt(target_graph_text, cand, gate), temperature=0.2)
+                if "graph_text" not in cand and target_graph_text:
+                    cand["graph_text"] = target_graph_text
+                if "skeleton_text" not in cand:
+                    cand["skeleton_text"] = cand.get("graph_text", "")
 
             out_row = {
                 **cand,
