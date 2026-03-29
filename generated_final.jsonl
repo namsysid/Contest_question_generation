@@ -1,0 +1,318 @@
+=== ANCHOR 1/5: SOLUTION SKELETON ===
+{
+  "id": "p4",
+  "optypes": [],
+  "laws": [],
+  "target": null
+}
+
+=== GENERATED PROBLEM 1/5 ===
+PROBLEM:  
+A 5-gram sample of a radioactive isotope decays such that its mass halves every 3 hours. After \( t \) hours, a chemist finds that exactly 0.625 grams of the isotope remain. Let \( t \) be the target unknown. Determine the value of \( t \).
+
+---
+
+SOLUTION OUTLINE:
+
+- Operators: [Exponentiation, Logarithm, Solving for unknowns]
+- Laws: [Exponential decay law, Properties of exponents/logarithms]
+- Target quantity: \( t \) (the elapsed time)
+
+Steps:
+1. Set up the exponential decay model: \( m = m_0 \left( \frac{1}{2} \right)^{t/T_{1/2}} \), where \( T_{1/2} \) is the half-life.
+2. Plug in known values for initial mass, final mass, and half-life.
+3. Isolate the exponential term.
+4. Take natural logarithms of both sides.
+5. Solve for \( t \) using properties of logarithms.
+
+---
+
+FULL SOLUTION:
+
+Let:
+- Initial mass: \( m_0 = 5 \) grams
+- Remaining mass: \( m = 0.625 \) grams
+- Half-life: \( T_{1/2} = 3 \) hours
+
+The exponential decay formula:
+\[
+m = m_0 \left( \frac{1}{2} \right)^{\frac{t}{T_{1/2}}}
+\]
+
+Plugging in values:
+\[
+0.625 = 5 \left( \frac{1}{2} \right)^{\frac{t}{3}}
+\]
+
+Divide both sides by 5:
+\[
+0.125 = \left( \frac{1}{2} \right)^{\frac{t}{3}}
+\]
+
+Express 0.125 as a power of 1/2:
+\[
+0.125 = \frac{1}{8} = \left( \frac{1}{2} \right)^3
+\]
+So,
+\[
+\left( \frac{1}{2} \right)^3 = \left( \frac{1}{2} \right)^{\frac{t}{3}}
+\]
+
+Thus,
+\[
+3 = \frac{t}{3}
+\implies t = 9
+\]
+
+---
+
+FINAL ANSWER:  
+\( t = 9 \) hours.
+
+------------------------------------------------------------
+
+=== ANCHOR 2/5: SOLUTION SKELETON ===
+{
+  "id": "p17",
+  "optypes": [],
+  "laws": [],
+  "target": null
+}
+
+=== GENERATED PROBLEM 2/5 ===
+PROBLEM:
+A rocket is launched vertically from the ground with an initial velocity \( v_0 \). It moves upward under constant acceleration \( a \) for a time \( t_1 \) (when its engines shut off). After that, it moves only under gravity (\( g \)). In total, it reaches a maximum height \( H \). Given \( v_0 \), \( a \), \( t_1 \), and \( g \), find the total maximum height \( H \) the rocket attains.
+
+SOLUTION OUTLINE:
+- Operators: [Displacement (s = s_0 + v_0 t + 0.5 a t^2), Final velocity (v = v_0 + a t), Kinematics under gravity]
+- Laws: [Kinematic equations of motion for constant acceleration, Principle of superposition for piecewise motion]
+- Target quantity: Maximum height (\( H \))
+
+Steps:
+1. **Powered Ascent (with engine):**
+   - Displacement during powered phase: \( h_1 = v_0 t_1 + \frac{1}{2} a t_1^2 \)    [Displacement operator]
+   - Velocity at shutdown: \( v_1 = v_0 + a t_1 \)                             [Final velocity operator]
+2. **Coasting Ascent (after engine cutoff, upward velocity \( v_1 \), acceleration \( -g \)):**
+   - At max height, final velocity is zero: \( 0 = v_1 - g t_2 \) ⇒ \( t_2 = \frac{v_1}{g} \)
+   - Extra height gained during coasting: \( h_2 = v_1 t_2 - \frac{1}{2} g t_2^2 \)
+3. **Total maximum height:** \( H = h_1 + h_2 \)
+
+FULL SOLUTION:
+Step 1: Powered Ascent  
+- Displacement:  
+  \( h_1 = v_0 t_1 + \frac{1}{2} a t_1^2 \)
+
+- Final velocity:  
+  \( v_1 = v_0 + a t_1 \)
+
+Step 2: Coasting Ascent (upwards, then stops at max height)  
+- Time to max height:  
+  \( 0 = v_1 - g t_2 \) ⇒ \( t_2 = \frac{v_1}{g} \)
+
+- Additional height:  
+  \( h_2 = v_1 t_2 - \frac{1}{2} g t_2^2 \)  
+  Plug in \( t_2 \):  
+  \( h_2 = v_1 \left(\frac{v_1}{g}\right) - \frac{1}{2} g \left(\frac{v_1}{g}\right)^2 \)  
+  \( = \frac{v_1^2}{g} - \frac{1}{2}\frac{v_1^2}{g} \)  
+  \( = \frac{v_1^2}{2g} \)
+
+Step 3: Total maximum height  
+  \( H = h_1 + h_2 \)  
+  \( = \left[ v_0 t_1 + \frac{1}{2} a t_1^2 \right] + \frac{1}{2g} (v_0 + a t_1)^2 \)
+
+FINAL ANSWER:
+\[
+\boxed{
+H = v_0 t_1 + \frac{1}{2} a t_1^2 + \frac{1}{2g} (v_0 + a t_1)^2
+}
+\]
+
+------------------------------------------------------------
+
+=== ANCHOR 3/5: SOLUTION SKELETON ===
+{
+  "id": "p18",
+  "optypes": [],
+  "laws": [],
+  "target": null
+}
+
+=== GENERATED PROBLEM 3/5 ===
+PROBLEM:
+A cylindrical tank of fixed radius \( r \) is initially full of water to a height \( h_0 \). Water leaks from a small hole at the bottom of the tank at a constant rate \( Q \) (volume per time). After a certain time \( t_1 \), the water level has dropped to \( h_1 \). Given \( r, h_0, h_1, Q \), find \( t_1 \).
+
+---
+
+SOLUTION OUTLINE:
+- Operators: [Volume calculation, Subtraction, Rate equation, Solve for time]
+- Laws: [Volume of a cylinder: \( V = \pi r^2 h \); Rate law: \( \frac{dV}{dt} = -Q \) (since water is lost); Algebraic solving]
+
+Steps:
+1. Compute volume of water at initial height: \( V_0 = \pi r^2 h_0 \).
+2. Compute volume of water at later height: \( V_1 = \pi r^2 h_1 \).
+3. Water lost: \( \Delta V = V_0 - V_1 \).
+4. From the constant leakage rate: \( \Delta V = Q t_1 \).
+5. Solve for \( t_1 \): \( t_1 = \frac{V_0 - V_1}{Q} \).
+
+---
+
+FULL SOLUTION:
+1. Initial water volume:
+   \[
+   V_0 = \pi r^2 h_0
+   \]
+2. Final water volume:
+   \[
+   V_1 = \pi r^2 h_1
+   \]
+3. Water lost:
+   \[
+   \Delta V = V_0 - V_1 = \pi r^2 h_0 - \pi r^2 h_1 = \pi r^2 (h_0 - h_1)
+   \]
+4. The amount lost at constant rate \( Q \) in time \( t_1 \):
+   \[
+   \Delta V = Q t_1 \implies t_1 = \frac{\Delta V}{Q}
+   \]
+5. Substitute value for \( \Delta V \):
+   \[
+   t_1 = \frac{\pi r^2 (h_0 - h_1)}{Q}
+   \]
+
+---
+
+FINAL ANSWER:
+\[
+t_1 = \frac{\pi r^2 (h_0 - h_1)}{Q}
+\]
+
+------------------------------------------------------------
+
+=== ANCHOR 4/5: SOLUTION SKELETON ===
+{
+  "id": "p1",
+  "optypes": [],
+  "laws": [],
+  "target": null
+}
+
+=== GENERATED PROBLEM 4/5 ===
+PROBLEM:  
+Let vector **a** have magnitude √13 and is in the direction of the vector (2, 3). Let vector **b** have magnitude 5 and is perpendicular to **a**. If **c** = **a** + **b**, what is the magnitude of **c**?
+
+---
+
+SOLUTION OUTLINE:
+
+- Operators: Vector normalization, scalar multiplication, vector addition, Pythagorean theorem (for perpendicular vectors).
+- Laws:  
+   1. Vector normalization: To find the unit vector in a given direction.  
+   2. Scalar multiplication: To scale a unit vector to a given magnitude.  
+   3. Perpendicular vector construction (rotating 90° in the plane).  
+   4. Pythagorean theorem: For vectors at 90°: |**c**|² = |**a**|² + |**b**|².
+
+Steps:
+1. Find the unit vector in the direction (2, 3).
+2. Construct **a** = (unit vector) × √13.
+3. Construct a unit vector perpendicular to (2, 3).
+4. Construct **b** = (perp unit vector) × 5.
+5. Since **a** and **b** are perpendicular, use the Pythagorean theorem to find |**c**| = sqrt(|**a**|² + |**b**|²).
+
+---
+
+FULL SOLUTION:
+
+Step 1: Normalize (2, 3):
+
+Magnitude = sqrt(2² + 3²) = sqrt(4 + 9) = sqrt(13)  
+Unit vector = (2/√13, 3/√13)
+
+Step 2: **a** = (unit vector) × √13  
+**a** = (2/√13 × √13, 3/√13 × √13) = (2, 3)
+[Thus, **a** = (2, 3), and its magnitude is √(2²+3²) = √13]
+
+Step 3: Find a vector perpendicular to (2, 3):  
+In the plane, a perpendicular vector to (x, y) is (-y, x).  
+So, a perpendicular unit vector = (-3, 2)/√13
+
+Step 4: **b** = (perpendicular unit vector) × 5 = (-3/√13 × 5, 2/√13 × 5) = (-15/√13, 10/√13)
+
+Step 5: Since **a** and **b** are perpendicular,  
+|**c**|² = |**a**|² + |**b**|²
+
+|**a**| = √13  
+|**b**| = 5  
+|**c**| = sqrt((√13)² + 5²) = sqrt(13 + 25) = sqrt(38)
+
+---
+
+FINAL ANSWER:  
+The magnitude of **c** is √38.
+
+------------------------------------------------------------
+
+=== ANCHOR 5/5: SOLUTION SKELETON ===
+{
+  "id": "p24",
+  "optypes": [],
+  "laws": [],
+  "target": null
+}
+
+=== GENERATED PROBLEM 5/5 ===
+PROBLEM:  
+A cylindrical tank with a uniform cross-sectional area is being filled with water at a constant volumetric rate \( R \) (in \(\mathrm{m}^3/\mathrm{min}\)). The tank has a base area \( A \) (\(\mathrm{m}^2\)) and starts with an initial water height \( h_0 \) (in meters). After \( t \) minutes, the height of the water is measured to be \( h_1 \).  
+Given \( R \), \( A \), \( h_0 \), and \( h_1 \), determine the time \( t \) required to reach the new water height.
+
+SOLUTION OUTLINE:  
+- Operators: [Addition, Subtraction, Multiplication, Division]  
+- Laws: [Conservation of Volume, Definition of Volume = Area × Height]  
+- Target quantity: \( t \)
+
+1. **Operator & Law:** Change in volume is equal to inflow rate times time.  
+   \[ \text{Volume increase} = R \cdot t \]
+
+2. **Operator & Law:** Volume increase also equals change in water height times cross-sectional area.  
+   \[ \text{Volume increase} = A \cdot (h_1 - h_0) \]
+
+3. **Logical Step:** Equate the two expressions for volume increase.  
+   \[ R \cdot t = A \cdot (h_1 - h_0) \]
+
+4. **Operator:** Solve for \( t \) by division.  
+   \[ t = \frac{A \cdot (h_1 - h_0)}{R} \]
+
+FULL SOLUTION:
+
+Given:  
+- Inflow rate \( R \) (\(\mathrm{m}^3/\mathrm{min}\))
+- Base area \( A \) (\(\mathrm{m}^2\))
+- Initial height \( h_0 \) (\(\mathrm{m}\))
+- Final height \( h_1 \) (\(\mathrm{m}\))
+
+Step 1: The volume of water added is the difference in height times the area:  
+\[
+\text{Volume increase} = A \times (h_1 - h_0)
+\]
+
+Step 2: The total volume added is also the rate times the time:  
+\[
+\text{Volume increase} = R \times t
+\]
+
+Step 3: Equate the two expressions:  
+\[
+A \times (h_1 - h_0) = R \times t
+\]
+
+Step 4: Solve for \( t \):  
+\[
+t = \frac{A \times (h_1 - h_0)}{R}
+\]
+
+FINAL ANSWER:  
+\[
+t = \frac{A \times (h_1 - h_0)}{R}
+\]
+where \( t \) is the time required (in minutes) for the water height to rise from \( h_0 \) to \( h_1 \) in the cylindrical tank.
+
+------------------------------------------------------------
+
