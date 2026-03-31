@@ -26,7 +26,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from ollama_client import generate_json
 
 
 SYSTEM_GEN = """You generate contest-faithful STEM multiple-choice problems (e.g., F=ma / USNCO style).
@@ -155,17 +155,8 @@ CANDIDATE_JSON:
 """
 
 
-def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: float = 0.0) -> Dict[str, Any]:
-    resp = client.chat.completions.create(
-        model=model,
-        temperature=temperature,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        response_format={"type": "json_object"},
-    )
-    return json.loads(resp.choices[0].message.content)
+def llm_json(model: str, system: str, user: str, temperature: float = 0.0) -> Dict[str, Any]:
+    return generate_json(model, user, system=system, temperature=temperature)
 
 
 def repair_prompt(target: Dict[str, Any], bad: Dict[str, Any], verify: Dict[str, Any], k_max_exemplars: int = 4) -> str:
@@ -214,7 +205,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--targets", required=True, help="targets.jsonl from 03_retrieve.py")
     ap.add_argument("--out", default="generated_problems.jsonl")
-    ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument("--model", default="qwen2.5:7b-instruct")
     ap.add_argument("--verify_model", default="", help="optional separate verifier model (defaults to --model)")
     ap.add_argument("--limit", type=int, default=0, help="0 = no limit")
     ap.add_argument("--timeout", type=float, default=90.0, help="seconds per request")
@@ -226,11 +217,6 @@ def main() -> None:
     args = ap.parse_args()
 
     load_dotenv()
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
-
-    client = OpenAI(timeout=args.timeout, max_retries=args.max_retries)
-
     verify_model = args.verify_model.strip() or args.model
 
     n_done = 0
@@ -250,7 +236,6 @@ def main() -> None:
                 user_prompt = build_user_prompt(target, k_max_exemplars=args.max_exemplars)
 
                 candidate = llm_json(
-                    client=client,
                     model=args.model,
                     system=SYSTEM_GEN,
                     user=user_prompt,
@@ -278,7 +263,6 @@ def main() -> None:
                         if verify_obj is None:
                             vprompt = build_verify_prompt(target, candidate, k_max_exemplars=args.max_exemplars)
                             verify_obj = llm_json(
-                                client=client,
                                 model=verify_model,
                                 system=SYSTEM_VERIFY,
                                 user=vprompt,
@@ -294,7 +278,6 @@ def main() -> None:
                         # Attempt repair
                         rprompt = repair_prompt(target, candidate, verify_obj, k_max_exemplars=args.max_exemplars)
                         repaired = llm_json(
-                            client=client,
                             model=args.model,
                             system=SYSTEM_GEN,
                             user=rprompt,

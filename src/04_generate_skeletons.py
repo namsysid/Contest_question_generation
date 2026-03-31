@@ -11,11 +11,9 @@ from __future__ import annotations
 import argparse, json, os, sys, time
 from typing import Any, Dict, List
 from dotenv import load_dotenv
-from openai import OpenAI
+from ollama_client import generate_json
 
 load_dotenv()
-if not os.environ.get("OPENAI_API_KEY"):
-    raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
 
 NODE_TYPES = ["Given", "Target", "Law", "State", "Constraint", "Auxiliary", "Trap", "Distractor"]
 EDGE_TYPES = ["supports", "depends_on", "derived_from", "couples", "rules_out", "produces_distractor"]
@@ -72,14 +70,8 @@ def write_jsonl_line(f, row: Dict[str, Any]) -> None:
     f.flush()
 
 
-def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: float=0.25) -> Dict[str, Any]:
-    resp = client.chat.completions.create(
-        model=model,
-        temperature=temperature,
-        messages=[{"role":"system","content":system},{"role":"user","content":user}],
-        response_format={"type":"json_object"},
-    )
-    return json.loads(resp.choices[0].message.content)
+def llm_json(model: str, system: str, user: str, temperature: float=0.25) -> Dict[str, Any]:
+    return generate_json(model, user, system=system, temperature=temperature)
 
 
 def normalize_graph(graph: Any) -> Dict[str, Any]:
@@ -162,8 +154,8 @@ def graph_ok(graph: Dict[str, Any]) -> bool:
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--bundles", required=True)
-    ap.add_argument("--out", default="generated_skeletons.jsonl")
-    ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument("--out", default="./generated/generated_skeletons.jsonl")
+    ap.add_argument("--model", default="qwen2.5:7b-instruct")
     ap.add_argument("--domain", default="fma")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
@@ -173,7 +165,6 @@ def main():
     if args.limit and args.limit>0:
         rows=rows[:args.limit]
 
-    client=OpenAI()
     total=len(rows)
 
     if args.debug:
@@ -203,7 +194,7 @@ def main():
 
             best=None
             for k in range(3):
-                js=llm_json(client, args.model, SYSTEM, user, temperature=0.25)
+                js=llm_json(args.model, SYSTEM, user, temperature=0.25)
                 graph = normalize_graph(js.get("problem_graph") or {})
                 gt = graph_text(graph)
                 ok = graph_ok(graph)

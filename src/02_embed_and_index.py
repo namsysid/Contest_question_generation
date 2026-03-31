@@ -21,7 +21,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 from dotenv import load_dotenv
-from openai import OpenAI
+from ollama_client import embed_texts as ollama_embed_texts
 
 load_dotenv()
 
@@ -205,7 +205,7 @@ def safe_get_question_text(r: Dict[str, Any]) -> str:
     return ""
 
 
-def embed_texts(client: OpenAI, model: str, texts: List[str], batch: int = 64) -> List[List[float]]:
+def embed_texts(model: str, texts: List[str], batch: int = 64) -> List[List[float]]:
     embedding_dim = None
     embs: List[List[float]] = []
 
@@ -219,13 +219,13 @@ def embed_texts(client: OpenAI, model: str, texts: List[str], batch: int = 64) -
                 non_empty_indices.append(j)
 
         if non_empty_chunk:
-            resp = client.embeddings.create(model=model, input=non_empty_chunk)
-            if embedding_dim is None and resp.data:
-                embedding_dim = len(resp.data[0].embedding)
+            resp = ollama_embed_texts(model, non_empty_chunk)
+            if embedding_dim is None and resp:
+                embedding_dim = len(resp[0])
 
             chunk_embs = [None] * len(chunk)
-            for idx, emb in zip(non_empty_indices, resp.data):
-                chunk_embs[idx] = emb.embedding
+            for idx, emb in zip(non_empty_indices, resp):
+                chunk_embs[idx] = emb
             zero_vec = [0.0] * embedding_dim if embedding_dim else []
             for j in range(len(chunk_embs)):
                 if chunk_embs[j] is None:
@@ -233,8 +233,8 @@ def embed_texts(client: OpenAI, model: str, texts: List[str], batch: int = 64) -
             embs.extend(chunk_embs)
         else:
             if embedding_dim is None:
-                test_resp = client.embeddings.create(model=model, input=["test"])
-                embedding_dim = len(test_resp.data[0].embedding)
+                test_resp = ollama_embed_texts(model, ["test"])
+                embedding_dim = len(test_resp[0])
             zero_vec = [0.0] * embedding_dim
             embs.extend([zero_vec for _ in chunk])
     return embs
@@ -259,19 +259,15 @@ def knn_density_scores(X: np.ndarray, k: int = 20) -> np.ndarray:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True, help="Enriched problems JSONL (has question + graph/skeleton)")
-    ap.add_argument("--embed_model", default="text-embedding-3-large")
+    ap.add_argument("--embed_model", default="qwen3-embedding")
     ap.add_argument("--anchor_frac", type=float, default=0.18, help="15–20% recommended (e.g. 0.15–0.20)")
     ap.add_argument("--k_density", type=int, default=20, help="kNN size for density proxy")
-    ap.add_argument("--out_skel", default="skeleton_embedded.jsonl")
-    ap.add_argument("--out_q", default="question_embedded.jsonl")
-    ap.add_argument("--out_anchors", default="anchors.jsonl")
+    ap.add_argument("--out_skel", default="./data/skeleton_embedded.jsonl")
+    ap.add_argument("--out_q", default="./data/question_embedded.jsonl")
+    ap.add_argument("--out_anchors", default="./data/anchors.jsonl")
     args = ap.parse_args()
 
     load_dotenv()
-    if not os.getenv("OPENAI_API_KEY"):
-        raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
-
-    client = OpenAI()
     rows = read_jsonl(args.input)
     if not rows:
         raise RuntimeError("No rows found in input JSONL.")
@@ -279,8 +275,8 @@ def main() -> None:
     graph_texts = [safe_get_graph_text(r) for r in rows]
     q_texts = [safe_get_question_text(r) for r in rows]
 
-    graph_embs = embed_texts(client, args.embed_model, graph_texts)
-    q_embs = embed_texts(client, args.embed_model, q_texts)
+    graph_embs = embed_texts(args.embed_model, graph_texts)
+    q_embs = embed_texts(args.embed_model, q_texts)
 
     sk_out: List[Dict[str, Any]] = []
     q_out: List[Dict[str, Any]] = []

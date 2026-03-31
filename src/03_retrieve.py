@@ -4,6 +4,10 @@
 
 Retrieves bundles using graph_text as the primary structural representation.
 Backward compatible with legacy skeleton_text fields.
+
+python3 src/03_retrieve.py --skeleton_embedded data/skeleton_embedded.jsonl --question_embedded da
+ta/question_embedded.jsonl --anchors data/anchors.jsonl 
+
 """
 import argparse, json, random, re
 from typing import Any, Dict, List, Tuple

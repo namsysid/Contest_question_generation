@@ -18,17 +18,15 @@ Output:
       id, skeleton (structured), operators_used, meta
 
 Usage:
-  export OPENAI_API_KEY="..."
   python3 generate_solution_skeletons.py \
       --in solutions.jsonl \
       --out skeletons.jsonl \
-      --model gpt-4.1-mini \
+      --model qwen2.5:7b-instruct \
       --max-items 0 \
       --resume
 
 Notes:
-  - Uses OpenAI Responses API via the official python SDK.
-  - If you don’t want to depend on OpenAI, you can replace call_llm() with your local model call.
+  - Uses a self-hosted Ollama/Qwen backend via /api/generate.
 """
 
 from __future__ import annotations
@@ -42,13 +40,8 @@ import sys
 import time
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
-# --- Optional OpenAI dependency ---
-try:
-    from openai import OpenAI
-except Exception:
-    OpenAI = None
-
 from dotenv import load_dotenv
+from ollama_client import generate_json
 load_dotenv()
 
 
@@ -227,41 +220,11 @@ def call_llm(
     max_output_tokens: int = 900,
 ) -> Dict[str, Any]:
     """
-    Calls OpenAI Responses API and returns parsed JSON.
-
-    If you use a different provider/local model, replace this function
-    but keep the returned dict shape.
+    Calls the self-hosted Ollama/Qwen backend and returns parsed JSON.
     """
-    if client is None:
-        raise RuntimeError(
-            "OpenAI client not available. Install openai (`pip install openai`) "
-            "and set OPENAI_API_KEY, or replace call_llm() with your local model call."
-        )
-
-    kwargs: Dict[str, Any] = {}
-    # Some models accept seed; harmless to include only when provided.
-    if seed is not None:
-        kwargs["seed"] = seed
-
-    resp = client.responses.create(
-        model=model,
-        input=prompt,
-        max_output_tokens=max_output_tokens,
-        **kwargs,
-    )
-
-    # The SDK returns output text in a structured way; we’ll extract concatenated text.
-    # Compatible approach:
-    text_parts: List[str] = []
-    for out in resp.output:
-        if out.type == "message":
-            for c in out.content:
-                if c.type == "output_text":
-                    text_parts.append(c.text)
-    raw = "".join(text_parts).strip()
-
-    # Parse JSON strictly; if it fails, raise so caller can retry/fallback.
-    return json.loads(raw)
+    _ = client
+    _ = max_output_tokens
+    return generate_json(model, prompt, seed=seed)
 
 
 # ---------------------------
@@ -392,7 +355,7 @@ def process_items(
     sleep_s: float,
     retries: int,
 ) -> None:
-    client = OpenAI() if OpenAI is not None else None
+    client = object()
 
     done_ids = existing_ids_from_out(out_path) if resume else set()
 
@@ -478,19 +441,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="inp", required=True, help="Input solution packet (.json or .jsonl)")
     ap.add_argument("--out", dest="out", required=True, help="Output .jsonl file (appended)")
-    ap.add_argument("--model", default="gpt-4.1-mini", help="Model name")
+    ap.add_argument("--model", default="qwen2.5:7b-instruct", help="Model name")
     ap.add_argument("--resume", action="store_true", help="Skip ids already in output")
     ap.add_argument("--max-items", type=int, default=0, help="0 = all, else limit count")
     ap.add_argument("--seed", type=int, default=None, help="Optional seed for repeatability")
     ap.add_argument("--sleep", type=float, default=0.0, help="Sleep seconds between calls")
     ap.add_argument("--retries", type=int, default=1, help="Retries per item")
     args = ap.parse_args()
-
-    # Basic env check
-    if OpenAI is None:
-        print("WARNING: openai package not installed. Install with: pip install openai", file=sys.stderr)
-    if not os.getenv("OPENAI_API_KEY"):
-        print("WARNING: OPENAI_API_KEY not set. Calls will fail unless you use a different backend.", file=sys.stderr)
 
     items = load_items(args.inp)
     if not items:

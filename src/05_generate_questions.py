@@ -15,11 +15,9 @@ import time
 from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from ollama_client import generate_json
 
 load_dotenv()
-if not os.environ.get("OPENAI_API_KEY"):
-    raise RuntimeError("OPENAI_API_KEY not set (env or .env).")
 
 SYSTEM_GEN = """You generate contest-faithful STEM multiple-choice problems (e.g., F=ma / USNCO style).
 
@@ -64,14 +62,8 @@ def write_jsonl_line(f, row: Dict[str, Any]) -> None:
     f.flush()
 
 
-def llm_json(client: OpenAI, model: str, system: str, user: str, temperature: float = 0.2) -> Dict[str, Any]:
-    resp = client.chat.completions.create(
-        model=model,
-        temperature=temperature,
-        messages=[{"role":"system","content":system},{"role":"user","content":user}],
-        response_format={"type":"json_object"},
-    )
-    return json.loads(resp.choices[0].message.content)
+def llm_json(model: str, system: str, user: str, temperature: float = 0.2) -> Dict[str, Any]:
+    return generate_json(model, user, system=system, temperature=temperature)
 
 
 def _truncate(s: str, n: int) -> str:
@@ -189,7 +181,7 @@ def main() -> None:
     ap.add_argument("--bundles", required=True)
     ap.add_argument("--skeletons", required=True)
     ap.add_argument("--out", default="generated_problems.jsonl")
-    ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument("--model", default="qwen2.5:7b-instruct")
     ap.add_argument("--verify_model", default="")
     ap.add_argument("--max_q_exemplars", type=int, default=4)
     ap.add_argument("--max_paired_exemplars", type=int, default=3)
@@ -208,7 +200,6 @@ def main() -> None:
     if args.limit and args.limit > 0:
         bundles = bundles[: args.limit]
 
-    client = OpenAI()
     total = len(bundles)
 
     if args.debug:
@@ -228,7 +219,7 @@ def main() -> None:
                 print(f"[{i}/{total}] bundle_id={bid} calling gen model={args.model}", file=sys.stderr, flush=True)
                 t0 = time.time()
 
-            cand = llm_json(client, args.model, SYSTEM_GEN, prompt, temperature=0.25)
+            cand = llm_json(args.model, SYSTEM_GEN, prompt, temperature=0.25)
             if "graph_text" not in cand and target_graph_text:
                 cand["graph_text"] = target_graph_text
             if "skeleton_text" not in cand:
@@ -247,7 +238,7 @@ def main() -> None:
                 else:
                     if args.debug:
                         print(f"[{i}/{total}] bundle_id={bid} gatekeeper call {r_i+1} model={verify_model}", file=sys.stderr, flush=True)
-                    gate = llm_json(client, verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_graph_text, cand), temperature=0.0)
+                    gate = llm_json(verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_graph_text, cand), temperature=0.0)
 
                 if gate.get("verdict") == "PASS":
                     if args.debug:
@@ -257,7 +248,7 @@ def main() -> None:
                 repairs.append({"gatekeeper": gate, "candidate": cand})
                 if args.debug:
                     print(f"[{i}/{total}] bundle_id={bid} repair {r_i+1} calling model={args.model}", file=sys.stderr, flush=True)
-                cand = llm_json(client, args.model, SYSTEM_GEN, build_repair_prompt(target_graph_text, cand, gate), temperature=0.2)
+                cand = llm_json(args.model, SYSTEM_GEN, build_repair_prompt(target_graph_text, cand, gate), temperature=0.2)
                 if "graph_text" not in cand and target_graph_text:
                     cand["graph_text"] = target_graph_text
                 if "skeleton_text" not in cand:
