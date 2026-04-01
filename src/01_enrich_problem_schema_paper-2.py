@@ -121,6 +121,15 @@ Return JSON with keys:
 - problem_graph: object with keys:
   - nodes: list of objects {{id: string, type: string, label: string, importance: "primary"|"secondary"|"optional"}}
   - edges: list of objects {{src: string, dst: string, type: string, note: string}}
+- graph_profile: object with keys:
+  - target_summary: short string
+  - state_evolution: list of short strings (1-6)
+  - hidden_states: list of short strings (1-6)
+  - coupling_points: list of short strings (1-6)
+  - insight_type: list of short strings (1-4)
+  - trap_profile: list of short strings (1-5)
+  - reasoning_depth: integer 1-5
+  - why_naive_method_fails: list of short strings (0-3)
 - concepts: list of short strings (2-8)
 - skills: list of short strings (0-8)
 - difficulty: integer 1-10
@@ -133,6 +142,8 @@ Guidelines:
 - Do not compute numeric answers; keep it symbolic/structural.
 - Include at least 1 Target node, at least 2 Law/Constraint nodes total, and at least 2 State nodes.
 - Prefer including at least one nontrivial feature: Auxiliary or Trap or nontrivial Constraint coupling.
+- Use graph_profile to capture contest complexity, especially hidden conditions, coupled equations, thresholds, and likely wrong paths.
+- Make graph_profile concise and retrieval-friendly, not essay-like.
 - diagram_required true ONLY if information is missing without the figure.
 """
 
@@ -226,6 +237,61 @@ def normalize_graph(graph: Any) -> Dict[str, Any]:
     return {"graph_type": "typed_problem_graph", "nodes": nodes, "edges": edges}
 
 
+
+def normalize_profile(profile: Any) -> Dict[str, Any]:
+    if not isinstance(profile, dict):
+        profile = {}
+
+    def _clean_list(key: str, limit: int) -> List[str]:
+        vals = profile.get(key) or []
+        out: List[str] = []
+        if isinstance(vals, list):
+            for v in vals:
+                txt = " ".join(str(v).split())[:160]
+                if txt:
+                    out.append(txt)
+        return out[:limit]
+
+    target_summary = " ".join(str(profile.get("target_summary") or "").split())[:160]
+    reasoning_depth = profile.get("reasoning_depth", 0)
+    try:
+        reasoning_depth = int(reasoning_depth)
+    except Exception:
+        reasoning_depth = 0
+    if reasoning_depth < 1 or reasoning_depth > 5:
+        reasoning_depth = 2
+
+    return {
+        "target_summary": target_summary,
+        "state_evolution": _clean_list("state_evolution", 6),
+        "hidden_states": _clean_list("hidden_states", 6),
+        "coupling_points": _clean_list("coupling_points", 6),
+        "insight_type": _clean_list("insight_type", 4),
+        "trap_profile": _clean_list("trap_profile", 5),
+        "reasoning_depth": reasoning_depth,
+        "why_naive_method_fails": _clean_list("why_naive_method_fails", 3),
+    }
+
+
+def profile_to_text(profile: Dict[str, Any]) -> str:
+    bits: List[str] = []
+    if profile.get("target_summary"):
+        bits.append(f"TARGET_SUMMARY: {profile['target_summary']}")
+    if profile.get("state_evolution"):
+        bits.append("STATE_EVOLUTION: " + " | ".join(profile["state_evolution"]))
+    if profile.get("hidden_states"):
+        bits.append("HIDDEN_STATES: " + " | ".join(profile["hidden_states"]))
+    if profile.get("coupling_points"):
+        bits.append("COUPLING_POINTS: " + " | ".join(profile["coupling_points"]))
+    if profile.get("insight_type"):
+        bits.append("INSIGHT_TYPE: " + " | ".join(profile["insight_type"]))
+    if profile.get("trap_profile"):
+        bits.append("TRAP_PROFILE: " + " | ".join(profile["trap_profile"]))
+    bits.append(f"REASONING_DEPTH: {profile.get('reasoning_depth', 2)}")
+    if profile.get("why_naive_method_fails"):
+        bits.append("WHY_NAIVE_FAILS: " + " | ".join(profile["why_naive_method_fails"]))
+    return "\n".join(bits).strip()
+
 def graph_to_text(graph: Dict[str, Any]) -> str:
     nodes = graph.get("nodes") or []
     edges = graph.get("edges") or []
@@ -304,6 +370,7 @@ def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Option
         },
         "analysis": {
             "problem_graph": None,
+            "graph_profile": None,
             "graph_text": "",
             "skeleton": None,
             "concepts": [],
@@ -396,9 +463,13 @@ def main() -> None:
                 print(f"[{i}/{total}] id={raw.get('id','?')} post-process start", file=sys.stderr, flush=True)
 
             problem_graph = normalize_graph(enrich.get("problem_graph") or {})
-            graph_text = graph_to_text(problem_graph)
+            graph_profile = normalize_profile(enrich.get("graph_profile") or {})
+            graph_text_core = graph_to_text(problem_graph)
+            graph_text_profile = profile_to_text(graph_profile)
+            graph_text = "\n".join(x for x in [graph_text_core, graph_text_profile] if x).strip()
 
             schema["analysis"]["problem_graph"] = problem_graph
+            schema["analysis"]["graph_profile"] = graph_profile
             schema["analysis"]["graph_text"] = graph_text
             schema["analysis"]["skeleton"] = graph_text
             schema["analysis"]["concepts"] = enrich.get("concepts") or []
