@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
 """
-01_enrich_problem_schema_paper.py  (GRAPH-FIRST SCHEMA ENRICHMENT)
+01_enrich_problem_schema_paper.py  (GRAPH-FIRST SCHEMA ENRICHMENT + GRAPH GRAMMAR)
 
 Input:  raw JSONL from 00_pdf-to-txt.py
 Output: enriched JSONL with:
   - problem.stem + problem.choices
   - analysis.problem_graph: typed latent problem graph
   - analysis.graph_text: stable string form of the graph for retrieval
+  - analysis.graph_metrics: computed structural metrics
+  - analysis.graph_constraints: grammar + budget parameters used
   - analysis.* tags (concepts/skills/difficulty/structure_tags)
 
-This stage aligns the corpus with the newer graph-first retrieval/generation pipeline.
+This version adds:
+  - explicit graph grammar (allowed node/edge arrangements)
+  - configurable structural budgets (max depth / max branching / max nodes / max edges)
+  - grammar enforcement modes: off | warn | strict
+  - computed graph metrics for downstream bucketing experiments
+
 Legacy `analysis.skeleton` is still populated as a compatibility alias, but the graph is
 the authoritative structural representation.
 """
@@ -18,12 +25,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 import time
+from collections import Counter, defaultdict, deque
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from dotenv import load_dotenv
 from ollama_client import generate_json, generate_text
@@ -86,6 +93,50 @@ def infer_domain(raw: Dict[str, Any]) -> str:
 
 NODE_TYPES = ["Given", "Target", "Law", "State", "Constraint", "Auxiliary", "Trap", "Distractor"]
 EDGE_TYPES = ["supports", "depends_on", "derived_from", "couples", "rules_out", "produces_distractor"]
+NODE_TYPE_SET = set(NODE_TYPES)
+EDGE_TYPE_SET = set(EDGE_TYPES)
+
+# Graph grammar: allowed (src_type, dst_type) pairs per edge type.
+GRAPH_GRAMMAR: Dict[str, Set[Tuple[str, str]]] = {
+    "supports": {
+        ("Given", "Law"), ("Given", "State"), ("Given", "Constraint"), ("Given", "Auxiliary"), ("Given", "Target"),
+        ("State", "Law"), ("State", "Constraint"), ("State", "Auxiliary"), ("State", "Target"),
+        ("Law", "State"), ("Law", "Constraint"), ("Law", "Target"), ("Law", "Auxiliary"),
+        ("Constraint", "Law"), ("Constraint", "State"), ("Constraint", "Target"),
+        ("Auxiliary", "Law"), ("Auxiliary", "State"), ("Auxiliary", "Target"),
+    },
+    "depends_on": {
+        ("Target", "Law"), ("Target", "State"), ("Target", "Constraint"), ("Target", "Auxiliary"), ("Target", "Given"),
+        ("State", "Law"), ("State", "Constraint"), ("State", "Auxiliary"), ("State", "Given"),
+        ("Law", "Constraint"), ("Law", "Given"), ("Law", "Auxiliary"),
+        ("Auxiliary", "Law"), ("Auxiliary", "Constraint"), ("Auxiliary", "Given"),
+    },
+    "derived_from": {
+        ("State", "Given"), ("State", "Law"), ("State", "Constraint"), ("State", "Auxiliary"), ("State", "State"),
+        ("Auxiliary", "Given"), ("Auxiliary", "Law"), ("Auxiliary", "Constraint"), ("Auxiliary", "State"),
+        ("Target", "State"), ("Target", "Law"), ("Target", "Auxiliary"),
+    },
+    "couples": {
+        ("Constraint", "State"), ("Constraint", "Law"), ("Constraint", "Auxiliary"), ("Constraint", "Target"),
+        ("State", "Constraint"), ("State", "State"), ("State", "Law"),
+        ("Law", "Constraint"), ("Law", "State"),
+        ("Auxiliary", "State"), ("Auxiliary", "Law"),
+    },
+    "rules_out": {
+        ("Constraint", "Trap"), ("Law", "Trap"), ("State", "Trap"), ("Given", "Trap"), ("Auxiliary", "Trap"),
+        ("Constraint", "Distractor"), ("Law", "Distractor"), ("State", "Distractor"),
+    },
+    "produces_distractor": {
+        ("Trap", "Distractor"), ("Law", "Distractor"), ("State", "Distractor"), ("Auxiliary", "Distractor"),
+    },
+}
+
+DEFAULT_LIMITS = {
+    "max_depth": 10,
+    "max_branching": 10,
+    "max_nodes": 100,
+    "max_edges": 100,
+}
 
 
 # ----------------------------
@@ -117,6 +168,15 @@ Allowed node types:
 Allowed edge types:
 {edge_types_block}
 
+Graph grammar (treat as hard in spirit; strict postprocessing may enforce it):
+{grammar_block}
+
+Structural budgets:
+- max depth: {max_depth}
+- max outgoing branching per node: {max_branching}
+- max nodes: {max_nodes}
+- max edges: {max_edges}
+
 Return JSON with keys:
 - problem_graph: object with keys:
   - nodes: list of objects {{id: string, type: string, label: string, importance: "primary"|"secondary"|"optional"}}
@@ -140,12 +200,24 @@ Return JSON with keys:
 
 Guidelines:
 - Do not compute numeric answers; keep it symbolic/structural.
-- Include at least 1 Target node, at least 2 Law/Constraint nodes total, and at least 2 State nodes.
+- Include at least 1 Target node, at least 2 Law/Constraint nodes total, and at least 2 State nodes unless the problem is truly degenerate.
 - Prefer including at least one nontrivial feature: Auxiliary or Trap or nontrivial Constraint coupling.
+- Keep the graph compact and grammar-consistent.
+- Favor a single coherent dependency structure over many loose nodes.
 - Use graph_profile to capture contest complexity, especially hidden conditions, coupled equations, thresholds, and likely wrong paths.
 - Make graph_profile concise and retrieval-friendly, not essay-like.
 - diagram_required true ONLY if information is missing without the figure.
 """
+
+
+def format_grammar_block() -> str:
+    lines: List[str] = []
+    for edge_type in EDGE_TYPES:
+        allowed = sorted(GRAPH_GRAMMAR[edge_type])
+        pairs = ", ".join(f"{src}->{dst}" for src, dst in allowed)
+        lines.append(f"- {edge_type}: {pairs}")
+    return "\n".join(lines)
+
 
 def llm_enrich(
     domain: str,
@@ -154,6 +226,7 @@ def llm_enrich(
     has_diagram: bool,
     diagram_files: List[str],
     model: str,
+    limits: Dict[str, int],
 ) -> Dict[str, Any]:
     choices_block = "\n".join(choices) if choices else "(none)"
     user = USER_TMPL.format(
@@ -164,6 +237,11 @@ def llm_enrich(
         diagram_files=json.dumps(diagram_files),
         node_types_block="\n".join(f"- {o}" for o in NODE_TYPES),
         edge_types_block="\n".join(f"- {o}" for o in EDGE_TYPES),
+        grammar_block=format_grammar_block(),
+        max_depth=limits["max_depth"],
+        max_branching=limits["max_branching"],
+        max_nodes=limits["max_nodes"],
+        max_edges=limits["max_edges"],
     )
 
     try:
@@ -177,15 +255,185 @@ def llm_enrich(
 
 
 # ----------------------------
-# Schema builder
+# Graph grammar / metrics
 # ----------------------------
 
-def normalize_graph(graph: Any) -> Dict[str, Any]:
+
+def edge_respects_grammar(src_type: str, dst_type: str, edge_type: str) -> bool:
+    return (src_type, dst_type) in GRAPH_GRAMMAR.get(edge_type, set())
+
+
+
+def compute_graph_metrics(graph: Dict[str, Any]) -> Dict[str, Any]:
+    nodes = graph.get("nodes") or []
+    edges = graph.get("edges") or []
+    id_to_type = {n["id"]: n["type"] for n in nodes if isinstance(n, dict) and "id" in n and "type" in n}
+
+    out_adj: Dict[str, List[str]] = defaultdict(list)
+    in_adj: Dict[str, List[str]] = defaultdict(list)
+    edge_type_counts: Counter[str] = Counter()
+    for e in edges:
+        if not isinstance(e, dict):
+            continue
+        src, dst, et = e.get("src"), e.get("dst"), e.get("type")
+        if src in id_to_type and dst in id_to_type:
+            out_adj[src].append(dst)
+            in_adj[dst].append(src)
+            edge_type_counts[str(et)] += 1
+
+    node_type_counts: Counter[str] = Counter(str(n.get("type")) for n in nodes if isinstance(n, dict))
+    max_out = max((len(v) for v in out_adj.values()), default=0)
+    avg_out = round(sum(len(v) for v in out_adj.values()) / max(len(nodes), 1), 3)
+
+    sources = [n["id"] for n in nodes if n.get("type") == "Given"]
+    targets = [n["id"] for n in nodes if n.get("type") == "Target"]
+
+    # Longest source-to-target depth in DAG-like approximation via BFS from all sources.
+    max_depth = 0
+    if sources and targets:
+        for s in sources:
+            dq = deque([(s, 0)])
+            seen_depth: Dict[str, int] = {s: 0}
+            while dq:
+                cur, d = dq.popleft()
+                if cur in targets:
+                    max_depth = max(max_depth, d)
+                if d > len(nodes):
+                    continue
+                for nxt in out_adj.get(cur, []):
+                    nd = d + 1
+                    if nd > seen_depth.get(nxt, -1):
+                        seen_depth[nxt] = nd
+                        dq.append((nxt, nd))
+
+    # Weakly connected components count.
+    undirected: Dict[str, Set[str]] = defaultdict(set)
+    for e in edges:
+        if not isinstance(e, dict):
+            continue
+        src, dst = e.get("src"), e.get("dst")
+        if src in id_to_type and dst in id_to_type:
+            undirected[src].add(dst)
+            undirected[dst].add(src)
+
+    components = 0
+    visited: Set[str] = set()
+    for nid in id_to_type:
+        if nid in visited:
+            continue
+        components += 1
+        dq = deque([nid])
+        visited.add(nid)
+        while dq:
+            cur = dq.popleft()
+            for nxt in undirected.get(cur, set()):
+                if nxt not in visited:
+                    visited.add(nxt)
+                    dq.append(nxt)
+
+    return {
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "node_type_counts": dict(node_type_counts),
+        "edge_type_counts": dict(edge_type_counts),
+        "max_branching": max_out,
+        "avg_branching": avg_out,
+        "target_depth": max_depth,
+        "connected_components": components,
+    }
+
+
+
+def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, int]) -> Tuple[Dict[str, Any], List[str]]:
+    """Prune softly toward useful structure: keep core node types, then important nodes, then connected edges."""
+    notes: List[str] = []
+    nodes = list(graph.get("nodes") or [])
+    edges = list(graph.get("edges") or [])
+
+    # Rank nodes so target/state/law/constraint survive first.
+    type_rank = {
+        "Target": 0,
+        "State": 1,
+        "Law": 2,
+        "Constraint": 3,
+        "Given": 4,
+        "Auxiliary": 5,
+        "Trap": 6,
+        "Distractor": 7,
+    }
+    importance_rank = {"primary": 0, "secondary": 1, "optional": 2}
+    nodes_sorted = sorted(
+        nodes,
+        key=lambda n: (
+            importance_rank.get(str(n.get("importance", "primary")), 0),
+            type_rank.get(str(n.get("type", "State")), 99),
+            str(n.get("id", "")),
+        ),
+    )
+
+    if len(nodes_sorted) > limits["max_nodes"]:
+        kept_nodes = nodes_sorted[: limits["max_nodes"]]
+        notes.append(f"pruned_nodes:{len(nodes_sorted) - len(kept_nodes)}")
+    else:
+        kept_nodes = nodes_sorted
+
+    kept_ids = {n["id"] for n in kept_nodes}
+    edges = [e for e in edges if e.get("src") in kept_ids and e.get("dst") in kept_ids]
+
+    # Enforce branching cap.
+    out_count: Dict[str, int] = defaultdict(int)
+    pruned_edges: List[Dict[str, Any]] = []
+    removed_branch = 0
+    for e in edges:
+        src = str(e.get("src") or "")
+        if out_count[src] >= limits["max_branching"]:
+            removed_branch += 1
+            continue
+        out_count[src] += 1
+        pruned_edges.append(e)
+    edges = pruned_edges
+    if removed_branch:
+        notes.append(f"pruned_branching_edges:{removed_branch}")
+
+    # Enforce edge cap.
+    if len(edges) > limits["max_edges"]:
+        notes.append(f"pruned_edges:{len(edges) - limits['max_edges']}")
+        edges = edges[: limits["max_edges"]]
+
+    graph = {"graph_type": "typed_problem_graph", "nodes": kept_nodes, "edges": edges}
+
+    # Enforce depth cap by iteratively dropping edges that push farthest target paths.
+    if limits["max_depth"] >= 0:
+        safety = 0
+        while safety < 50:
+            metrics = compute_graph_metrics(graph)
+            if metrics["target_depth"] <= limits["max_depth"]:
+                break
+            if not graph["edges"]:
+                break
+            removed = graph["edges"].pop()  # deterministic last-edge trim after prior sorting/preservation
+            notes.append(f"pruned_for_depth:{removed.get('src')}->{removed.get('dst')}:{removed.get('type')}")
+            safety += 1
+
+    return graph, notes
+
+
+
+def normalize_graph(
+    graph: Any,
+    grammar_mode: str = "warn",
+    limits: Optional[Dict[str, int]] = None,
+) -> Tuple[Dict[str, Any], List[str], Dict[str, Any]]:
+    if limits is None:
+        limits = dict(DEFAULT_LIMITS)
     if not isinstance(graph, dict):
-        return {"graph_type": "typed_problem_graph", "nodes": [], "edges": []}
+        empty = {"graph_type": "typed_problem_graph", "nodes": [], "edges": []}
+        return empty, ["invalid_graph_object"], compute_graph_metrics(empty)
 
     nodes: List[Dict[str, str]] = []
-    seen: set[str] = set()
+    seen: Set[str] = set()
+    notes: List[str] = []
+
     for idx, node in enumerate(graph.get("nodes") or [], start=1):
         if not isinstance(node, dict):
             continue
@@ -195,7 +443,8 @@ def normalize_graph(graph: Any) -> Dict[str, Any]:
         seen.add(node_id)
 
         node_type = str(node.get("type") or "State").strip()
-        if node_type not in NODE_TYPES:
+        if node_type not in NODE_TYPE_SET:
+            notes.append(f"coerced_node_type:{node_id}:{node_type}->State")
             node_type = "State"
 
         label = " ".join(str(node.get("label") or "").split())[:160]
@@ -216,7 +465,9 @@ def normalize_graph(graph: Any) -> Dict[str, Any]:
         )
 
     valid_ids = {node["id"] for node in nodes}
+    id_to_type = {node["id"]: node["type"] for node in nodes}
     edges: List[Dict[str, str]] = []
+
     for edge in graph.get("edges") or []:
         if not isinstance(edge, dict):
             continue
@@ -224,9 +475,19 @@ def normalize_graph(graph: Any) -> Dict[str, Any]:
         dst = str(edge.get("dst") or "").strip()[:40]
         edge_type = str(edge.get("type") or "supports").strip()
         if src not in valid_ids or dst not in valid_ids:
+            notes.append(f"dropped_edge_missing_node:{src}->{dst}:{edge_type}")
             continue
-        if edge_type not in EDGE_TYPES:
+        if edge_type not in EDGE_TYPE_SET:
+            notes.append(f"coerced_edge_type:{src}->{dst}:{edge_type}->supports")
             edge_type = "supports"
+
+        if not edge_respects_grammar(id_to_type[src], id_to_type[dst], edge_type):
+            msg = f"grammar_violation:{src}[{id_to_type[src]}]-{edge_type}->{dst}[{id_to_type[dst]}]"
+            if grammar_mode == "strict":
+                notes.append(f"dropped_{msg}")
+                continue
+            if grammar_mode == "warn":
+                notes.append(msg)
 
         row = {"src": src, "dst": dst, "type": edge_type}
         note = " ".join(str(edge.get("note") or "").split())[:160]
@@ -234,7 +495,11 @@ def normalize_graph(graph: Any) -> Dict[str, Any]:
             row["note"] = note
         edges.append(row)
 
-    return {"graph_type": "typed_problem_graph", "nodes": nodes, "edges": edges}
+    norm = {"graph_type": "typed_problem_graph", "nodes": nodes, "edges": edges}
+    norm, prune_notes = prune_to_limits(norm, limits)
+    notes.extend(prune_notes)
+    metrics = compute_graph_metrics(norm)
+    return norm, notes, metrics
 
 
 
@@ -273,6 +538,7 @@ def normalize_profile(profile: Any) -> Dict[str, Any]:
     }
 
 
+
 def profile_to_text(profile: Dict[str, Any]) -> str:
     bits: List[str] = []
     if profile.get("target_summary"):
@@ -292,7 +558,9 @@ def profile_to_text(profile: Dict[str, Any]) -> str:
         bits.append("WHY_NAIVE_FAILS: " + " | ".join(profile["why_naive_method_fails"]))
     return "\n".join(bits).strip()
 
-def graph_to_text(graph: Dict[str, Any]) -> str:
+
+
+def graph_to_text(graph: Dict[str, Any], metrics: Optional[Dict[str, Any]] = None) -> str:
     nodes = graph.get("nodes") or []
     edges = graph.get("edges") or []
     groups = {node_type: [] for node_type in NODE_TYPES}
@@ -332,7 +600,23 @@ def graph_to_text(graph: Dict[str, Any]) -> str:
         if edge_bits:
             parts.append("EDGES: " + " | ".join(edge_bits))
 
+    if metrics:
+        parts.append(
+            "GRAPH_METRICS: "
+            f"nodes={metrics.get('node_count', 0)} | "
+            f"edges={metrics.get('edge_count', 0)} | "
+            f"depth={metrics.get('target_depth', 0)} | "
+            f"max_branching={metrics.get('max_branching', 0)} | "
+            f"components={metrics.get('connected_components', 0)}"
+        )
+
     return "\n".join(parts).strip()
+
+
+# ----------------------------
+# Schema builder
+# ----------------------------
+
 
 def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Optional[int] = None, variant: Optional[str] = None) -> Dict[str, Any]:
     domain = infer_domain(raw)
@@ -372,6 +656,8 @@ def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Option
             "problem_graph": None,
             "graph_profile": None,
             "graph_text": "",
+            "graph_metrics": None,
+            "graph_constraints": None,
             "skeleton": None,
             "concepts": [],
             "skills": [],
@@ -383,12 +669,13 @@ def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Option
         "retrieval": {
             "embed_views": {
                 "question": "stem + choices",
-                "problem_graph": "analysis.problem_graph / analysis.graph_text",
+                "problem_graph": "analysis.problem_graph / analysis.graph_text / analysis.graph_metrics",
                 "skeleton": "analysis.graph_text (legacy alias)",
             },
             "embedding_ref": None,
         },
     }
+
 
 
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -401,15 +688,11 @@ def read_jsonl(path: str) -> List[Dict[str, Any]]:
     return rows
 
 
-def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
-    with open(path, "w", encoding="utf-8") as f:
-        for r in rows:
-            f.write(json.dumps(r, ensure_ascii=False) + "\n")
-
 
 def write_jsonl_line(f, row: Dict[str, Any]) -> None:
     f.write(json.dumps(row, ensure_ascii=False) + "\n")
     f.flush()
+
 
 
 def main() -> None:
@@ -421,8 +704,20 @@ def main() -> None:
     ap.add_argument("--year", type=int, default=0)
     ap.add_argument("--variant", default="")
     ap.add_argument("--limit", type=int, default=0, help="0 = no limit")
+    ap.add_argument("--grammar-mode", choices=["off", "warn", "strict"], default="strict")
+    ap.add_argument("--max-depth", type=int, default=DEFAULT_LIMITS["max_depth"])
+    ap.add_argument("--max-branching", type=int, default=DEFAULT_LIMITS["max_branching"])
+    ap.add_argument("--max-nodes", type=int, default=DEFAULT_LIMITS["max_nodes"])
+    ap.add_argument("--max-edges", type=int, default=DEFAULT_LIMITS["max_edges"])
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
+
+    limits = {
+        "max_depth": max(0, args.max_depth),
+        "max_branching": max(1, args.max_branching),
+        "max_nodes": max(1, args.max_nodes),
+        "max_edges": max(0, args.max_edges),
+    }
 
     rows = read_jsonl(args.input)
     if args.limit and args.limit > 0:
@@ -445,9 +740,6 @@ def main() -> None:
                 print(f"[{i}/{total}] id={rid} calling model={args.model}", file=sys.stderr, flush=True)
                 t0 = time.time()
 
-            if args.debug:
-                print(f"[{i}/{total}] id={raw.get('id','?')} parsing model response", file=sys.stderr, flush=True)
-
             enrich = llm_enrich(
                 domain=domain,
                 stem=stem,
@@ -455,6 +747,7 @@ def main() -> None:
                 has_diagram=has_diagram,
                 diagram_files=diagram_files,
                 model=args.model,
+                limits=limits,
             )
 
             if args.debug:
@@ -462,15 +755,25 @@ def main() -> None:
                 print(f"[{i}/{total}] id={raw.get('id','?')} model done in {dt:.2f}s", file=sys.stderr, flush=True)
                 print(f"[{i}/{total}] id={raw.get('id','?')} post-process start", file=sys.stderr, flush=True)
 
-            problem_graph = normalize_graph(enrich.get("problem_graph") or {})
+            problem_graph, validator_notes, metrics = normalize_graph(
+                enrich.get("problem_graph") or {},
+                grammar_mode=args.grammar_mode,
+                limits=limits,
+            )
             graph_profile = normalize_profile(enrich.get("graph_profile") or {})
-            graph_text_core = graph_to_text(problem_graph)
+            graph_text_core = graph_to_text(problem_graph, metrics=metrics)
             graph_text_profile = profile_to_text(graph_profile)
             graph_text = "\n".join(x for x in [graph_text_core, graph_text_profile] if x).strip()
 
             schema["analysis"]["problem_graph"] = problem_graph
             schema["analysis"]["graph_profile"] = graph_profile
             schema["analysis"]["graph_text"] = graph_text
+            schema["analysis"]["graph_metrics"] = metrics
+            schema["analysis"]["graph_constraints"] = {
+                "grammar_mode": args.grammar_mode,
+                "limits": limits,
+                "grammar_version": "v1",
+            }
             schema["analysis"]["skeleton"] = graph_text
             schema["analysis"]["concepts"] = enrich.get("concepts") or []
             schema["analysis"]["skills"] = enrich.get("skills") or []
@@ -479,6 +782,7 @@ def main() -> None:
             schema["problem"]["units_expected"] = enrich.get("units_expected")
             schema["analysis"]["diagram_required"] = bool(enrich.get("diagram_required"))
             schema["checks"]["quick_checks"] = enrich.get("quick_checks") or []
+            schema["checks"]["validators"] = validator_notes
 
             write_jsonl_line(out_f, schema)
             if args.debug:
