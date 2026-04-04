@@ -226,8 +226,11 @@ def llm_enrich(
     has_diagram: bool,
     diagram_files: List[str],
     model: str,
-    limits: Dict[str, int],
+    limits: Dict[str, Optional[int]],
 ) -> Dict[str, Any]:
+    def budget_text(value: Optional[int]) -> str:
+        return "unbounded" if value is None else str(value)
+
     choices_block = "\n".join(choices) if choices else "(none)"
     user = USER_TMPL.format(
         domain=domain,
@@ -238,10 +241,10 @@ def llm_enrich(
         node_types_block="\n".join(f"- {o}" for o in NODE_TYPES),
         edge_types_block="\n".join(f"- {o}" for o in EDGE_TYPES),
         grammar_block=format_grammar_block(),
-        max_depth=limits["max_depth"],
-        max_branching=limits["max_branching"],
-        max_nodes=limits["max_nodes"],
-        max_edges=limits["max_edges"],
+        max_depth=budget_text(limits["max_depth"]),
+        max_branching=budget_text(limits["max_branching"]),
+        max_nodes=budget_text(limits["max_nodes"]),
+        max_edges=budget_text(limits["max_edges"]),
     )
 
     try:
@@ -344,7 +347,7 @@ def compute_graph_metrics(graph: Dict[str, Any]) -> Dict[str, Any]:
 
 
 
-def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, int]) -> Tuple[Dict[str, Any], List[str]]:
+def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, Optional[int]]) -> Tuple[Dict[str, Any], List[str]]:
     """Prune softly toward useful structure: keep core node types, then important nodes, then connected edges."""
     notes: List[str] = []
     nodes = list(graph.get("nodes") or [])
@@ -371,8 +374,9 @@ def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, int]) -> Tuple[Dict
         ),
     )
 
-    if len(nodes_sorted) > limits["max_nodes"]:
-        kept_nodes = nodes_sorted[: limits["max_nodes"]]
+    max_nodes = limits.get("max_nodes")
+    if max_nodes is not None and len(nodes_sorted) > max_nodes:
+        kept_nodes = nodes_sorted[: max_nodes]
         notes.append(f"pruned_nodes:{len(nodes_sorted) - len(kept_nodes)}")
     else:
         kept_nodes = nodes_sorted
@@ -384,9 +388,10 @@ def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, int]) -> Tuple[Dict
     out_count: Dict[str, int] = defaultdict(int)
     pruned_edges: List[Dict[str, Any]] = []
     removed_branch = 0
+    max_branching = limits.get("max_branching")
     for e in edges:
         src = str(e.get("src") or "")
-        if out_count[src] >= limits["max_branching"]:
+        if max_branching is not None and out_count[src] >= max_branching:
             removed_branch += 1
             continue
         out_count[src] += 1
@@ -396,18 +401,20 @@ def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, int]) -> Tuple[Dict
         notes.append(f"pruned_branching_edges:{removed_branch}")
 
     # Enforce edge cap.
-    if len(edges) > limits["max_edges"]:
-        notes.append(f"pruned_edges:{len(edges) - limits['max_edges']}")
-        edges = edges[: limits["max_edges"]]
+    max_edges = limits.get("max_edges")
+    if max_edges is not None and len(edges) > max_edges:
+        notes.append(f"pruned_edges:{len(edges) - max_edges}")
+        edges = edges[: max_edges]
 
     graph = {"graph_type": "typed_problem_graph", "nodes": kept_nodes, "edges": edges}
 
     # Enforce depth cap by iteratively dropping edges that push farthest target paths.
-    if limits["max_depth"] >= 0:
+    max_depth = limits.get("max_depth")
+    if max_depth is not None and max_depth >= 0:
         safety = 0
         while safety < 50:
             metrics = compute_graph_metrics(graph)
-            if metrics["target_depth"] <= limits["max_depth"]:
+            if metrics["target_depth"] <= max_depth:
                 break
             if not graph["edges"]:
                 break
@@ -422,7 +429,7 @@ def prune_to_limits(graph: Dict[str, Any], limits: Dict[str, int]) -> Tuple[Dict
 def normalize_graph(
     graph: Any,
     grammar_mode: str = "warn",
-    limits: Optional[Dict[str, int]] = None,
+    limits: Optional[Dict[str, Optional[int]]] = None,
 ) -> Tuple[Dict[str, Any], List[str], Dict[str, Any]]:
     if limits is None:
         limits = dict(DEFAULT_LIMITS)
@@ -705,18 +712,18 @@ def main() -> None:
     ap.add_argument("--variant", default="")
     ap.add_argument("--limit", type=int, default=0, help="0 = no limit")
     ap.add_argument("--grammar-mode", choices=["off", "warn", "strict"], default="strict")
-    ap.add_argument("--max-depth", type=int, default=DEFAULT_LIMITS["max_depth"])
-    ap.add_argument("--max-branching", type=int, default=DEFAULT_LIMITS["max_branching"])
-    ap.add_argument("--max-nodes", type=int, default=DEFAULT_LIMITS["max_nodes"])
-    ap.add_argument("--max-edges", type=int, default=DEFAULT_LIMITS["max_edges"])
+    ap.add_argument("--max-depth", type=int, default=None, help="optional cap; omit for unbounded")
+    ap.add_argument("--max-branching", type=int, default=None, help="optional cap; omit for unbounded")
+    ap.add_argument("--max-nodes", type=int, default=None, help="optional cap; omit for unbounded")
+    ap.add_argument("--max-edges", type=int, default=None, help="optional cap; omit for unbounded")
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
 
-    limits = {
-        "max_depth": max(0, args.max_depth),
-        "max_branching": max(1, args.max_branching),
-        "max_nodes": max(1, args.max_nodes),
-        "max_edges": max(0, args.max_edges),
+    limits: Dict[str, Optional[int]] = {
+        "max_depth": (max(0, args.max_depth) if args.max_depth is not None else None),
+        "max_branching": (max(1, args.max_branching) if args.max_branching is not None else None),
+        "max_nodes": (max(1, args.max_nodes) if args.max_nodes is not None else None),
+        "max_edges": (max(0, args.max_edges) if args.max_edges is not None else None),
     }
 
     rows = read_jsonl(args.input)

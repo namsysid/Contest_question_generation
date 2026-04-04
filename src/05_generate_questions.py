@@ -66,6 +66,35 @@ def llm_json(model: str, system: str, user: str, temperature: float = 0.2) -> Di
     return generate_json(model, user, system=system, temperature=temperature)
 
 
+def llm_json_with_retries(
+    model: str,
+    system: str,
+    user: str,
+    *,
+    temperature: float,
+    retries: int,
+    debug: bool,
+    debug_prefix: str,
+) -> Dict[str, Any]:
+    last_exc: Optional[Exception] = None
+    max_attempts = max(1, retries + 1)
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return llm_json(model, system, user, temperature=temperature)
+        except Exception as exc:
+            last_exc = exc
+            if debug:
+                print(
+                    f"{debug_prefix} JSON call failed attempt {attempt}/{max_attempts}: {exc}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            if attempt < max_attempts:
+                time.sleep(0.6 * attempt)
+    assert last_exc is not None
+    raise last_exc
+
+
 def _truncate(s: str, n: int) -> str:
     s = s or ""
     return s if len(s) <= n else s[:n] + "…"
@@ -186,6 +215,7 @@ def main() -> None:
     ap.add_argument("--max_q_exemplars", type=int, default=4)
     ap.add_argument("--max_paired_exemplars", type=int, default=3)
     ap.add_argument("--repair_max", type=int, default=1)
+    ap.add_argument("--json_retries", type=int, default=3, help="Retry count for malformed/non-JSON model responses")
     ap.add_argument("--sleep", type=float, default=0.0)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
@@ -205,78 +235,108 @@ def main() -> None:
     if args.debug:
         print(f"[write] open (truncate): {args.out}", file=sys.stderr, flush=True)
     with open(args.out, "w", encoding="utf-8") as out_f:
+        failures = 0
         for i, b in enumerate(bundles, start=1):
             bid = b.get("bundle_id")
             sk = sk_by_bundle.get(bid, {})
             target_graph_text = sk.get("graph_text") or sk.get("skeleton_text") or ""
 
-            if args.debug:
-                print(f"[{i}/{total}] bundle_id={bid} building prompt", file=sys.stderr, flush=True)
-
-            prompt = build_prompt(b, target_graph_text, args.max_q_exemplars, args.max_paired_exemplars)
-
-            if args.debug:
-                print(f"[{i}/{total}] bundle_id={bid} calling gen model={args.model}", file=sys.stderr, flush=True)
-                t0 = time.time()
-
-            cand = llm_json(args.model, SYSTEM_GEN, prompt, temperature=0.25)
-            if "graph_text" not in cand and target_graph_text:
-                cand["graph_text"] = target_graph_text
-            if "skeleton_text" not in cand:
-                cand["skeleton_text"] = cand.get("graph_text", "")
-
-            if args.debug:
-                dt = time.time() - t0
-                print(f"[{i}/{total}] bundle_id={bid} gen done in {dt:.2f}s", file=sys.stderr, flush=True)
-
-            repairs: List[Dict[str, Any]] = []
-            gate: Optional[Dict[str, Any]] = None
-
-            for r_i in range(max(0, args.repair_max) + 1):
-                if not is_basic_schema_ok(cand):
-                    gate = {"verdict":"FAIL","issues":["Basic schema invalid"],"required_fixes":["Fix JSON schema to match required keys and 5 choices A-E"],"answer_consistency":{"answer_claimed":cand.get("answer",""),"answer_verified":"UNKNOWN","notes":"schema invalid"}}
-                else:
-                    if args.debug:
-                        print(f"[{i}/{total}] bundle_id={bid} gatekeeper call {r_i+1} model={verify_model}", file=sys.stderr, flush=True)
-                    gate = llm_json(verify_model, SYSTEM_GATEKEEP, build_gatekeeper_prompt(target_graph_text, cand), temperature=0.0)
-
-                if gate.get("verdict") == "PASS":
-                    if args.debug:
-                        print(f"[{i}/{total}] bundle_id={bid} gatekeeper PASS", file=sys.stderr, flush=True)
-                    break
-
-                repairs.append({"gatekeeper": gate, "candidate": cand})
+            try:
                 if args.debug:
-                    print(f"[{i}/{total}] bundle_id={bid} repair {r_i+1} calling model={args.model}", file=sys.stderr, flush=True)
-                cand = llm_json(args.model, SYSTEM_GEN, build_repair_prompt(target_graph_text, cand, gate), temperature=0.2)
+                    print(f"[{i}/{total}] bundle_id={bid} building prompt", file=sys.stderr, flush=True)
+
+                prompt = build_prompt(b, target_graph_text, args.max_q_exemplars, args.max_paired_exemplars)
+
+                if args.debug:
+                    print(f"[{i}/{total}] bundle_id={bid} calling gen model={args.model}", file=sys.stderr, flush=True)
+                    t0 = time.time()
+
+                cand = llm_json_with_retries(
+                    args.model,
+                    SYSTEM_GEN,
+                    prompt,
+                    temperature=0.25,
+                    retries=args.json_retries,
+                    debug=args.debug,
+                    debug_prefix=f"[{i}/{total}] bundle_id={bid}",
+                )
                 if "graph_text" not in cand and target_graph_text:
                     cand["graph_text"] = target_graph_text
                 if "skeleton_text" not in cand:
                     cand["skeleton_text"] = cand.get("graph_text", "")
 
-            out_row = {
-                **cand,
-                "_meta": {
-                    "bundle_id": bid,
-                    "seed_id": b.get("seed_id"),
-                    "mode": b.get("mode"),
-                    "anchor_id": b.get("anchor_id"),
-                    "anchor_distance": b.get("anchor_distance"),
-                },
-                "_gatekeeper": gate,
-                "_repairs": repairs,
-            }
+                if args.debug:
+                    dt = time.time() - t0
+                    print(f"[{i}/{total}] bundle_id={bid} gen done in {dt:.2f}s", file=sys.stderr, flush=True)
 
-            write_jsonl_line(out_f, out_row)
-            if args.debug:
-                print(f"[{i}/{total}] bundle_id={bid} wrote", file=sys.stderr, flush=True)
+                repairs: List[Dict[str, Any]] = []
+                gate: Optional[Dict[str, Any]] = None
 
-            if args.sleep:
-                time.sleep(args.sleep)
+                for r_i in range(max(0, args.repair_max) + 1):
+                    if not is_basic_schema_ok(cand):
+                        gate = {"verdict":"FAIL","issues":["Basic schema invalid"],"required_fixes":["Fix JSON schema to match required keys and 5 choices A-E"],"answer_consistency":{"answer_claimed":cand.get("answer",""),"answer_verified":"UNKNOWN","notes":"schema invalid"}}
+                    else:
+                        if args.debug:
+                            print(f"[{i}/{total}] bundle_id={bid} gatekeeper call {r_i+1} model={verify_model}", file=sys.stderr, flush=True)
+                        gate = llm_json_with_retries(
+                            verify_model,
+                            SYSTEM_GATEKEEP,
+                            build_gatekeeper_prompt(target_graph_text, cand),
+                            temperature=0.0,
+                            retries=args.json_retries,
+                            debug=args.debug,
+                            debug_prefix=f"[{i}/{total}] bundle_id={bid}",
+                        )
+
+                    if gate.get("verdict") == "PASS":
+                        if args.debug:
+                            print(f"[{i}/{total}] bundle_id={bid} gatekeeper PASS", file=sys.stderr, flush=True)
+                        break
+
+                    repairs.append({"gatekeeper": gate, "candidate": cand})
+                    if args.debug:
+                        print(f"[{i}/{total}] bundle_id={bid} repair {r_i+1} calling model={args.model}", file=sys.stderr, flush=True)
+                    cand = llm_json_with_retries(
+                        args.model,
+                        SYSTEM_GEN,
+                        build_repair_prompt(target_graph_text, cand, gate),
+                        temperature=0.2,
+                        retries=args.json_retries,
+                        debug=args.debug,
+                        debug_prefix=f"[{i}/{total}] bundle_id={bid}",
+                    )
+                    if "graph_text" not in cand and target_graph_text:
+                        cand["graph_text"] = target_graph_text
+                    if "skeleton_text" not in cand:
+                        cand["skeleton_text"] = cand.get("graph_text", "")
+
+                out_row = {
+                    **cand,
+                    "_meta": {
+                        "bundle_id": bid,
+                        "seed_id": b.get("seed_id"),
+                        "mode": b.get("mode"),
+                        "anchor_id": b.get("anchor_id"),
+                        "anchor_distance": b.get("anchor_distance"),
+                    },
+                    "_gatekeeper": gate,
+                    "_repairs": repairs,
+                }
+
+                write_jsonl_line(out_f, out_row)
+                if args.debug:
+                    print(f"[{i}/{total}] bundle_id={bid} wrote", file=sys.stderr, flush=True)
+
+                if args.sleep:
+                    time.sleep(args.sleep)
+            except Exception as exc:
+                failures += 1
+                print(f"[{i}/{total}] bundle_id={bid} FAILED: {exc}", file=sys.stderr, flush=True)
+                continue
 
     if args.debug:
         print(f"[write] done: {args.out}", file=sys.stderr, flush=True)
-    print(f"Wrote {total} generated problems -> {args.out}")
+    print(f"Wrote generated problems -> {args.out} (success={total - failures}, failed={failures})")
 
 if __name__ == "__main__":
     main()

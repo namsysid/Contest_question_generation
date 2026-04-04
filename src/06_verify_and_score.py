@@ -12,7 +12,11 @@ import sys
 import time
 from typing import Any, Dict, Iterable, List
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except Exception:
+    def load_dotenv() -> None:  # type: ignore[no-redef]
+        return
 
 try:
     from openai import OpenAI
