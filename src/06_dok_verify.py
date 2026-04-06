@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-06_verify_and_score.py  (QUESTION-ONLY SOLVE + DIFFICULTY SCORING)
+06_verify_and_score.py  (QUESTION-ONLY SOLVE + DIFFICULTY SCORING + DOK)
 """
 from __future__ import annotations
 
@@ -54,78 +54,31 @@ _load_env_fallback()
 
 SYSTEM_TEMPLATE = """You are an expert evaluator of Olympiad-style STEM multiple-choice problems.
 
-You will receive a single problem JSON containing only:
-- rendered question text
-- answer choices
+You will receive a single problem JSON with only the rendered question and answer choices.
+You also receive exemplars of real __COMPETITION_LABEL__ problems for style calibration.
 
-You may also receive exemplar __COMPETITION_LABEL__ problems for calibration.
+Your task:
+- Ignore any hidden metadata, graph structure, or supplied solution.
+- Try to solve the problem from the question text and answer choices alone.
+- If the problem has formatting issues, ambiguity, or a missing piece, do not reject it immediately.
+- Instead, solve the problem as written using the most reasonable interpretation, and note the issue.
+- Estimate difficulty based on the actual reasoning required to solve the rendered problem.
+- Also assign a Webb's Depth of Knowledge (DOK) level based on the cognitive demand of the problem as presented.
 
---------------------------------
-EVALUATION PRINCIPLES
---------------------------------
-- Treat this as a student would encountering the problem cold.
-- Do NOT use or rely on any provided solution, metadata, or hidden structure.
-- Solve using only the given text and answer choices.
-- Do NOT assume missing information unless standard in physics contests.
-- If the problem is flawed, ambiguous, or inconsistent:
-  - Attempt the most reasonable interpretation
-  - Explicitly note the issue
-- Be strict. Do NOT inflate scores.
+Use this DOK rubric:
+- 1 = Recall / direct application of a familiar fact, identity, or single routine step.
+- 2 = Skill / concept use with some decision-making, multi-step but still fairly direct.
+- 3 = Strategic thinking: non-routine planning, combining ideas, hidden setup, or meaningful intermediate construction.
+- 4 = Extended strategic reasoning: sustained multi-stage reasoning, multiple interdependent conceptual steps, or deep transfer/synthesis.
 
---------------------------------
-STEP 1 — SOLVE ATTEMPT
---------------------------------
-Attempt to solve the problem.
+DOK guidance:
+- Focus on the depth of thinking required, not merely the length of algebra.
+- Prefer the lowest DOK level that fully matches the main solving path.
+- Routine computation alone should not push a problem to DOK 3 or 4.
+- Olympiad problems commonly fall in DOK 2-4; only use DOK 4 when the reasoning is genuinely extended or highly integrated.
+- Be concise. Keep `reasoning_summary` and all `notes` brief.
 
-Status definitions:
-- "solved": you can confidently determine a unique answer choice
-- "partial": meaningful progress but no confident final answer
-- "unclear": problem is too ambiguous, inconsistent, or underspecified to solve
-
-Guidelines:
-- If multiple interpretations lead to different answers → "unclear"
-- If answer choices do not match your derived result → still select closest and note issue
-- Prefer physical reasoning over pattern matching
-
---------------------------------
-STEP 2 — DIFFICULTY
---------------------------------
-Estimate difficulty based on actual reasoning required (not appearance).
-
-Calibration:
-1 = trivial recall / direct substitution  
-2 = simple single-step reasoning  
-3 = standard multi-step contest problem  
-4 = challenging multi-step with insight  
-5 = olympiad-level, non-obvious, elegant  
-
---------------------------------
-STEP 3 — COMPETITION APPROPRIATENESS
---------------------------------
-Score each dimension (1–5):
-
-- depth_reasoning:
-  number and nontriviality of reasoning steps required
-
-- conceptual_richness:
-  number and interaction of distinct physics concepts
-
-- clarity:
-  wording precision, lack of ambiguity, AND whether the problem is well-posed as written
-
-- olympiad_similarity:
-  resemblance to real __COMPETITION_LABEL__ problems in structure, reasoning style, and elegance
-
-Calibration:
-1 = very weak  
-2 = weak / flawed  
-3 = acceptable (average contest level)  
-4 = strong  
-5 = comparable to high-quality official olympiad problems  
-
---------------------------------
-OUTPUT FORMAT (STRICT JSON ONLY)
---------------------------------
+Return ONLY strict JSON with keys:
 {
   "solve_attempt": {
     "status": "solved"|"partial"|"unclear",
@@ -136,6 +89,11 @@ OUTPUT FORMAT (STRICT JSON ONLY)
   "difficulty_assessment": {
     "score": 1-5,
     "notes": "<<=60 words>"
+  },
+  "dok_assessment": {
+    "level": 1-4,
+    "label": "recall|skill_concept|strategic_thinking|extended_strategic_thinking",
+    "justification": "<<=60 words>"
   },
   "competition_appropriateness": {
     "depth_reasoning": 1-5,
@@ -239,6 +197,67 @@ def parse_json_text(text: str) -> Dict[str, Any]:
         return _loads_with_escape_repair(raw[i : j + 1])
 
 
+DOK_LABELS = {
+    1: "recall",
+    2: "skill_concept",
+    3: "strategic_thinking",
+    4: "extended_strategic_thinking",
+}
+
+
+def clamp_int(value: Any, low: int, high: int, default: int) -> int:
+    try:
+        ivalue = int(value)
+    except Exception:
+        return default
+    return max(low, min(high, ivalue))
+
+
+def coerce_score_shape(score: Dict[str, Any]) -> Dict[str, Any]:
+    score = dict(score or {})
+
+    solve_attempt = dict(score.get("solve_attempt") or {})
+    solve_attempt["status"] = str(solve_attempt.get("status") or "unclear")
+    if solve_attempt["status"] not in {"solved", "partial", "unclear"}:
+        solve_attempt["status"] = "unclear"
+    solve_attempt["selected_answer"] = str(solve_attempt.get("selected_answer") or "UNKNOWN")
+    if solve_attempt["selected_answer"] not in {"A", "B", "C", "D", "E", "UNKNOWN"}:
+        solve_attempt["selected_answer"] = "UNKNOWN"
+    solve_attempt["reasoning_summary"] = str(solve_attempt.get("reasoning_summary") or "")
+    issue_notes = solve_attempt.get("issue_notes")
+    if isinstance(issue_notes, list):
+        solve_attempt["issue_notes"] = [str(x) for x in issue_notes[:8]]
+    elif issue_notes:
+        solve_attempt["issue_notes"] = [str(issue_notes)]
+    else:
+        solve_attempt["issue_notes"] = []
+
+    difficulty = dict(score.get("difficulty_assessment") or {})
+    difficulty["score"] = clamp_int(difficulty.get("score"), 1, 5, 3)
+    difficulty["notes"] = str(difficulty.get("notes") or "")
+
+    dok = dict(score.get("dok_assessment") or {})
+    level = clamp_int(dok.get("level"), 1, 4, 2)
+    dok["level"] = level
+    label = str(dok.get("label") or "").strip().lower()
+    if label not in set(DOK_LABELS.values()):
+        label = DOK_LABELS[level]
+    dok["label"] = label
+    dok["justification"] = str(dok.get("justification") or "")
+
+    comp = dict(score.get("competition_appropriateness") or {})
+    for key in ("depth_reasoning", "conceptual_richness", "clarity", "olympiad_similarity"):
+        comp[key] = clamp_int(comp.get(key), 1, 5, 3)
+    comp["notes"] = str(comp.get("notes") or "")
+
+    return {
+        "solve_attempt": solve_attempt,
+        "difficulty_assessment": difficulty,
+        "dok_assessment": dok,
+        "competition_appropriateness": comp,
+    }
+
+
 def llm_json(client: Any, model: str, system: str, user: str) -> Dict[str, Any]:
     if client is None:
         raise RuntimeError(
@@ -251,7 +270,7 @@ def llm_json(client: Any, model: str, system: str, user: str) -> Dict[str, Any]:
         user
         + "\n\nIMPORTANT: The previous answer may have been truncated. Return the same JSON schema, but with very short field values. Do not show step-by-step derivations.",
     ]
-    token_budgets = [1200, 2200]
+    token_budgets = [1400, 2400]
 
     for prompt, max_output_tokens in zip(prompts, token_budgets):
         resp = client.responses.create(
@@ -273,7 +292,7 @@ def llm_json(client: Any, model: str, system: str, user: str) -> Dict[str, Any]:
 
         last_raw = "".join(text_parts).strip()
         try:
-            return parse_json_text(last_raw)
+            return coerce_score_shape(parse_json_text(last_raw))
         except Exception:
             continue
 
@@ -378,6 +397,7 @@ def main() -> None:
         if args.resume:
             print(f"[resume] skipped {skipped} existing rows", file=sys.stderr, flush=True)
     print(f"Wrote {wrote} scored rows -> {args.out}")
+
 
 if __name__ == "__main__":
     main()

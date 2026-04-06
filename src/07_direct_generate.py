@@ -115,7 +115,7 @@ def exemplar_from_row(row: Dict[str, Any]) -> str:
             f"ANSWER: {answer or '(unknown)'}"
         ).strip()
 
-    question = str(row.get("question") or "").strip()
+    question = str(row.get("question") or row.get("question_text") or "").strip()
     prompt = str(row.get("prompt") or "").strip()
     constraints = str(row.get("constraints") or "").strip()
     choices = stringify_choices(row.get("choices"))
