@@ -77,7 +77,9 @@ def infer_stage_domain(domain: str) -> str:
     key = domain.strip().lower()
     if key in {"chem", "chemistry"}:
         return "chem"
-    return "fma"
+    if key in {"phys", "physics", "fma"}:
+        return "fma"
+    return key or "fma"
 
 
 def ensure_parent(path: Path) -> None:

@@ -46,9 +46,9 @@ CHOICE_RE = re.compile(
     r"\(\s*([A-E])\s*\)\s*(.+?)(?=(?:\n\s*\(\s*[A-E]\s*\)\s)|\Z)",
     re.DOTALL,
 )
-LEADING_QNUM_RE = re.compile(r"^\s*\d+\.\s*", re.DOTALL)
+LEADING_QNUM_RE = re.compile(r"^\s*\d+[\).]\s*", re.DOTALL)
 FOOTER_JUNK_RE = re.compile(
-    r"(Copyright.*?$|F\s*=\s*ma Exam.*?$|\n\s*\d+\s*$)",
+    r"(Copyright.*?$|F\s*=\s*ma Exam.*?$)",
     re.IGNORECASE | re.MULTILINE,
 )
 FIGURE_HINT_RE = re.compile(r"(figure|diagram|shown|shown below)", re.IGNORECASE)
@@ -82,13 +82,40 @@ def split_stem_and_choices(qtext: str) -> Tuple[str, List[str], Optional[str]]:
 
 def infer_domain(raw: Dict[str, Any]) -> str:
     if raw.get("domain"):
-        d = str(raw["domain"]).lower()
-        if d in ("fma", "usnco"):
+        d = str(raw["domain"]).strip().lower()
+        if d:
             return d
     src = (raw.get("source_pdf") or "").lower()
     if "f" in src and "ma" in src:
         return "fma"
+    if "usnco" in src or "chem" in src:
+        return "chem"
     return "fma"
+
+
+def _choice_list(raw_choices: Any) -> List[str]:
+    if isinstance(raw_choices, dict):
+        out = []
+        for key in ("A", "B", "C", "D", "E"):
+            if key in raw_choices:
+                out.append(f"({key}) {raw_choices[key]}")
+        return out
+    if isinstance(raw_choices, list):
+        return [str(choice).strip() for choice in raw_choices if str(choice).strip()]
+    return []
+
+
+def _raw_question_text(raw: Dict[str, Any]) -> str:
+    if isinstance(raw.get("question_text"), str):
+        return raw["question_text"]
+    if isinstance(raw.get("question"), str):
+        return raw["question"]
+    problem = raw.get("problem")
+    if isinstance(problem, dict):
+        return str(problem.get("stem") or "")
+    if isinstance(raw.get("prompt"), str):
+        return raw["prompt"]
+    return ""
 
 
 NODE_TYPES = ["Given", "Target", "Law", "State", "Constraint", "Auxiliary", "Trap", "Distractor"]
@@ -627,7 +654,16 @@ def graph_to_text(graph: Dict[str, Any], metrics: Optional[Dict[str, Any]] = Non
 
 def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Optional[int] = None, variant: Optional[str] = None) -> Dict[str, Any]:
     domain = infer_domain(raw)
-    stem, choices, answer_key = split_stem_and_choices(raw.get("question_text", ""))
+    stem, choices, answer_key = split_stem_and_choices(_raw_question_text(raw))
+    if not choices:
+        structured_choices = raw.get("choices")
+        if structured_choices is None and isinstance(raw.get("problem"), dict):
+            structured_choices = raw["problem"].get("choices")
+        choices = _choice_list(structured_choices)
+    problem_answer = None
+    if isinstance(raw.get("problem"), dict):
+        problem_answer = raw["problem"].get("answer_key")
+    answer_key = answer_key or raw.get("answer") or raw.get("answer_key") or problem_answer
 
     diagrams = []
     for f in raw.get("diagram_files", []) or []:

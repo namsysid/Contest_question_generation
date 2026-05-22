@@ -5,8 +5,81 @@ import os
 from typing import Any, Dict, List, Optional
 from urllib import error, request
 
+try:
+    from openai import OpenAI
+except Exception:  # pragma: no cover - optional dependency
+    OpenAI = None
+
 
 DEFAULT_BASE_URL = "http://192.168.50.186:11434"
+
+
+def _provider_for_model(model: str, kind: str) -> str:
+    explicit = (
+        os.getenv(f"{kind.upper()}_PROVIDER")
+        or os.getenv("MODEL_PROVIDER")
+        or os.getenv("LLM_PROVIDER")
+        or ""
+    ).strip().lower()
+    if explicit:
+        return explicit
+
+    name = (model or "").strip().lower()
+    if kind == "embed" and name.startswith(("text-embedding-", "embedding-")):
+        return "openai"
+    if name.startswith(("gpt-", "o1", "o3", "o4", "o5", "chatgpt-")):
+        return "openai"
+    return "ollama"
+
+
+def _openai_client(timeout: float) -> Any:
+    if OpenAI is None:
+        raise RuntimeError("OpenAI client not available. Install the `openai` package.")
+    if not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY not found in environment or .env.")
+    return OpenAI(timeout=timeout)
+
+
+def _extract_openai_text(resp: Any) -> str:
+    direct = getattr(resp, "output_text", None)
+    if isinstance(direct, str) and direct.strip():
+        return direct
+
+    text_parts: List[str] = []
+    for out in getattr(resp, "output", []) or []:
+        if getattr(out, "type", None) != "message":
+            continue
+        for content in getattr(out, "content", []) or []:
+            if getattr(content, "type", None) == "output_text":
+                text_parts.append(content.text)
+    return "".join(text_parts).strip()
+
+
+def _openai_generate_text(
+    model: str,
+    prompt: str,
+    *,
+    system: str = "",
+    temperature: float = 0.0,
+    timeout: float = 180.0,
+) -> str:
+    client = _openai_client(timeout)
+    max_output_tokens = int(os.getenv("OPENAI_MAX_OUTPUT_TOKENS", "4096"))
+    input_messages = []
+    if system:
+        input_messages.append({"role": "system", "content": system})
+    input_messages.append({"role": "user", "content": prompt})
+
+    resp = client.responses.create(
+        model=model,
+        input=input_messages,
+        temperature=temperature,
+        max_output_tokens=max_output_tokens,
+    )
+    text = _extract_openai_text(resp)
+    if not text:
+        raise ValueError(f"Unexpected OpenAI response: {resp}")
+    return text
 
 
 def resolve_base_url(explicit: Optional[str] = None) -> str:
@@ -65,6 +138,17 @@ def generate_text(
     base_url: Optional[str] = None,
     timeout: float = 180.0,
 ) -> str:
+    if _provider_for_model(model, "llm") == "openai":
+        if format_json:
+            prompt = prompt + "\n\nReturn strict JSON only."
+        return _openai_generate_text(
+            model,
+            prompt,
+            system=system,
+            temperature=temperature,
+            timeout=timeout,
+        )
+
     payload: Dict[str, Any] = {
         "model": model,
         "prompt": prompt,
@@ -116,6 +200,11 @@ def embed_texts(
     base_url: Optional[str] = None,
     timeout: float = 180.0,
 ) -> List[List[float]]:
+    if _provider_for_model(model, "embed") == "openai":
+        client = _openai_client(timeout)
+        data = client.embeddings.create(model=model, input=texts)
+        return [item.embedding for item in data.data]
+
     data = _post_json(
         f"{resolve_base_url(base_url)}/api/embed",
         {"model": model, "input": texts},
