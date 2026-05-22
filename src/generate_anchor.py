@@ -30,15 +30,10 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import faiss
-from openai import OpenAI
 
 from dotenv import load_dotenv
+from ollama_client import generate_text
 load_dotenv()
-
-if not os.environ.get("OPENAI_API_KEY"):
-    raise RuntimeError("OPENAI_API_KEY is not set. Please set it in .env file or environment variable.")
-
-client = OpenAI()
 
 # ----------------------------
 # IO utils
@@ -210,7 +205,7 @@ Return JSON with keys:
 def generate_from_exemplars(spec: str,
                             target_skeleton_text: str,
                             exemplars: List[Dict[str, Any]],
-                            model: str = "gpt-4.1") -> Dict[str, Any]:
+                            model: str = "qwen2.5:7b-instruct") -> Dict[str, Any]:
     exemplar_block = "\n\n".join(
         f"EX {i+1}\nQ:\n{question_view(d)}\n\nSKEL:\n{json.dumps(d.get('analysis', {}).get('skeleton', {}), ensure_ascii=False)}"
         for i, d in enumerate(exemplars)
@@ -222,15 +217,9 @@ def generate_from_exemplars(spec: str,
         exemplar_block=exemplar_block,
     )
 
-    resp = client.responses.create(
-        model=model,
-        input=[
-            {"role": "system", "content": GEN_SYSTEM},
-            {"role": "user", "content": user},
-        ],
-        temperature=0.6,
+    return json_loads_loose(
+        generate_text(model, user, system=GEN_SYSTEM, temperature=0.6)
     )
-    return json_loads_loose(resp.output_text)
 
 # ----------------------------
 # Final schema assembly
@@ -301,7 +290,7 @@ def main():
     ap.add_argument("--k", type=int, default=8, help="MMR-selected exemplars per generation")
     ap.add_argument("--candidates", type=int, default=60, help="Initial FAISS top-N per anchor")
     ap.add_argument("--lambda", dest="lambda_", type=float, default=0.7, help="MMR tradeoff (0-1)")
-    ap.add_argument("--gen-model", default="gpt-4.1")
+    ap.add_argument("--gen-model", default="qwen2.5:7b-instruct")
     ap.add_argument("--out", default="generated.jsonl", help="Output JSONL")
     ap.add_argument("--seed", type=int, default=0, help="Random seed")
     ap.add_argument("--id-prefix", default="gen", help="ID prefix for generated problems")

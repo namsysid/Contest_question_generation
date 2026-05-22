@@ -1,0 +1,470 @@
+#!/usr/bin/env python3
+"""
+generate_solution_skeletons.py
+
+Convert worked solutions into "operatorized" solution skeletons.
+
+Input:
+  - JSONL: one object per line
+  - JSON: a list[object]
+
+Each object should contain at least:
+  - id (optional but recommended)
+  - question (string)
+  - solution (string)  # worked solution / explanation / derivation
+
+Output:
+  - JSONL, one object per line, with:
+      id, skeleton (structured), operators_used, meta
+
+Usage:
+  python3 generate_solution_skeletons.py \
+      --in solutions.jsonl \
+      --out skeletons.jsonl \
+      --model qwen2.5:7b-instruct \
+      --max-items 0 \
+      --resume
+
+Notes:
+  - Uses a self-hosted Ollama/Qwen backend via /api/generate.
+"""
+
+from __future__ import annotations
+
+import argparse
+import dataclasses
+import hashlib
+import json
+import os
+import sys
+import time
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+
+from dotenv import load_dotenv
+from ollama_client import generate_json
+load_dotenv()
+
+
+# ---------------------------
+# Operator schema (editable)
+# ---------------------------
+
+OPERATOR_CATALOG = [
+    "ESTABLISH_FRAMEWORK",   # diagrams, frames, approximations, representations
+    "IDENTIFY_RELATION",     # pre-existing law/theorem/definition/algorithm
+    "APPLY_RELATION",        # substitute/transform/solve using a relation
+    "SAVE_RESULT",           # store an intermediate quantity/relationship/constraint
+    "APPLY_RESULT",          # reuse a previously saved result
+]
+
+
+# Skeleton step JSON schema we instruct the model to output:
+# {
+#   "op": "<OPERATOR_NAME>",
+#   "in": { ... },     # inputs / referenced variables / context
+#   "out": { ... },    # outputs produced by this step
+#   "note": "short human-readable note (<= 20 words)",
+#   "difficulty": {
+#       "identify": int | null,   # 1–10, only for IDENTIFY_RELATION
+#       "apply": int | null       # 1–10, only for APPLY_RELATION
+#   }
+# }
+#
+# Additional required structure:
+# - For IDENTIFY_RELATION: out MUST include "relation_name" (short canonical name),
+#   and MAY include "relation_form" (symbolic form).
+# - For SAVE_RESULT: out MUST include "result_type" in {"quantity","relationship","constraint","definition","lemma"},
+#   and SHOULD include "result_name".
+
+
+
+# ---------------------------
+# I/O helpers
+# ---------------------------
+
+def load_items(path: str) -> List[Dict[str, Any]]:
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read().strip()
+    if not text:
+        return []
+    # Heuristic: JSONL if first non-ws line starts with "{"
+    # but JSON list also starts with "[". We'll detect.
+    if text[0] == "[":
+        data = json.loads(text)
+        if not isinstance(data, list):
+            raise ValueError("JSON input must be a list of objects.")
+        return data
+    # JSONL
+    items = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        items.append(json.loads(line))
+    return items
+
+
+def iter_jsonl(path: str) -> Iterable[Dict[str, Any]]:
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            yield json.loads(line)
+
+
+def write_jsonl(path: str, rows: Iterable[Dict[str, Any]]) -> None:
+    with open(path, "a", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def existing_ids_from_out(out_path: str) -> set:
+    if not os.path.exists(out_path):
+        return set()
+    ids = set()
+    try:
+        for obj in iter_jsonl(out_path):
+            if "id" in obj:
+                ids.add(str(obj["id"]))
+    except Exception:
+        # If output is corrupted, don't silently skip; but keep safe.
+        return ids
+    return ids
+
+
+def stable_id(item: Dict[str, Any], idx: int) -> str:
+    """If no id provided, create a stable hash-based id from question+solution."""
+    if "id" in item and item["id"] is not None:
+        return str(item["id"])
+    q = (item.get("question") or "").strip()
+    s = (item.get("solution") or "").strip()
+    h = hashlib.sha1((q + "\n---\n" + s).encode("utf-8")).hexdigest()[:12]
+    return f"auto_{idx}_{h}"
+
+
+# ---------------------------
+# Prompting
+# ---------------------------
+
+def build_prompt(question: str, solution: str) -> str:
+    ops = ", ".join(OPERATOR_CATALOG)
+    return f"""You convert worked solutions into *operatorized solution skeletons*.
+
+OUTPUT FORMAT:
+- Output MUST be valid JSON (no markdown, no trailing comments).
+- Output MUST match the schema:
+  {{
+    "operators_used": ["OP1", "OP2", ...],
+    "skeleton": [
+      {{
+        "op": "OP_NAME",
+        "in": {{}},
+        "out": {{}},
+        "note": "...",
+        "difficulty": {{"identify": int|null, "apply": int|null}}
+      }},
+      ...
+    ],
+    "final": {{"target": "...", "value": "...", "expression": "..."}}
+  }}
+
+OPERATOR CONSTRAINTS:
+- Each skeleton step MUST use an operator from this allowed list:
+  [{ops}]
+- Use as FEW steps as possible while preserving the logical pathway.
+- "note" should be short (<= 20 words), specific, and not verbose.
+
+SEMANTICS:
+- ESTABLISH_FRAMEWORK: diagrams/frames/assumptions/approximations/representation choices.
+- IDENTIFY_RELATION: cite a *pre-existing* law/theorem/definition/algorithm.
+    - out MUST include:
+        - "relation_name": a canonical, specific short name (e.g., "Raoult's Law", "Michaelis–Menten kinetics", "Bayes' Theorem").
+    - out MAY include:
+        - "relation_form": concise symbolic form (e.g., "P_i = x_i P_i^0").
+    - difficulty.identify MUST be an integer 1–10; difficulty.apply MUST be null.
+- APPLY_RELATION: compute/derive by applying a relation (substitute, transform, solve).
+    - difficulty.apply MUST be an integer 1–10; difficulty.identify MUST be null.
+- SAVE_RESULT: store a problem-specific derived fact (NOT a law).
+    - out MUST include:
+        - "result_type": one of ["quantity","relationship","constraint","definition","lemma"]
+    - out SHOULD include:
+        - "result_name": short label (e.g., "x_eq", "rate_expression", "V_final")
+    - note MUST start with exactly: "Save <result_type>:" where <result_type> == out.result_type (e.g., "Save quantity: x_eq").
+    - difficulty fields MUST be null.
+- APPLY_RESULT: reuse a previously saved result.
+    - difficulty fields MUST be null.
+
+IMPORTANT DISTINCTION:
+- Laws/relationships are global, pre-existing knowledge.
+- Results are problem-local derived facts and MUST NOT be promoted into laws.
+
+QUESTION:
+{question}
+
+WORKED SOLUTION:
+{solution}
+"""
+
+
+
+# ---------------------------
+# LLM call
+# ---------------------------
+
+def call_llm(
+    client: Any,
+    model: str,
+    prompt: str,
+    seed: Optional[int] = None,
+    max_output_tokens: int = 900,
+) -> Dict[str, Any]:
+    """
+    Calls the self-hosted Ollama/Qwen backend and returns parsed JSON.
+    """
+    _ = client
+    _ = max_output_tokens
+    return generate_json(model, prompt, seed=seed)
+
+
+# ---------------------------
+# Validation + light repair
+# ---------------------------
+
+def validate_skeleton(obj: Dict[str, Any]) -> Tuple[bool, str]:
+    if not isinstance(obj, dict):
+        return False, "Top-level is not an object."
+    if "skeleton" not in obj or not isinstance(obj["skeleton"], list):
+        return False, "Missing or invalid 'skeleton' list."
+
+    allowed_result_types = {"quantity", "relationship", "constraint", "definition", "lemma"}
+
+    for i, step in enumerate(obj["skeleton"]):
+        if not isinstance(step, dict):
+            return False, f"Step {i} is not an object."
+
+        op = step.get("op")
+        if op not in OPERATOR_CATALOG:
+            return False, f"Step {i} has invalid operator: {op}"
+
+        if "in" not in step or "out" not in step:
+            return False, f"Step {i} missing 'in' or 'out'."
+
+        # Difficulty rules
+        diff = step.get("difficulty", {})
+        id_diff = diff.get("identify") if isinstance(diff, dict) else None
+        ap_diff = diff.get("apply") if isinstance(diff, dict) else None
+
+        if op == "IDENTIFY_RELATION":
+            out = step.get("out", {})
+            if not isinstance(out, dict):
+                return False, f"Step {i} out must be an object."
+            rn = out.get("relation_name")
+            if not isinstance(rn, str) or not rn.strip() or len(rn.strip()) > 60:
+                return False, f"Step {i} IDENTIFY_RELATION requires short out.relation_name."
+            if not isinstance(id_diff, int) or not (1 <= id_diff <= 10):
+                return False, f"Step {i} IDENTIFY_RELATION requires difficulty.identify 1–10."
+            if ap_diff is not None:
+                return False, f"Step {i} IDENTIFY_RELATION must have difficulty.apply = null."
+        elif op == "APPLY_RELATION":
+            if not isinstance(ap_diff, int) or not (1 <= ap_diff <= 10):
+                return False, f"Step {i} APPLY_RELATION requires difficulty.apply 1–10."
+            if id_diff is not None:
+                return False, f"Step {i} APPLY_RELATION must have difficulty.identify = null."
+        elif op == "SAVE_RESULT":
+            out = step.get("out", {})
+            if not isinstance(out, dict):
+                return False, f"Step {i} out must be an object."
+            rt = out.get("result_type")
+            if rt not in allowed_result_types:
+                return False, f"Step {i} SAVE_RESULT requires out.result_type in {sorted(allowed_result_types)}."
+            # note should indicate kind of result saved
+            note = step.get("note", "")
+            if not isinstance(note, str) or not note.strip():
+                return False, f"Step {i} SAVE_RESULT requires a non-empty note."
+            normalized = note.strip().lower()
+            if not normalized.startswith(f"save {rt}:"):
+                return False, f"Step {i} SAVE_RESULT note must start with \"Save {rt}:\"."
+            if id_diff is not None or ap_diff is not None:
+                return False, f"Step {i} SAVE_RESULT must have difficulty fields null."
+        else:
+            # Other ops: difficulty must be null
+            if id_diff is not None or ap_diff is not None:
+                return False, f"Step {i} '{op}' must have difficulty fields null."
+
+    return True, "ok"
+
+
+
+
+def postprocess_skeleton(obj: Dict[str, Any]) -> Dict[str, Any]:
+    """Light deterministic fixes to satisfy strict formatting requirements."""
+    if not isinstance(obj, dict):
+        return obj
+    sk = obj.get("skeleton")
+    if not isinstance(sk, list):
+        return obj
+    for step in sk:
+        if not isinstance(step, dict):
+            continue
+        if step.get("op") != "SAVE_RESULT":
+            continue
+        out = step.get("out")
+        if not isinstance(out, dict):
+            continue
+        rt = out.get("result_type")
+        if not isinstance(rt, str):
+            continue
+        note = step.get("note")
+        normalized = note.strip().lower() if isinstance(note, str) else ""
+        if not normalized.startswith(f"save {rt}:"):
+            rn = out.get("result_name")
+            rn_str = rn.strip() if isinstance(rn, str) and rn.strip() else "result"
+            step["note"] = f"Save {rt}: {rn_str}"
+        # Ensure difficulty nulls for SAVE_RESULT
+        diff = step.get("difficulty")
+        if not isinstance(diff, dict):
+            step["difficulty"] = {"identify": None, "apply": None}
+        else:
+            diff["identify"] = None
+            diff["apply"] = None
+    return obj
+
+def force_repair_prompt(bad_json_text: str) -> str:
+    ops = ", ".join(OPERATOR_CATALOG)
+    return f"""Fix the following so it becomes VALID JSON matching the required schema.
+No markdown. Output JSON only.
+Operators allowed: [{ops}]
+
+BROKEN:
+{bad_json_text}
+"""
+
+
+# ---------------------------
+# Main pipeline
+# ---------------------------
+
+def process_items(
+    items: List[Dict[str, Any]],
+    out_path: str,
+    model: str,
+    resume: bool,
+    max_items: int,
+    seed: Optional[int],
+    sleep_s: float,
+    retries: int,
+) -> None:
+    client = object()
+
+    done_ids = existing_ids_from_out(out_path) if resume else set()
+
+    written = 0
+    total = len(items)
+
+    for idx, item in enumerate(items):
+        if max_items and written >= max_items:
+            break
+
+        q = (item.get("question") or "").strip()
+        s = (item.get("solution") or "").strip()
+        if not q or not s:
+            continue
+
+        _id = stable_id(item, idx)
+        if _id in done_ids:
+            continue
+
+        prompt = build_prompt(q, s)
+
+        last_err = None
+        for attempt in range(retries + 1):
+            try:
+                obj = call_llm(
+                    client=client,
+                    model=model,
+                    prompt=prompt,
+                    seed=seed,
+                )
+                obj = postprocess_skeleton(obj)
+                ok, msg = validate_skeleton(obj)
+                if not ok:
+                    raise ValueError(f"Skeleton failed validation: {msg}")
+                row = {
+                    "id": _id,
+                    "question": q,
+                    "skeleton": obj.get("skeleton"),
+                    "operators_used": obj.get("operators_used"),
+                    "final": obj.get("final"),
+                    "meta": {
+                        "model": model,
+                        "seed": seed,
+                        "idx": idx,
+                        "total": total,
+                    },
+                }
+                write_jsonl(out_path, [row])
+                written += 1
+                done_ids.add(_id)
+                break
+            except Exception as e:
+                last_err = e
+                # One repair attempt: ask model to fix JSON/constraints
+                if attempt == 0:
+                    try:
+                        # if call_llm failed due to JSON parse, we don't have the raw.
+                        # so we do a generic retry; for more advanced repair, wrap call_llm to return raw too.
+                        pass
+                    except Exception:
+                        pass
+                if attempt < retries:
+                    time.sleep(1.0 + attempt)
+                continue
+
+        if last_err is not None and _id not in done_ids:
+            # Write a failure record so resume won’t loop forever unless you delete it.
+            fail_row = {
+                "id": _id,
+                "question": q,
+                "error": str(last_err),
+                "meta": {"model": model, "seed": seed, "idx": idx, "total": total},
+            }
+            write_jsonl(out_path, [fail_row])
+            written += 1
+            done_ids.add(_id)
+
+        if sleep_s > 0:
+            time.sleep(sleep_s)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--in", dest="inp", required=True, help="Input solution packet (.json or .jsonl)")
+    ap.add_argument("--out", dest="out", required=True, help="Output .jsonl file (appended)")
+    ap.add_argument("--model", default="qwen2.5:7b-instruct", help="Model name")
+    ap.add_argument("--resume", action="store_true", help="Skip ids already in output")
+    ap.add_argument("--max-items", type=int, default=0, help="0 = all, else limit count")
+    ap.add_argument("--seed", type=int, default=None, help="Optional seed for repeatability")
+    ap.add_argument("--sleep", type=float, default=0.0, help="Sleep seconds between calls")
+    ap.add_argument("--retries", type=int, default=1, help="Retries per item")
+    args = ap.parse_args()
+
+    items = load_items(args.inp)
+    if not items:
+        print("No items found in input.", file=sys.stderr)
+        sys.exit(1)
+
+    process_items(
+        items=items,
+        out_path=args.out,
+        model=args.model,
+        resume=args.resume,
+        max_items=args.max_items,
+        seed=args.seed,
+        sleep_s=args.sleep,
+        retries=args.retries,
+    )
+
+
+if __name__ == "__main__":
+    main()
