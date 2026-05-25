@@ -18,14 +18,14 @@ load_dotenv()
 NODE_TYPES = ["Given", "Target", "Law", "State", "Constraint", "Auxiliary", "Trap", "Distractor"]
 EDGE_TYPES = ["supports", "depends_on", "derived_from", "couples", "rules_out", "produces_distractor"]
 
-SYSTEM = """You generate STRUCTURED typed latent problem graphs for Olympiad-style STEM problems.
+SYSTEM = """You generate STRUCTURED typed latent problem graphs for STEM problems.
 
 Hard constraints:
 - Do NOT copy any exemplar graph verbatim.
 - Keep it abstract: no full arithmetic, no long derivations.
-- The graph MUST be Olympiad-like and nontrivial, not one-equation.
-- Include at least 1 Target node, at least 2 Law/Constraint nodes total, at least 2 State nodes.
-- Include at least one nontrivial feature: Auxiliary or Trap or Constraint coupling.
+- Include at least 1 Target node.
+- For advanced STEM domains, include at least 2 Law/Constraint nodes total, at least 2 State nodes, and at least one Auxiliary, Trap, or Constraint coupling.
+- For grade-school math, keep the graph smaller: one Law/Constraint and one State is enough when the source task is simple.
 Return strict JSON only.
 """
 
@@ -44,7 +44,13 @@ Allowed edge types:
 {edge_types_block}
 
 TASK:
-Generate ONE NEW typed latent problem graph that is contest-faithful and nontrivial.
+Generate ONE NEW typed latent problem graph that is faithful to the source domain and exemplars.
+
+If Domain is math:
+- Target grade 5-7 worksheet-level ratio/proportion practice.
+- Keep the graph simple and concrete: equivalent ratios, ratio tables, comparing two ratios, or one missing value.
+- Do NOT create quadratics, rational expressions, square roots, domain restrictions, trigonometry, geometry similarity, or abstract multi-variable equations.
+- Difficulty should usually be 2-4.
 
 Return strict JSON with keys:
 - problem_graph: object with keys:
@@ -135,13 +141,20 @@ def graph_text(graph: Dict[str, Any]) -> str:
     return "\n".join(parts).strip()
 
 
-def graph_ok(graph: Dict[str, Any]) -> bool:
+def graph_ok(graph: Dict[str, Any], domain: str = "") -> bool:
     nodes = graph.get("nodes") or []
     edges = graph.get("edges") or []
     counts = {t: 0 for t in NODE_TYPES}
     for n in nodes:
         if isinstance(n, dict) and n.get("type") in counts:
             counts[n["type"]] += 1
+    if domain.strip().lower() == "math":
+        return (
+            counts["Target"] >= 1 and
+            (counts["Law"] + counts["Constraint"]) >= 1 and
+            counts["State"] >= 1 and
+            len(edges) >= 2
+        )
     return (
         counts["Target"] >= 1 and
         (counts["Law"] + counts["Constraint"]) >= 2 and
@@ -197,7 +210,7 @@ def main():
                 js=llm_json(args.model, SYSTEM, user, temperature=0.25)
                 graph = normalize_graph(js.get("problem_graph") or {})
                 gt = graph_text(graph)
-                ok = graph_ok(graph)
+                ok = graph_ok(graph, domain=domain)
                 best=(js, graph, gt, ok)
                 if ok:
                     break

@@ -208,6 +208,8 @@ def build_stage_commands_for_paths(
         *shared_limit,
         *common_debug,
     ]
+    if not args.multiple_choice:
+        commands["05"].append("--no-multiple-choice")
     if args.verify_model:
         commands["05"].extend(["--verify_model", args.verify_model])
 
@@ -748,6 +750,7 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument("--max-q-exemplars", type=int, default=4)
     pipe.add_argument("--max-paired-exemplars", type=int, default=3)
     pipe.add_argument("--repair-max", type=int, default=1)
+    pipe.add_argument("--multiple-choice", action=argparse.BooleanOptionalAction, default=True)
     pipe.add_argument("--sleep", type=float, default=0.0)
 
     bucket = sub.add_parser(
@@ -806,6 +809,7 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.add_argument("--max-q-exemplars", type=int, default=4)
     bucket.add_argument("--max-paired-exemplars", type=int, default=3)
     bucket.add_argument("--repair-max", type=int, default=1)
+    bucket.add_argument("--multiple-choice", action=argparse.BooleanOptionalAction, default=True)
     bucket.add_argument("--sleep", type=float, default=0.0)
 
     return parser

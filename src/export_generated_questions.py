@@ -52,7 +52,8 @@ def write_text(path: Path, rows: List[Dict[str, Any]], *, include_answers: bool)
         verdict = gatekeeper_status(row)
         suffix = f" [{verdict}]" if verdict else ""
         lines.append(f"{idx}. {row.get('question', '').strip()}{suffix}")
-        for choice in choices_lines(row.get("choices")):
+        choice_lines = choices_lines(row.get("choices"))
+        for choice in choice_lines:
             lines.append(choice)
         lines.append("")
         answer = str(row.get("answer") or "").strip()
@@ -91,7 +92,9 @@ def write_html(path: Path, rows: List[Dict[str, Any]], *, include_answers: bool)
         verdict_html = f" <span class='fail'>[{html.escape(verdict)}]</span>" if verdict else ""
         parts.append("<section class='q'>")
         parts.append(f"<div class='stem'>{idx}. {html.escape(str(row.get('question') or '').strip())}{verdict_html}</div>")
-        parts.append("<ol class='choices' type='A'>")
+        choice_rows = choices_lines(row.get("choices"))
+        if choice_rows:
+            parts.append("<ol class='choices' type='A'>")
         choices = row.get("choices")
         if isinstance(choices, dict):
             for key in ("A", "B", "C", "D", "E"):
@@ -100,7 +103,9 @@ def write_html(path: Path, rows: List[Dict[str, Any]], *, include_answers: bool)
         elif isinstance(choices, list):
             for choice in choices[:5]:
                 parts.append(f"<li>{html.escape(str(choice))}</li>")
-        parts.append("</ol></section>")
+        if choice_rows:
+            parts.append("</ol>")
+        parts.append("</section>")
         answer = str(row.get("answer") or "").strip()
         if answer:
             answer_parts.append(f"<li>{idx}. {html.escape(answer)}</li>")
