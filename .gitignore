@@ -2,3 +2,6 @@
 data/
 generated/
 index/
+logen.txt
+direct_generated.jsonl
+.DS_Store
