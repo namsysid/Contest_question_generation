@@ -14,7 +14,11 @@ import sys
 import time
 from typing import Any, Dict, List, Optional
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv() -> None:
+        return None
 from ollama_client import generate_json
 
 load_dotenv()
@@ -46,10 +50,8 @@ Return strict JSON only:
 If you cannot verify answer correctness from the solution, mark FAIL.
 """
 
-MATH_GRADE_SCHOOL_STYLE = """REQUESTED_STYLE:
-Audience: elementary/middle school students, roughly grades 5-7.
+MATH_RATIO_STYLE = """REQUESTED_STYLE:
 Topic: ratios, equivalent ratios, ratio tables, and one-step proportions.
-Difficulty: match a worksheet, not a contest.
 
 Allowed:
 - whole-number ratios and simple fractions
@@ -57,6 +59,7 @@ Allowed:
 - compare two ratios for equivalence
 - write/select equivalent ratios
 - solve one missing value such as n in 7/9 = n/18
+- multi-step ratio reasoning when hard difficulty is requested
 - short everyday contexts like recipes, beads, parks, cars, classes, or sports
 
 Forbidden:
@@ -67,6 +70,92 @@ Forbidden:
 - answer values outside A-E or multiple answers like A|C
 - long solutions
 """
+
+MATH_RATIO_CHALLENGE_STYLE = """REQUESTED_STYLE:
+Topic: challenging rates, ratios, proportions, and algebraic rate modeling.
+
+Allowed:
+- contest-style stems with a non-obvious setup, not just larger numbers
+- variables, coupled linear equations, weighted averages, mixture/work/speed-rate constraints, and hidden invariants
+- rate/proportion reasoning embedded in an algebraic model
+- concise but complete solutions that explain the setup before computing
+- plausible traps such as averaging rates incorrectly, confusing total and per-unit quantities, or assuming a constant that must be derived
+
+Forbidden:
+- brute-force arithmetic-only extensions of an easy ratio table
+- unrelated advanced topics whose core is not rates/proportions
+- gratuitous quadratics, trigonometry, geometry similarity, or calculus
+- long exposition without a real modeling step
+"""
+
+MATH_SEQUENCE_STYLE = """REQUESTED_STYLE:
+Topic: number sequences and pattern rules.
+
+Allowed:
+- continue a sequence by identifying its rule
+- simple arithmetic, geometric, constant, recursive, Fibonacci-like/add-previous-terms, alternating, or other explicit patterns when present in the target graph
+- short prompts asking for the next term, missing terms, rule, or a named term such as A6
+- small whole numbers unless the target graph implies otherwise
+- preserve the target graph's specific sequence rule; do not convert arithmetic/geometric/constant sequences into Fibonacci-like sequences
+
+Forbidden:
+- ratios, rates, proportions, or equivalent-ratio tables unless the target graph explicitly contains them
+- quadratics, rational expressions, square roots, trigonometry, geometry similarity, or unrelated algebra
+- trick questions, impossible answers, or long solutions
+"""
+
+MATH_INEQUALITY_STYLE = """REQUESTED_STYLE:
+Topic: linear inequalities in one variable, including multi-step inequalities with variables on both sides.
+
+Allowed:
+- solve one linear inequality for one variable
+- variables on both sides of the inequality
+- combine like terms, distribute a small integer or simple fraction, move terms, and isolate the variable
+- coefficients that may require multiplying or dividing by a negative number, with the inequality sign reversed in the solution
+- final answers in inequality notation such as x > 4, y <= -3, a >= 2/5, all real numbers, or no solution
+- worksheet-style free-response prompts
+
+Forbidden:
+- ratios, rates, proportions, equivalent-ratio tables, or unit-rate contexts
+- number sequences, next-term questions, Fibonacci-like patterns, or arithmetic/geometric sequence rules
+- geometry, trigonometry, systems, quadratic inequalities, absolute value inequalities, compound inequalities, rational inequalities, or calculus
+- long word problems or modeling contexts
+- multiple variables in the final answer
+"""
+
+MATH_GENERIC_STYLE = """REQUESTED_STYLE:
+Topic: infer the math topic from TARGET_GRAPH_TEXT and exemplars.
+
+Allowed:
+- stay within the topic family and reasoning pattern shown by the target graph
+- use concrete, self-contained numbers and wording
+- keep the solution concise and aligned to the requested difficulty
+
+Forbidden:
+- switching to ratios, rates, proportions, sequences, geometry, or algebra unless that topic is in the target graph or exemplars
+- adding unrelated advanced concepts just to change difficulty
+- trick questions or long solutions
+"""
+
+DIFFICULTY_STYLE = {
+    "easy": """DIFFICULTY TARGET: easy
+- Store/use difficulty level 1.
+- Audience: elementary to early middle school.
+- Use one direct idea with small whole numbers, matching the target graph's topic.
+- The wording should be short and straightforward.""",
+    "medium": """DIFFICULTY TARGET: medium
+- Store/use difficulty level 2.
+- Audience: middle school to early high school.
+- Use one or two linked ideas, matching the target graph's topic.
+- Moderate distractors are fine, but avoid trick wording.""",
+    "hard": """DIFFICULTY TARGET: hard
+- Store/use difficulty level 3.
+- Audience: high school level challenge.
+- Use multi-step reasoning, an algebraic setup, or carefully chosen distractor traps when the target graph supports them.
+- The problem should require modeling insight, not only harder arithmetic.
+- Stay within the target graph's topic; do not add unrelated advanced topics.""",
+}
+DIFFICULTY_LEVEL = {"easy": 1, "medium": 2, "hard": 3}
 
 
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -122,17 +211,48 @@ def _truncate(s: str, n: int) -> str:
     return s if len(s) <= n else s[:n] + "…"
 
 
-def _is_math_bundle(bundle: Dict[str, Any], target_graph_text: str) -> bool:
-    haystack = " ".join(
+def _topic_haystack(bundle: Dict[str, Any], target_graph_text: str) -> str:
+    return " ".join(
         str(x or "")
         for x in [
             bundle.get("domain"),
             bundle.get("seed_topic"),
             target_graph_text,
             " ".join(str(ex.get("topic") or "") for ex in bundle.get("question_exemplars") or [] if isinstance(ex, dict)),
+            " ".join(str(ex.get("question_text") or "") for ex in bundle.get("question_exemplars") or [] if isinstance(ex, dict)),
+            " ".join(str(ex.get("graph_text") or ex.get("skeleton_text") or "") for ex in bundle.get("paired_exemplars") or [] if isinstance(ex, dict)),
         ]
     ).lower()
-    return "math" in haystack or "ratio" in haystack or "proportion" in haystack
+
+
+def topic_style_block(bundle: Dict[str, Any], target_graph_text: str, difficulty: str = "medium") -> str:
+    haystack = _topic_haystack(bundle, target_graph_text)
+    inequality_terms = (
+        "inequality",
+        "inequality notation",
+        "linear inequality",
+        "solve for",
+        "variables on both sides",
+        "greater than",
+        "less than",
+        "≥",
+        "≤",
+        ">=",
+        "<=",
+    )
+    sequence_terms = ("fibonacci", "sequence", "recursive", "recurrence", "next term", "nth term", "a6", "geometric sequence", "arithmetic sequence")
+    ratio_terms = ("ratio", "proportion", "unit rate", "scaling", "equivalent ratios")
+    if any(term in haystack for term in inequality_terms):
+        return MATH_INEQUALITY_STYLE
+    if any(term in haystack for term in sequence_terms):
+        return MATH_SEQUENCE_STYLE
+    if any(term in haystack for term in ratio_terms):
+        if difficulty == "hard":
+            return MATH_RATIO_CHALLENGE_STYLE
+        return MATH_RATIO_STYLE
+    if "math" in haystack:
+        return MATH_GENERIC_STYLE
+    return ""
 
 
 def output_format_block(multiple_choice: bool) -> str:
@@ -181,7 +301,15 @@ OUTPUT strict JSON schema:
 }"""
 
 
-def build_prompt(bundle: Dict[str, Any], target_graph_text: str, max_q_ex: int, max_paired: int, *, multiple_choice: bool) -> str:
+def build_prompt(
+    bundle: Dict[str, Any],
+    target_graph_text: str,
+    max_q_ex: int,
+    max_paired: int,
+    *,
+    multiple_choice: bool,
+    difficulty: str,
+) -> str:
     q_ex = (bundle.get("question_exemplars") or [])[:max_q_ex]
     p_ex = (bundle.get("paired_exemplars") or [])[:max_paired]
 
@@ -198,7 +326,7 @@ def build_prompt(bundle: Dict[str, Any], target_graph_text: str, max_q_ex: int, 
         )
     p_section = "\n\n".join(p_blocks) if p_blocks else "(none)"
 
-    style_block = MATH_GRADE_SCHOOL_STYLE if _is_math_bundle(bundle, target_graph_text) else ""
+    style_block = topic_style_block(bundle, target_graph_text, difficulty)
     format_block = output_format_block(multiple_choice)
     format_task = (
         "- Exactly 5 choices A-E (confusable distractors).\n"
@@ -223,28 +351,32 @@ def build_prompt(bundle: Dict[str, Any], target_graph_text: str, max_q_ex: int, 
 
 {style_block}
 
+{DIFFICULTY_STYLE[difficulty]}
+
 {format_block}
 
 TASK:
 Generate ONE NEW problem that is faithful to TARGET_GRAPH_TEXT and the exemplar difficulty.
 - Invent a NEW scenario and NEW wording (no copying).
-- For grade-school math, keep it concrete, short, and worksheet-like.
+- For math, keep it concrete and aligned to the requested difficulty.
 - Use different numbers than any exemplars.
 {format_task}
 - Do not reveal the full solution path in the statement.
-- Preserve the high-level dependency backbone without increasing grade level.
+- Preserve the high-level dependency backbone while matching the requested difficulty.
 - The final wording should feel natural, not like a graph dump.
 - Keep the solution concise, preferably 2-5 short steps.
 """
 
 
-def build_gatekeeper_prompt(target_graph_text: str, candidate: Dict[str, Any], *, multiple_choice: bool) -> str:
-    style_block = MATH_GRADE_SCHOOL_STYLE if _is_math_bundle({}, target_graph_text) else ""
+def build_gatekeeper_prompt(target_graph_text: str, candidate: Dict[str, Any], *, multiple_choice: bool, difficulty: str) -> str:
+    style_block = topic_style_block({}, target_graph_text, difficulty)
     format_block = output_format_block(multiple_choice)
     return f"""TARGET_GRAPH_TEXT:
 {target_graph_text}
 
 {style_block}
+
+{DIFFICULTY_STYLE[difficulty]}
 
 {format_block}
 
@@ -253,8 +385,15 @@ CANDIDATE_JSON:
 """
 
 
-def build_repair_prompt(target_graph_text: str, candidate: Dict[str, Any], gate: Dict[str, Any], *, multiple_choice: bool) -> str:
-    style_block = MATH_GRADE_SCHOOL_STYLE if _is_math_bundle({}, target_graph_text) else ""
+def build_repair_prompt(
+    target_graph_text: str,
+    candidate: Dict[str, Any],
+    gate: Dict[str, Any],
+    *,
+    multiple_choice: bool,
+    difficulty: str,
+) -> str:
+    style_block = topic_style_block({}, target_graph_text, difficulty)
     format_block = output_format_block(multiple_choice)
     choice_line = (
         "- Exactly 5 confusable choices A-E"
@@ -267,6 +406,8 @@ TARGET_GRAPH_TEXT (must remain faithful):
 {target_graph_text}
 
 {style_block}
+
+{DIFFICULTY_STYLE[difficulty]}
 
 {format_block}
 
@@ -325,8 +466,10 @@ def main() -> None:
     ap.add_argument("--repair_max", type=int, default=1)
     ap.add_argument("--json_retries", type=int, default=3, help="Retry count for malformed/non-JSON model responses")
     ap.add_argument("--multiple-choice", action=argparse.BooleanOptionalAction, default=True)
+    ap.add_argument("--difficulty", choices=["easy", "medium", "hard"], default="medium")
     ap.add_argument("--sleep", type=float, default=0.0)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--write-failed", action="store_true", help="Write final gatekeeper FAIL rows with diagnostics instead of skipping them")
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
 
@@ -360,6 +503,7 @@ def main() -> None:
                     args.max_q_exemplars,
                     args.max_paired_exemplars,
                     multiple_choice=args.multiple_choice,
+                    difficulty=args.difficulty,
                 )
 
                 if args.debug:
@@ -400,7 +544,12 @@ def main() -> None:
                         gate = llm_json_with_retries(
                             verify_model,
                             SYSTEM_GATEKEEP,
-                            build_gatekeeper_prompt(target_graph_text, cand, multiple_choice=args.multiple_choice),
+                            build_gatekeeper_prompt(
+                                target_graph_text,
+                                cand,
+                                multiple_choice=args.multiple_choice,
+                                difficulty=args.difficulty,
+                            ),
                             temperature=0.0,
                             retries=args.json_retries,
                             debug=args.debug,
@@ -418,7 +567,13 @@ def main() -> None:
                     cand = llm_json_with_retries(
                         args.model,
                         SYSTEM_GEN,
-                        build_repair_prompt(target_graph_text, cand, gate, multiple_choice=args.multiple_choice),
+                        build_repair_prompt(
+                            target_graph_text,
+                            cand,
+                            gate,
+                            multiple_choice=args.multiple_choice,
+                            difficulty=args.difficulty,
+                        ),
                         temperature=0.2,
                         retries=args.json_retries,
                         debug=args.debug,
@@ -431,6 +586,7 @@ def main() -> None:
 
                 out_row = {
                     **cand,
+                    "difficulty": DIFFICULTY_LEVEL[args.difficulty],
                     "_meta": {
                         "bundle_id": bid,
                         "seed_id": b.get("seed_id"),
@@ -441,6 +597,23 @@ def main() -> None:
                     "_gatekeeper": gate,
                     "_repairs": repairs,
                 }
+
+                if gate and gate.get("verdict") != "PASS":
+                    failures += 1
+                    if not args.write_failed:
+                        if args.debug:
+                            print(
+                                f"[{i}/{total}] bundle_id={bid} final gatekeeper verdict={gate.get('verdict')} skipped",
+                                file=sys.stderr,
+                                flush=True,
+                            )
+                        continue
+                    if args.debug:
+                        print(
+                            f"[{i}/{total}] bundle_id={bid} final gatekeeper verdict={gate.get('verdict')} writing failed row",
+                            file=sys.stderr,
+                            flush=True,
+                        )
 
                 write_jsonl_line(out_f, out_row)
                 if args.debug:

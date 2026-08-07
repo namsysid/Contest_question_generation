@@ -17,13 +17,20 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from typing import Any, Dict, List
 
 import numpy as np
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv() -> None:
+        return None
 from ollama_client import embed_texts as ollama_embed_texts
 
 load_dotenv()
+
+QUESTION_MARKER_RE = re.compile(r"^\s*\d{1,4}[\).]\s+")
 
 
 def read_jsonl(path: str) -> List[Dict[str, Any]]:
@@ -40,6 +47,11 @@ def write_jsonl(path: str, rows: List[Dict[str, Any]]) -> None:
     with open(path, "w", encoding="utf-8") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def normalized_cache_key(text: str) -> str:
+    text = QUESTION_MARKER_RE.sub("", str(text or "").strip())
+    return " ".join(text.lower().split())
 
 
 def _string_list(values: Any, limit: int | None = None) -> List[str]:
@@ -260,11 +272,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True, help="Enriched problems JSONL (has question + graph/skeleton)")
     ap.add_argument("--embed_model", default="qwen3-embedding")
-    ap.add_argument("--anchor_frac", type=float, default=0.18, help="15–20% recommended (e.g. 0.15–0.20)")
+    ap.add_argument("--anchor_frac", type=float, default=0.18, help="15-20%% recommended (e.g. 0.15-0.20)")
     ap.add_argument("--k_density", type=int, default=20, help="kNN size for density proxy")
     ap.add_argument("--out_skel", default="./data/skeleton_embedded.jsonl")
     ap.add_argument("--out_q", default="./data/question_embedded.jsonl")
     ap.add_argument("--out_anchors", default="./data/anchors.jsonl")
+    ap.add_argument("--reuse_cache", action="store_true", help="Reuse cached embeddings for unchanged question text")
+    ap.add_argument("--cache_skel", default="", help="Existing skeleton embedding JSONL cache")
+    ap.add_argument("--cache_q", default="", help="Existing question embedding JSONL cache")
     args = ap.parse_args()
 
     load_dotenv()
@@ -275,8 +290,44 @@ def main() -> None:
     graph_texts = [safe_get_graph_text(r) for r in rows]
     q_texts = [safe_get_question_text(r) for r in rows]
 
-    graph_embs = embed_texts(args.embed_model, graph_texts)
-    q_embs = embed_texts(args.embed_model, q_texts)
+    cached_by_key: Dict[str, Dict[str, Dict[str, Any]]] = {}
+    if (
+        args.reuse_cache
+        and args.cache_skel
+        and args.cache_q
+        and os.path.exists(args.cache_skel)
+        and os.path.exists(args.cache_q)
+    ):
+        cached_skel_by_id = {str(row.get("id")): row for row in read_jsonl(args.cache_skel)}
+        for q_row in read_jsonl(args.cache_q):
+            cache_id = str(q_row.get("id") or "")
+            key = normalized_cache_key(str(q_row.get("question_text") or q_row.get("question") or ""))
+            sk_row = cached_skel_by_id.get(cache_id)
+            if key and sk_row and q_row.get("embedding") and sk_row.get("embedding"):
+                cached_by_key[key] = {"q": q_row, "skel": sk_row}
+
+    graph_embs: List[Any] = [None] * len(rows)
+    q_embs: List[Any] = [None] * len(rows)
+    reused = 0
+    missing_indices: List[int] = []
+    for idx, q_txt in enumerate(q_texts):
+        cached = cached_by_key.get(normalized_cache_key(q_txt))
+        if cached:
+            graph_embs[idx] = cached["skel"]["embedding"]
+            q_embs[idx] = cached["q"]["embedding"]
+            reused += 1
+        else:
+            missing_indices.append(idx)
+
+    if missing_indices:
+        new_graph_embs = embed_texts(args.embed_model, [graph_texts[i] for i in missing_indices])
+        new_q_embs = embed_texts(args.embed_model, [q_texts[i] for i in missing_indices])
+        for i, e_graph, e_q in zip(missing_indices, new_graph_embs, new_q_embs):
+            graph_embs[i] = e_graph
+            q_embs[i] = e_q
+
+    if any(e is None for e in graph_embs) or any(e is None for e in q_embs):
+        raise RuntimeError("Internal error: missing embedding after cache/embed pass")
 
     sk_out: List[Dict[str, Any]] = []
     q_out: List[Dict[str, Any]] = []
@@ -351,6 +402,8 @@ def main() -> None:
 
     print(f"Wrote: {args.out_skel}, {args.out_q}, {args.out_anchors}")
     print(f"Anchors: {n_anchor}/{n} ({args.anchor_frac:.2%})")
+    if args.reuse_cache:
+        print(f"Embedding cache reused: {reused}/{n}; embedded new: {len(missing_indices)}")
 
 
 if __name__ == "__main__":

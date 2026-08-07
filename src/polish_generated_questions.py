@@ -36,6 +36,8 @@ STOPWORDS = {
     "if", "in", "is", "it", "of", "on", "or", "that", "the", "these", "this", "to",
     "two", "which", "with", "what", "when", "where", "who", "why", "how", "given",
     "ratio", "ratios", "equivalent", "find", "determine", "value", "number",
+    "numbers", "sequence", "sequences", "pattern", "patterns", "term", "terms",
+    "starts", "begins", "start", "begin", "next",
 }
 
 SCENARIO_GROUPS = {
@@ -53,6 +55,24 @@ DEFAULT_FORBIDDEN = {
     "engineer", "chemist", "chemical", "biologist", "biology", "experiment",
     "quadratic", "rational expression", "domain restriction", "square root", "sqrt",
     "triangle", "trigonometry",
+}
+
+POLISH_LEVELS: Dict[str, Dict[str, Any]] = {
+    "basic": {
+        "keep_failed": True,
+        "similarity_threshold": 1.01,
+        "max_per_scenario": 0,
+    },
+    "medium": {
+        "keep_failed": False,
+        "similarity_threshold": 0.84,
+        "max_per_scenario": 0,
+    },
+    "strict": {
+        "keep_failed": False,
+        "similarity_threshold": 0.72,
+        "max_per_scenario": 2,
+    },
 }
 
 
@@ -219,6 +239,47 @@ def similarity(a: str, b: str) -> float:
     return max(seq, jac)
 
 
+def sequence_signature(text: str) -> str:
+    lower = text.lower()
+    if "sequence" not in lower and "pattern" not in lower:
+        return ""
+
+    task = "other"
+    if re.search(r"\bnext\b|comes next|should come", lower):
+        task = "next"
+    else:
+        nth_match = re.search(r"\b(\d+)(?:st|nd|rd|th)\s+(?:number|term)\b", lower)
+        if nth_match:
+            task = f"nth:{nth_match.group(1)}"
+        elif "what is the pattern" in lower or "identify" in lower:
+            task = "rule"
+
+    rule = "unknown"
+    if "sum of the previous two" in lower or "adding the two" in lower or "two before" in lower:
+        rule = "sum_previous_two"
+    elif "twice" in lower or "double" in lower or "times the one before" in lower:
+        rule = "geometric"
+    elif re.search(r"\bmore than\b|\badd\s+\d+|\badding\s+\d+", lower):
+        rule = "arithmetic"
+    else:
+        nums = [float(x) for x in NUMBER_RE.findall(lower)]
+        if len(nums) >= 3:
+            diffs = [round(nums[i + 1] - nums[i], 8) for i in range(len(nums) - 1)]
+            if len(set(diffs)) == 1:
+                rule = "arithmetic"
+            elif all(nums[i] != 0 for i in range(len(nums) - 1)):
+                ratios = [round(nums[i + 1] / nums[i], 8) for i in range(len(nums) - 1)]
+                if len(set(ratios)) == 1:
+                    rule = "geometric"
+            if rule == "unknown" and len(nums) >= 4 and all(
+                round(nums[i] + nums[i + 1] - nums[i + 2], 8) == 0
+                for i in range(len(nums) - 2)
+            ):
+                rule = "sum_previous_two"
+
+    return f"sequence:{task}:{rule}"
+
+
 def has_single_answer(row: Dict[str, Any]) -> bool:
     answer = str(row.get("answer") or "").strip()
     if not answer:
@@ -268,14 +329,20 @@ def polish_rows(
     kept: List[Dict[str, Any]] = []
     rejected: List[Dict[str, Any]] = []
     scenario_counts: Dict[str, int] = {}
+    seen_sequence_signatures: Dict[str, str] = {}
 
     for row in rows:
         q = question_text(row)
         reason = reject_reason(row, keep_failed=keep_failed, forbidden_terms=forbidden_terms)
         group = scenario_group(q)
 
-        if not reason and scenario_counts.get(group, 0) >= max_per_scenario:
+        if not reason and max_per_scenario > 0 and scenario_counts.get(group, 0) >= max_per_scenario:
             reason = f"too many {group} scenarios"
+
+        if not reason:
+            sig = sequence_signature(q)
+            if sig and sig in seen_sequence_signatures:
+                reason = f"near duplicate sequence pattern of {seen_sequence_signatures[sig]} ({sig})"
 
         if not reason:
             for kept_row in kept:
@@ -295,6 +362,9 @@ def polish_rows(
         }
         kept.append(out)
         scenario_counts[group] = scenario_counts.get(group, 0) + 1
+        sig = sequence_signature(q)
+        if sig:
+            seen_sequence_signatures[sig] = str(row.get("id") or "kept item")
         if max_questions > 0 and len(kept) >= max_questions:
             break
 
@@ -375,6 +445,16 @@ def maybe_write_pdf(txt_path: Path, pdf_path: Path) -> bool:
     return True
 
 
+def apply_polish_level(args: argparse.Namespace) -> None:
+    settings = POLISH_LEVELS[args.polish_level]
+    if args.keep_failed is None:
+        args.keep_failed = bool(settings["keep_failed"])
+    if args.similarity_threshold is None:
+        args.similarity_threshold = float(settings["similarity_threshold"])
+    if args.max_per_scenario is None:
+        args.max_per_scenario = int(settings["max_per_scenario"])
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Final-pass polish generated questions.")
     ap.add_argument("--input", required=True, help="Generated problems JSONL or readable text file")
@@ -385,13 +465,20 @@ def main() -> None:
     ap.add_argument("--out-pdf", default="")
     ap.add_argument("--reject-report", default="")
     ap.add_argument("--max-questions", type=int, default=0, help="0 = no cap")
-    ap.add_argument("--similarity-threshold", type=float, default=0.72)
-    ap.add_argument("--max-per-scenario", type=int, default=2)
-    ap.add_argument("--keep-failed", action=argparse.BooleanOptionalAction, default=False)
+    ap.add_argument(
+        "--polish-level",
+        choices=["basic", "medium", "strict"],
+        default="medium",
+        help="basic keeps anything non-weird; medium removes clear duplicates; strict is harsh",
+    )
+    ap.add_argument("--similarity-threshold", type=float, default=None, help="Override the polish-level duplicate threshold")
+    ap.add_argument("--max-per-scenario", type=int, default=None, help="Override the polish-level scenario cap; 0 disables")
+    ap.add_argument("--keep-failed", action=argparse.BooleanOptionalAction, default=None, help="Override whether gatekeeper FAIL rows are kept")
     ap.add_argument("--include-answers", action=argparse.BooleanOptionalAction, default=True)
     ap.add_argument("--forbid-term", action="append", default=[], help="Additional lowercase term to reject")
     ap.add_argument("--allow-default-forbidden", action=argparse.BooleanOptionalAction, default=True)
     args = ap.parse_args()
+    apply_polish_level(args)
 
     forbidden = set(DEFAULT_FORBIDDEN) if args.allow_default_forbidden else set()
     forbidden.update(term.lower() for term in args.forbid_term)

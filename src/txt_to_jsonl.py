@@ -15,9 +15,9 @@ from pathlib import Path
 from typing import Dict, List
 
 
-QUESTION_MARKER_RE = re.compile(r"(?:(?<=^)|(?<=\n)|(?<=\s))(\d{1,4})[\).]\s+")
+QUESTION_MARKER_RE = re.compile(r"(?m)^\s*(\d{1,4})[\).]\s+")
 SECTION_HEADING_RE = re.compile(
-    r"^(?:write|determine|use|find|solve|simplify|evaluate|choose|select|complete|"
+    r"^(?:write|determine|use|find|solve|simplify|evaluate|choose|select|complete|circle|"
     r"answer|show|calculate|compute)\b",
     re.IGNORECASE,
 )

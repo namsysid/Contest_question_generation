@@ -2,8 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib import error, request
+
+try:
+    from dotenv import find_dotenv, load_dotenv
+except Exception:  # pragma: no cover - optional dependency
+    find_dotenv = None
+    load_dotenv = None
 
 try:
     from openai import OpenAI
@@ -35,6 +42,13 @@ def _provider_for_model(model: str, kind: str) -> str:
 def _openai_client(timeout: float) -> Any:
     if OpenAI is None:
         raise RuntimeError("OpenAI client not available. Install the `openai` package.")
+    if not os.getenv("OPENAI_API_KEY") and load_dotenv is not None:
+        env_path = find_dotenv(usecwd=True) if find_dotenv is not None else ""
+        load_dotenv(env_path or None)
+    if not os.getenv("OPENAI_API_KEY") and load_dotenv is not None:
+        repo_env = Path(__file__).resolve().parent.parent / ".env"
+        if repo_env.is_file():
+            load_dotenv(repo_env)
     if not os.getenv("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY not found in environment or .env.")
     return OpenAI(timeout=timeout)
@@ -117,14 +131,24 @@ def parse_json_text(text: str) -> Dict[str, Any]:
     raw = (text or "").strip()
     if not raw:
         raise ValueError("Model returned empty content")
+    if raw.startswith("```"):
+        lines = raw.splitlines()
+        if lines and lines[0].strip().startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        raw = "\n".join(lines).strip()
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
         i = raw.find("{")
-        j = raw.rfind("}")
-        if i < 0 or j < 0 or j <= i:
+        if i < 0:
             raise ValueError(f"Model did not return JSON. Output was:\n{raw}")
-        return json.loads(raw[i : j + 1])
+        decoder = json.JSONDecoder()
+        obj, _ = decoder.raw_decode(raw[i:])
+        if not isinstance(obj, dict):
+            raise ValueError(f"Model did not return a JSON object. Output was:\n{raw}")
+        return obj
 
 
 def generate_text(

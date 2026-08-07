@@ -254,6 +254,7 @@ def llm_enrich(
     diagram_files: List[str],
     model: str,
     limits: Dict[str, Optional[int]],
+    json_retries: int,
 ) -> Dict[str, Any]:
     def budget_text(value: Optional[int]) -> str:
         return "unbounded" if value is None else str(value)
@@ -274,14 +275,21 @@ def llm_enrich(
         max_edges=budget_text(limits["max_edges"]),
     )
 
-    try:
-        return generate_json(model, user, system=SYSTEM, temperature=0.2)
-    except Exception as exc:
+    last_exc: Exception | None = None
+    for attempt in range(1, max(1, json_retries + 1) + 1):
         try:
-            raw = generate_text(model, user, system=SYSTEM, temperature=0.2)
-        except Exception:
-            raise exc
-        raise ValueError(f"Model returned invalid JSON. Raw output was:\n{raw}") from exc
+            return generate_json(model, user, system=SYSTEM, temperature=0.2)
+        except Exception as exc:
+            last_exc = exc
+            if attempt <= json_retries:
+                time.sleep(0.6 * attempt)
+
+    assert last_exc is not None
+    try:
+        raw = generate_text(model, user, system=SYSTEM, temperature=0.2)
+    except Exception:
+        raise last_exc
+    raise ValueError(f"Model returned invalid JSON. Raw output was:\n{raw}") from last_exc
 
 
 # ----------------------------
@@ -752,6 +760,7 @@ def main() -> None:
     ap.add_argument("--max-branching", type=int, default=None, help="optional cap; omit for unbounded")
     ap.add_argument("--max-nodes", type=int, default=None, help="optional cap; omit for unbounded")
     ap.add_argument("--max-edges", type=int, default=None, help="optional cap; omit for unbounded")
+    ap.add_argument("--json-retries", type=int, default=3, help="Retry count for malformed/non-JSON model responses")
     ap.add_argument("--debug", action="store_true", help="print per-row progress to stderr")
     args = ap.parse_args()
 
@@ -791,6 +800,7 @@ def main() -> None:
                 diagram_files=diagram_files,
                 model=args.model,
                 limits=limits,
+                json_retries=args.json_retries,
             )
 
             if args.debug:

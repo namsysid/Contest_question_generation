@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shlex
 import subprocess
 import sys
@@ -33,6 +34,7 @@ class BucketGroup:
 
 
 STAGES: List[StageSpec] = [
+    StageSpec("00", "txt_to_jsonl", "txt_to_jsonl.py"),
     StageSpec("01", "enrich", "01_enrich_problem_schema_paper-2.py"),
     StageSpec("02", "embed", "02_embed_and_index.py"),
     StageSpec("03", "retrieve", "03_retrieve.py"),
@@ -40,6 +42,7 @@ STAGES: List[StageSpec] = [
     StageSpec("05", "generate_questions", "05_generate_questions.py"),
 ]
 STAGE_IDS = {stage.stage_id for stage in STAGES}
+STAGE_BY_ID = {stage.stage_id: stage for stage in STAGES}
 
 
 def parse_stage_id(raw: str) -> str:
@@ -51,7 +54,12 @@ def parse_stage_id(raw: str) -> str:
     return text
 
 
-def default_domain_paths(domain: str) -> Dict[str, Path]:
+def slugify_topic(topic: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", topic.strip().lower())
+    return slug.strip("_")
+
+
+def default_domain_paths(domain: str, topic: str = "") -> Dict[str, Path]:
     key = domain.strip().lower()
     if key in {"chem", "chemistry"}:
         base = ROOT / "chem_data"
@@ -60,8 +68,13 @@ def default_domain_paths(domain: str) -> Dict[str, Path]:
     else:
         base = ROOT / key
 
+    topic_slug = slugify_topic(topic)
+    if topic_slug:
+        base = base / "topics" / topic_slug
+
     return {
         "base": base,
+        "input_txt": base / "txts" / "all_questions.txt",
         "input": base / "txts" / "all_questions.jsonl",
         "enriched": base / "enriched_schemae" / "enriched.jsonl",
         "skeleton_embedded": base / "skeleton_embedded.jsonl",
@@ -90,6 +103,46 @@ def shell_join(parts: Sequence[str]) -> str:
     return " ".join(shlex.quote(part) for part in parts)
 
 
+QUESTION_MARKER_RE = re.compile(r"^\s*\d{1,4}[\).]\s+")
+
+
+def normalized_question_key(text: str) -> str:
+    text = QUESTION_MARKER_RE.sub("", str(text or "").strip())
+    return " ".join(text.lower().split())
+
+
+def input_question_key(row: Dict[str, Any]) -> str:
+    return normalized_question_key(str(row.get("question_text") or row.get("question") or ""))
+
+
+def enriched_question_key(row: Dict[str, Any]) -> str:
+    problem = row.get("problem")
+    if isinstance(problem, dict) and problem.get("stem"):
+        return normalized_question_key(str(problem.get("stem") or ""))
+    return normalized_question_key(str(row.get("question_text") or row.get("question") or ""))
+
+
+def get_cmd_arg(cmd: Sequence[str], flag: str) -> str:
+    try:
+        idx = cmd.index(flag)
+    except ValueError:
+        return ""
+    return cmd[idx + 1] if idx + 1 < len(cmd) else ""
+
+
+def replace_cmd_arg(cmd: Sequence[str], flag: str, value: str) -> List[str]:
+    out = list(cmd)
+    try:
+        idx = out.index(flag)
+    except ValueError:
+        return [*out, flag, value]
+    if idx + 1 >= len(out):
+        out.append(value)
+    else:
+        out[idx + 1] = value
+    return out
+
+
 def run_stage(stage: StageSpec, args: List[str], dry_run: bool) -> None:
     cmd = [sys.executable, str(SRC_DIR / stage.script), *args]
     print(f"[{stage.stage_id}] {stage.name}: {shell_join(cmd)}")
@@ -98,9 +151,75 @@ def run_stage(stage: StageSpec, args: List[str], dry_run: bool) -> None:
     subprocess.run(cmd, check=True, cwd=str(ROOT))
 
 
+def incremental_stage01(args: argparse.Namespace, commands: Dict[str, List[str]]) -> None:
+    input_path = Path(get_cmd_arg(commands["01"], "--input"))
+    enriched_path = Path(get_cmd_arg(commands["01"], "--out"))
+    cache_path = Path(args.schema_cache) if args.schema_cache else enriched_path
+
+    if args.dry_run:
+        print(f"[01] enrich incremental: input={input_path} cache={cache_path} out={enriched_path}")
+        return
+
+    current_rows = read_jsonl(input_path)
+    cached_rows = read_jsonl(cache_path) if cache_path.is_file() else []
+    cached_by_key = {enriched_question_key(row): row for row in cached_rows if enriched_question_key(row)}
+
+    missing_input_rows: List[Dict[str, Any]] = []
+    merged_rows: List[Dict[str, Any] | None] = []
+    for row in current_rows:
+        key = input_question_key(row)
+        cached = cached_by_key.get(key)
+        if cached:
+            out_row = dict(cached)
+            out_row["id"] = row.get("id", out_row.get("id"))
+            if row.get("domain"):
+                out_row["domain"] = row["domain"]
+            merged_rows.append(out_row)
+        else:
+            missing_input_rows.append(row)
+            merged_rows.append(None)
+
+    new_by_key: Dict[str, Dict[str, Any]] = {}
+    if missing_input_rows:
+        work_dir = enriched_path.parent / ".incremental"
+        work_dir.mkdir(parents=True, exist_ok=True)
+        missing_input_path = work_dir / "stage01_missing_input.jsonl"
+        missing_enriched_path = work_dir / "stage01_missing_enriched.jsonl"
+        write_jsonl(missing_input_path, missing_input_rows)
+        stage_args = replace_cmd_arg(commands["01"], "--input", str(missing_input_path))
+        stage_args = replace_cmd_arg(stage_args, "--out", str(missing_enriched_path))
+        run_stage(STAGE_BY_ID["01"], stage_args, dry_run=False)
+        new_rows = read_jsonl(missing_enriched_path)
+        new_by_key = {enriched_question_key(row): row for row in new_rows if enriched_question_key(row)}
+
+    final_rows: List[Dict[str, Any]] = []
+    missing_iter = iter(missing_input_rows)
+    for original, maybe_cached in zip(current_rows, merged_rows):
+        if maybe_cached is not None:
+            final_rows.append(maybe_cached)
+            continue
+        missing_original = next(missing_iter)
+        key = input_question_key(missing_original)
+        new_row = new_by_key.get(key)
+        if not new_row:
+            raise RuntimeError(f"Stage 01 incremental missing enriched output for row id={original.get('id')}")
+        out_row = dict(new_row)
+        out_row["id"] = original.get("id", out_row.get("id"))
+        if original.get("domain"):
+            out_row["domain"] = original["domain"]
+        final_rows.append(out_row)
+
+    write_jsonl(enriched_path, final_rows)
+    print(
+        f"[01] enrich incremental: reused={len(current_rows) - len(missing_input_rows)} "
+        f"new={len(missing_input_rows)} total={len(final_rows)} -> {enriched_path}"
+    )
+
+
 def build_stage_commands_for_paths(
     args: argparse.Namespace,
     *,
+    input_txt_path: Path,
     input_path: Path,
     enriched_path: Path,
     skeleton_embedded_path: Path,
@@ -111,6 +230,7 @@ def build_stage_commands_for_paths(
     generated_problems_path: Path,
 ) -> Dict[str, List[str]]:
     outputs = [
+        input_path,
         enriched_path,
         skeleton_embedded_path,
         question_embedded_path,
@@ -125,8 +245,17 @@ def build_stage_commands_for_paths(
     common_debug = ["--debug"] if args.debug else []
     shared_limit = ["--limit", str(args.limit)] if args.limit > 0 else []
     stage_domain = args.stage_domain or infer_stage_domain(args.domain)
+    topic_slug = slugify_topic(getattr(args, "topic", ""))
+    id_prefix = args.id_prefix or (f"{stage_domain}_{topic_slug}" if topic_slug else stage_domain)
 
     commands: Dict[str, List[str]] = {}
+
+    commands["00"] = [
+        "--input", str(input_txt_path),
+        "--out", str(input_path),
+        "--domain", stage_domain,
+        "--id-prefix", id_prefix,
+    ]
 
     commands["01"] = [
         "--input", str(input_path),
@@ -192,6 +321,7 @@ def build_stage_commands_for_paths(
         "--out", str(generated_skeletons_path),
         "--model", args.graph_model,
         "--domain", stage_domain,
+        "--difficulty", args.difficulty,
         *shared_limit,
         *common_debug,
     ]
@@ -204,12 +334,15 @@ def build_stage_commands_for_paths(
         "--max_q_exemplars", str(args.max_q_exemplars),
         "--max_paired_exemplars", str(args.max_paired_exemplars),
         "--repair_max", str(args.repair_max),
+        "--difficulty", args.difficulty,
         "--sleep", str(args.sleep),
         *shared_limit,
         *common_debug,
     ]
     if not args.multiple_choice:
         commands["05"].append("--no-multiple-choice")
+    if args.write_failed:
+        commands["05"].append("--write-failed")
     if args.verify_model:
         commands["05"].extend(["--verify_model", args.verify_model])
 
@@ -243,8 +376,9 @@ def build_stage01_command(args: argparse.Namespace, *, input_path: Path, enriche
 
 
 def build_stage_commands(args: argparse.Namespace) -> Dict[str, List[str]]:
-    paths = default_domain_paths(args.domain)
+    paths = default_domain_paths(args.domain, args.topic)
 
+    input_txt_path = Path(args.txt_input) if args.txt_input else paths["input_txt"]
     input_path = Path(args.input) if args.input else paths["input"]
     enriched_path = Path(args.enriched_out) if args.enriched_out else paths["enriched"]
     skeleton_embedded_path = Path(args.skeleton_embedded_out) if args.skeleton_embedded_out else paths["skeleton_embedded"]
@@ -256,6 +390,7 @@ def build_stage_commands(args: argparse.Namespace) -> Dict[str, List[str]]:
 
     return build_stage_commands_for_paths(
         args,
+        input_txt_path=input_txt_path,
         input_path=input_path,
         enriched_path=enriched_path,
         skeleton_embedded_path=skeleton_embedded_path,
@@ -287,9 +422,47 @@ def cmd_list(_: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_paths(args: argparse.Namespace) -> int:
+    paths = default_domain_paths(args.domain, args.topic)
+    print(f"domain={args.domain}")
+    print(f"topic={args.topic or '(none)'}")
+    for key in [
+        "base",
+        "input_txt",
+        "input",
+        "enriched",
+        "skeleton_embedded",
+        "question_embedded",
+        "anchors",
+        "bundles",
+        "generated_skeletons",
+        "generated_problems",
+    ]:
+        print(f"{key}: {paths[key]}")
+    return 0
+
+
 def cmd_pipeline(args: argparse.Namespace) -> int:
     commands = build_stage_commands(args)
     stages = selected_stages(args.from_stage, args.to_stage)
+    if args.incremental:
+        selected_ids = {stage.stage_id for stage in stages}
+        if "00" in selected_ids:
+            run_stage(STAGE_BY_ID["00"], commands["00"], dry_run=args.dry_run)
+        if "01" in selected_ids:
+            incremental_stage01(args, commands)
+        if "02" in selected_ids:
+            stage02_args = list(commands["02"])
+            cache_skel = args.skeleton_embedding_cache or get_cmd_arg(commands["02"], "--out_skel")
+            cache_q = args.question_embedding_cache or get_cmd_arg(commands["02"], "--out_q")
+            stage02_args.extend(["--reuse_cache", "--cache_skel", cache_skel, "--cache_q", cache_q])
+            run_stage(STAGE_BY_ID["02"], stage02_args, dry_run=args.dry_run)
+        for stage in stages:
+            if stage.stage_id in {"00", "01", "02"}:
+                continue
+            run_stage(stage, commands[stage.stage_id], dry_run=args.dry_run)
+        return 0
+
     for stage in stages:
         run_stage(stage, commands[stage.stage_id], dry_run=args.dry_run)
     return 0
@@ -600,6 +773,7 @@ def cmd_bucketed_resume(args: argparse.Namespace, run_root: Path) -> int:
 
         per_bucket_commands = build_stage_commands_for_paths(
             args,
+            input_txt_path=bucket_dir / "txts" / "all_questions.txt",
             input_path=schema_path,
             enriched_path=schema_path,
             skeleton_embedded_path=bucket_dir / "skeleton_embedded.jsonl",
@@ -623,7 +797,7 @@ def cmd_bucketed_pipeline(args: argparse.Namespace) -> int:
         run_root = Path(args.resume_run_root)
         return cmd_bucketed_resume(args, run_root)
 
-    base = default_domain_paths(args.domain)["base"]
+    base = default_domain_paths(args.domain, args.topic)["base"]
     run_root = Path(args.bucket_root) if args.bucket_root else (base / "bucketed_runs" / datetime.now().strftime("%Y%m%d_%H%M%S"))
     run_root.mkdir(parents=True, exist_ok=True)
     print(f"[bucketed] run_root={run_root}")
@@ -633,9 +807,9 @@ def cmd_bucketed_pipeline(args: argparse.Namespace) -> int:
             raise ValueError("--bucket-enriched-input is required when --skip-enrich is set")
         enriched_all_path = Path(args.bucket_enriched_input)
     else:
-        input_path = Path(args.input) if args.input else default_domain_paths(args.domain)["input"]
+        input_path = Path(args.input) if args.input else default_domain_paths(args.domain, args.topic)["input"]
         enriched_all_path = run_root / "enriched" / "enriched.jsonl"
-        run_stage(STAGES[0], build_stage01_command(args, input_path=input_path, enriched_path=enriched_all_path), dry_run=args.dry_run)
+        run_stage(STAGE_BY_ID["01"], build_stage01_command(args, input_path=input_path, enriched_path=enriched_all_path), dry_run=args.dry_run)
         if args.dry_run:
             print("[bucketed] dry-run enabled; stage 01 printed, bucketing skipped.")
             return 0
@@ -666,6 +840,7 @@ def cmd_bucketed_pipeline(args: argparse.Namespace) -> int:
 
         per_bucket_commands = build_stage_commands_for_paths(
             args,
+            input_txt_path=bucket_dir / "txts" / "all_questions.txt",
             input_path=bucket_enriched,
             enriched_path=bucket_enriched,
             skeleton_embedded_path=bucket_dir / "skeleton_embedded.jsonl",
@@ -675,7 +850,7 @@ def cmd_bucketed_pipeline(args: argparse.Namespace) -> int:
             generated_skeletons_path=bucket_dir / "generated_skeletons.jsonl",
             generated_problems_path=bucket_dir / "generated_problems.jsonl",
         )
-        for stage in STAGES[1:]:
+        for stage in selected_stages("02", "05"):
             run_stage(stage, per_bucket_commands[stage.stage_id], dry_run=args.dry_run)
 
     summary_path = run_root / "bucket_summary.json"
@@ -692,18 +867,31 @@ def build_parser() -> argparse.ArgumentParser:
     list_parser = sub.add_parser("list", help="Show wrapped pipeline stages")
     list_parser.set_defaults(func=cmd_list)
 
+    paths_parser = sub.add_parser("paths", help="Show default files for a domain/topic run")
+    paths_parser.add_argument("--domain", default="phys")
+    paths_parser.add_argument("--topic", default="")
+    paths_parser.set_defaults(func=cmd_paths)
+
     pipe = sub.add_parser("pipeline", help="Run any contiguous subset of stages 01-05")
     pipe.set_defaults(func=cmd_pipeline)
 
     pipe.add_argument("--domain", default="phys", help="Preset path family: phys -> data, chem -> chem_data")
+    pipe.add_argument("--topic", default="", help="Optional topic namespace; outputs go under <domain>/topics/<topic-slug>/")
     pipe.add_argument("--stage-domain", default="", help="Domain string passed into stage 04; default is inferred from --domain")
     pipe.add_argument("--from-stage", type=parse_stage_id, default="01")
     pipe.add_argument("--to-stage", type=parse_stage_id, default="05")
     pipe.add_argument("--dry-run", action="store_true", help="Print commands without executing them")
     pipe.add_argument("--debug", action="store_true", help="Pass --debug to stages that support it")
     pipe.add_argument("--limit", type=int, default=0, help="Apply the same row limit to stages 01, 04, and 05")
+    pipe.add_argument("--difficulty", choices=["easy", "medium", "hard"], default="medium", help="Prompted difficulty for stages 04 and 05")
+    pipe.add_argument("--incremental", action="store_true", help="Reuse existing stage 01 schemae and stage 02 embeddings for unchanged questions")
 
+    pipe.add_argument("--txt-input", default="", help="Override stage 00 plain-text input")
     pipe.add_argument("--input", default="", help="Override stage 01 input JSONL")
+    pipe.add_argument("--id-prefix", default="", help="Override stage 00 generated question id prefix")
+    pipe.add_argument("--schema-cache", default="", help="Existing enriched JSONL cache; default is the stage 01 output path")
+    pipe.add_argument("--skeleton-embedding-cache", default="", help="Existing skeleton embedding JSONL cache; default is stage 02 out_skel")
+    pipe.add_argument("--question-embedding-cache", default="", help="Existing question embedding JSONL cache; default is stage 02 out_q")
     pipe.add_argument("--enriched-out", default="", help="Override stage 01 output path")
     pipe.add_argument("--skeleton-embedded-out", default="", help="Override stage 02 structural embedding output")
     pipe.add_argument("--question-embedded-out", default="", help="Override stage 02 question embedding output")
@@ -751,6 +939,7 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument("--max-paired-exemplars", type=int, default=3)
     pipe.add_argument("--repair-max", type=int, default=1)
     pipe.add_argument("--multiple-choice", action=argparse.BooleanOptionalAction, default=True)
+    pipe.add_argument("--write-failed", action="store_true", help="Write stage 05 gatekeeper FAIL rows with diagnostics")
     pipe.add_argument("--sleep", type=float, default=0.0)
 
     bucket = sub.add_parser(
@@ -760,10 +949,12 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.set_defaults(func=cmd_bucketed_pipeline)
 
     bucket.add_argument("--domain", default="phys", help="Preset path family: phys -> data, chem -> chem_data")
+    bucket.add_argument("--topic", default="", help="Optional topic namespace; outputs go under <domain>/topics/<topic-slug>/")
     bucket.add_argument("--stage-domain", default="", help="Domain string passed into stage 04; default is inferred from --domain")
     bucket.add_argument("--dry-run", action="store_true", help="Print commands without executing them")
     bucket.add_argument("--debug", action="store_true", help="Pass --debug to stages that support it")
     bucket.add_argument("--limit", type=int, default=0, help="Apply the same row limit to stages 01, 04, and 05")
+    bucket.add_argument("--difficulty", choices=["easy", "medium", "hard"], default="medium", help="Prompted difficulty for stages 04 and 05")
     bucket.add_argument("--min-bucket-size", type=int, default=30, help="Merge nearest buckets until each has at least this many rows")
     bucket.add_argument("--bucket-root", default="", help="Root output folder for this bucketed run")
     bucket.add_argument("--resume-run-root", default="", help="Resume an existing bucketed run root and continue missing stages")
@@ -771,6 +962,8 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.add_argument("--bucket-enriched-input", default="", help="Existing enriched JSONL for --skip-enrich, or for resume bucket-sync")
 
     bucket.add_argument("--input", default="", help="Override stage 01 input JSONL")
+    bucket.add_argument("--txt-input", default="", help="Accepted for consistency with pipeline; bucketed runs consume JSONL input")
+    bucket.add_argument("--id-prefix", default="", help="Accepted for consistency with pipeline")
     bucket.add_argument("--enrich-model", default="qwen2.5:7b-instruct")
     bucket.add_argument("--embed-model", default="qwen3-embedding")
     bucket.add_argument("--graph-model", default="qwen2.5:7b-instruct")
@@ -810,6 +1003,7 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.add_argument("--max-paired-exemplars", type=int, default=3)
     bucket.add_argument("--repair-max", type=int, default=1)
     bucket.add_argument("--multiple-choice", action=argparse.BooleanOptionalAction, default=True)
+    bucket.add_argument("--write-failed", action="store_true", help="Write stage 05 gatekeeper FAIL rows with diagnostics")
     bucket.add_argument("--sleep", type=float, default=0.0)
 
     return parser
