@@ -29,20 +29,51 @@ from dotenv import load_dotenv
 from ollama_client import generate_json
 
 
-SYSTEM_GEN = """You generate contest-faithful STEM multiple-choice problems (e.g., F=ma / USNCO style).
+def choice_labels(num_choices: int) -> List[str]:
+    if num_choices < 2 or num_choices > 5:
+        raise ValueError("--num_choices must be between 2 and 5")
+    return ["A", "B", "C", "D", "E"][:num_choices]
+
+
+def build_system_gen(num_choices: int) -> str:
+    labels = "-".join(choice_labels(num_choices))
+    return f"""You generate contest-faithful STEM multiple-choice problems (e.g., F=ma / USNCO style).
 Hard constraints:
 - Do NOT copy, paraphrase, or minimally edit any exemplar scenario, wording, variable names, or numbers.
 - You MUST produce a novel scenario and novel phrasing.
 - Stay faithful to the TARGET SKELETON_TEXT's reasoning structure (operators/laws/structure), but you may choose
   new symbols and a new context.
-- Provide 5 answer choices (A)-(E) with plausible distractors that are in tension (close, confusable),
+- Provide {num_choices} answer choices ({labels}) with plausible distractors that are in tension (close, confusable),
   not random far-apart numbers.
 - Prefer symbolic quantities where natural for the domain; only instantiate numbers when needed.
 - Keep the problem self-contained and solvable without outside references.
 Return strict JSON only (no markdown).
 """
 
-SYSTEM_VERIFY = """You are a strict verifier for contest-style multiple-choice STEM problems.
+
+def build_system_verify(num_choices: int) -> str:
+    labels = "-".join(choice_labels(num_choices))
+    labels_slash = "/".join(choice_labels(num_choices))
+    labels_json = json.dumps(choice_labels(num_choices))
+    example = json.dumps(
+        {
+            "verdict": "PASS or FAIL",
+            "issues": ["short, specific issue"],
+            "required_fixes": ["actionable edit if FAIL"],
+            "answer_consistency": {
+                "answer_claimed": choice_labels(num_choices)[0],
+                "answer_verified": f"one of {labels_slash} or UNKNOWN or DIFFERS",
+                "notes": "...",
+            },
+            "copy_risk": {
+                "risk_level": "LOW|MEDIUM|HIGH",
+                "notes": "...",
+            },
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
+    return f"""You are a strict verifier for contest-style multiple-choice STEM problems.
 You will be given:
 - TARGET_SKELETON_TEXT (authoritative reasoning plan)
 - EXEMPLARS (questions + compressed traces) that must NOT be copied
@@ -51,27 +82,15 @@ You will be given:
 Your job:
 1) Check the candidate is self-contained, solvable, and internally consistent.
 2) Check the provided solution logically leads to the claimed answer choice.
-3) Check there are exactly 5 choices A-E and answer is one of them.
+3) Check there are exactly {num_choices} choices {labels} and answer is one of them.
 4) Check choices are reasonably confusable (same order of magnitude / similar symbolic forms).
 5) Check anti-copy: no reuse of exemplar scenario/phrasing/variable names/numbers.
 6) Check surface feel: avoid "too many random numbers" if the domain seems symbolic (e.g., F=ma).
 
-Return strict JSON only with:
-{
-  "verdict": "PASS" or "FAIL",
-  "issues": ["...", ...],                  // short, specific
-  "required_fixes": ["...", ...],          // actionable edits if FAIL
-  "answer_consistency": {
-     "answer_claimed": "A",
-     "answer_verified": "A" or "UNKNOWN" or "DIFFERS",
-     "notes": "..."
-  },
-  "copy_risk": {
-     "risk_level": "LOW"|"MEDIUM"|"HIGH",
-     "notes": "..."
-  }
-}
+Return strict JSON only with this shape:
+{example}
 Be conservative: if you cannot verify answer correctness from the candidate solution, mark FAIL.
+Allowed answer labels: {labels_json}.
 """
 
 
@@ -80,7 +99,7 @@ def _truncate(s: str, n: int) -> str:
     return s if len(s) <= n else s[:n] + "…"
 
 
-def build_user_prompt(target: Dict[str, Any], k_max_exemplars: int = 4) -> str:
+def build_user_prompt(target: Dict[str, Any], k_max_exemplars: int = 4, num_choices: int = 5) -> str:
     skel = target.get("skeleton_text") or ""
     exemplars: List[Dict[str, Any]] = target.get("exemplars") or []
     exemplars = exemplars[:k_max_exemplars]
@@ -95,6 +114,10 @@ def build_user_prompt(target: Dict[str, Any], k_max_exemplars: int = 4) -> str:
         )
 
     exemplar_section = "\n\n".join(ex_blocks) if ex_blocks else "(none)"
+
+    labels = choice_labels(num_choices)
+    labels_dash = "-".join(labels)
+    choices_schema = ", ".join(f'"{label}":"..."' for label in labels)
 
     return f"""You are given:
 
@@ -111,13 +134,14 @@ Generate ONE new multiple-choice problem that is faithful to the TARGET SKELETON
 - Ensure the answer choices are confusable (same order of magnitude / near in value / share common symbolic forms).
 - Include at least 2 distractors that correspond to common mistakes implied by the skeleton (sign, component swap, missing factor, wrong conservation equation, etc.).
 - Keep the problem statement concise.
+- Use exactly {num_choices} answer choices: {labels_dash}.
 
 OUTPUT JSON schema (strict):
 {{
   "id": "<string>",
   "question": "<string problem stem>",
-  "choices": {{"A":"...", "B":"...", "C":"...", "D":"...", "E":"..."}},
-  "answer": "<one of A/B/C/D/E>",
+  "choices": {{{choices_schema}}},
+  "answer": "<one of {'/'.join(labels)}>",
   "solution": "<clear solution, may include equations>",
   "skeleton_text": "<compressed trace you actually used>",
   "anti_copy_report": {{
@@ -159,7 +183,7 @@ def llm_json(model: str, system: str, user: str, temperature: float = 0.0) -> Di
     return generate_json(model, user, system=system, temperature=temperature)
 
 
-def repair_prompt(target: Dict[str, Any], bad: Dict[str, Any], verify: Dict[str, Any], k_max_exemplars: int = 4) -> str:
+def repair_prompt(target: Dict[str, Any], bad: Dict[str, Any], verify: Dict[str, Any], k_max_exemplars: int = 4, num_choices: int = 5) -> str:
     # Give the model the issues and require a revised candidate JSON, same schema.
     return f"""You generated a candidate that FAILED verification.
 
@@ -179,13 +203,13 @@ TASK:
 Revise the candidate to address ALL required fixes while preserving:
 - Novel scenario (do not copy exemplars)
 - Faithfulness to TARGET_SKELETON_TEXT
-- 5 confusable choices A-E
+- {num_choices} confusable choices {"-".join(choice_labels(num_choices))}
 
 Return strict JSON in the SAME schema as before.
 """
 
 
-def is_basic_schema_ok(obj: Dict[str, Any]) -> bool:
+def is_basic_schema_ok(obj: Dict[str, Any], num_choices: int = 5) -> bool:
     if not isinstance(obj, dict):
         return False
     if "question" not in obj or "choices" not in obj or "answer" not in obj or "solution" not in obj:
@@ -194,9 +218,10 @@ def is_basic_schema_ok(obj: Dict[str, Any]) -> bool:
     if not isinstance(ch, dict):
         return False
     keys = set(ch.keys())
-    if keys != {"A", "B", "C", "D", "E"}:
+    allowed = set(choice_labels(num_choices))
+    if keys != allowed:
         return False
-    if obj.get("answer") not in ["A", "B", "C", "D", "E"]:
+    if obj.get("answer") not in allowed:
         return False
     return True
 
@@ -214,10 +239,14 @@ def main() -> None:
     ap.add_argument("--temperature", type=float, default=0.7)
     ap.add_argument("--do_verify", action="store_true", help="enable verification gate")
     ap.add_argument("--repair_attempts", type=int, default=1, help="number of auto-repair attempts if FAIL")
+    ap.add_argument("--num_choices", type=int, default=5, help="Number of MCQ choices to require (default: 5).")
     args = ap.parse_args()
 
     load_dotenv()
     verify_model = args.verify_model.strip() or args.model
+    gen_system = build_system_gen(args.num_choices)
+    verify_system = build_system_verify(args.num_choices)
+    labels_dash = "-".join(choice_labels(args.num_choices))
 
     n_done = 0
     t0 = time.time()
@@ -233,11 +262,11 @@ def main() -> None:
             target_id = target.get("id") or f"gen_{i}"
 
             try:
-                user_prompt = build_user_prompt(target, k_max_exemplars=args.max_exemplars)
+                user_prompt = build_user_prompt(target, k_max_exemplars=args.max_exemplars, num_choices=args.num_choices)
 
                 candidate = llm_json(
                     model=args.model,
-                    system=SYSTEM_GEN,
+                    system=gen_system,
                     user=user_prompt,
                     temperature=args.temperature,
                 )
@@ -247,11 +276,11 @@ def main() -> None:
                 verify_obj: Optional[Dict[str, Any]] = None
 
                 # Basic schema sanity before verifier
-                if not is_basic_schema_ok(candidate):
+                if not is_basic_schema_ok(candidate, num_choices=args.num_choices):
                     verify_obj = {
                         "verdict": "FAIL",
-                        "issues": ["Candidate JSON schema invalid (missing fields or not exactly A-E)."],
-                        "required_fixes": ["Return exactly the required schema with choices A-E and answer in A-E."],
+                        "issues": [f"Candidate JSON schema invalid (missing fields or not exactly {labels_dash})."],
+                        "required_fixes": [f"Return exactly the required schema with choices {labels_dash} and answer in {labels_dash}."],
                         "answer_consistency": {"answer_claimed": str(candidate.get("answer")), "answer_verified": "UNKNOWN", "notes": "Schema invalid."},
                         "copy_risk": {"risk_level": "UNKNOWN", "notes": "Schema invalid."},
                     }
@@ -264,7 +293,7 @@ def main() -> None:
                             vprompt = build_verify_prompt(target, candidate, k_max_exemplars=args.max_exemplars)
                             verify_obj = llm_json(
                                 model=verify_model,
-                                system=SYSTEM_VERIFY,
+                                system=verify_system,
                                 user=vprompt,
                                 temperature=0.0,
                             )
@@ -276,10 +305,10 @@ def main() -> None:
                             break
 
                         # Attempt repair
-                        rprompt = repair_prompt(target, candidate, verify_obj, k_max_exemplars=args.max_exemplars)
+                        rprompt = repair_prompt(target, candidate, verify_obj, k_max_exemplars=args.max_exemplars, num_choices=args.num_choices)
                         repaired = llm_json(
                             model=args.model,
-                            system=SYSTEM_GEN,
+                            system=gen_system,
                             user=rprompt,
                             temperature=max(0.3, args.temperature),
                         )
@@ -304,6 +333,8 @@ def main() -> None:
                     "topic": target.get("topic"),
                     "difficulty": target.get("difficulty"),
                 }
+                if isinstance(target.get("_chem"), dict):
+                    candidate["_meta"]["chem"] = target["_chem"]
                 if args.do_verify:
                     candidate["_verify"] = verify_obj or {"verdict": "FAIL", "issues": ["Unknown verifier state."], "required_fixes": []}
                     if repairs:

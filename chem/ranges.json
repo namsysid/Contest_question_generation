@@ -1,0 +1,136 @@
+{
+  "source_file": "data/usnco_questions.jsonl",
+  "bucket_size": 6,
+  "ranges": [
+    {
+      "range": "1-6",
+      "question_numbers": [1, 2, 3, 4, 5, 6],
+      "title": "Stoichiometry and introductory calculations",
+      "topic_focus": {
+        "1": "Stoichiometry and introductory calculations",
+        "2": "Stoichiometry and introductory calculations",
+        "3": "Stoichiometry and introductory calculations",
+        "4": "Stoichiometry and introductory calculations",
+        "5": "Stoichiometry and introductory calculations",
+        "6": "Stoichiometry and introductory calculations"
+      }
+    },
+    {
+      "range": "7-12",
+      "question_numbers": [7, 8, 9, 10, 11, 12],
+      "title": "Descriptive chemistry and laboratory practice",
+      "topic_focus": {
+        "7": "Descriptive chemistry and laboratory practice",
+        "8": "Descriptive chemistry and laboratory practice",
+        "9": "Descriptive chemistry and laboratory practice",
+        "10": "Descriptive chemistry and laboratory practice",
+        "11": "Descriptive chemistry and laboratory practice",
+        "12": "Descriptive chemistry and laboratory practice"
+      }
+    },
+    {
+      "range": "13-18",
+      "question_numbers": [13, 14, 15, 16, 17, 18],
+      "title": "States of matter",
+      "topic_focus": {
+        "13": "States of matter",
+        "14": "States of matter",
+        "15": "States of matter",
+        "16": "States of matter",
+        "17": "States of matter",
+        "18": "States of matter"
+      }
+    },
+    {
+      "range": "19-24",
+      "question_numbers": [19, 20, 21, 22, 23, 24],
+      "title": "Thermodynamics",
+      "topic_focus": {
+        "19": "Thermodynamics",
+        "20": "Thermodynamics",
+        "21": "Thermodynamics",
+        "22": "Thermodynamics",
+        "23": "Thermodynamics",
+        "24": "Thermodynamics"
+      }
+    },
+    {
+      "range": "25-30",
+      "question_numbers": [25, 26, 27, 28, 29, 30],
+      "title": "Kinetics",
+      "topic_focus": {
+        "25": "Kinetics",
+        "26": "Kinetics",
+        "27": "Kinetics",
+        "28": "Kinetics",
+        "29": "Kinetics",
+        "30": "Kinetics"
+      }
+    },
+    {
+      "range": "31-36",
+      "question_numbers": [31, 32, 33, 34, 35, 36],
+      "title": "Equilibrium",
+      "topic_focus": {
+        "31": "Equilibrium",
+        "32": "Equilibrium",
+        "33": "Equilibrium",
+        "34": "Equilibrium",
+        "35": "Equilibrium",
+        "36": "Equilibrium"
+      }
+    },
+    {
+      "range": "37-42",
+      "question_numbers": [37, 38, 39, 40, 41, 42],
+      "title": "Oxidation-reduction",
+      "topic_focus": {
+        "37": "Oxidation-reduction",
+        "38": "Oxidation-reduction",
+        "39": "Oxidation-reduction",
+        "40": "Oxidation-reduction",
+        "41": "Oxidation-reduction",
+        "42": "Oxidation-reduction"
+      }
+    },
+    {
+      "range": "43-48",
+      "question_numbers": [43, 44, 45, 46, 47, 48],
+      "title": "Atomic structure and periodicity",
+      "topic_focus": {
+        "43": "Atomic structure and periodicity",
+        "44": "Atomic structure and periodicity",
+        "45": "Atomic structure and periodicity",
+        "46": "Atomic structure and periodicity",
+        "47": "Atomic structure and periodicity",
+        "48": "Atomic structure and periodicity"
+      }
+    },
+    {
+      "range": "49-54",
+      "question_numbers": [49, 50, 51, 52, 53, 54],
+      "title": "Bonding and molecular structure",
+      "topic_focus": {
+        "49": "Bonding and molecular structure",
+        "50": "Bonding and molecular structure",
+        "51": "Bonding and molecular structure",
+        "52": "Bonding and molecular structure",
+        "53": "Bonding and molecular structure",
+        "54": "Bonding and molecular structure"
+      }
+    },
+    {
+      "range": "55-60",
+      "question_numbers": [55, 56, 57, 58, 59, 60],
+      "title": "Organic chemistry and biochemistry",
+      "topic_focus": {
+        "55": "Organic chemistry and biochemistry",
+        "56": "Organic chemistry and biochemistry",
+        "57": "Organic chemistry and biochemistry",
+        "58": "Organic chemistry and biochemistry",
+        "59": "Organic chemistry and biochemistry",
+        "60": "Organic chemistry and biochemistry"
+      }
+    }
+  ]
+}
