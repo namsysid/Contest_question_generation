@@ -1,0 +1,4783 @@
+
+
+### source: 2022-usnco-local-exam.pdf
+ 
+
+2022 U.S. NATIONAL 
+
+CHEMISTRY OLYMPIAD 
+
+LOCAL SECTION EXAM 
+
+Prepared by the American Chemical Society Chemistry Olympiad Examinations Task Force 
+
+OLYMPIAD EXAMINATIONS TASK FORCE 
+
+Seth N. Brown, Chair, University of Notre Dame, Notre Dame, IN 
+
+James Ayers, Colorado Mesa University, Grand Junction, CO 
+
+Jerry Bell, Simmons University, Boston, MA (retired) 
+
+Jesse Bernstein, Miami Country Day School, Miami, FL (retired) 
+
+Mark DeCamp, University of Michigan, Dearborn, MI (retired) 
+
+Joshua de Groot, College of Southern Idaho, Twin Falls, ID 
+
+James Dohm, ExxonMobil, Houston, TX 
+
+Xu Duan, Holton-Arms School, Bethesda, MD 
+
+Valerie Ferguson, Moore HS, Moore, OK (retired) 
+
+Kimberly Gardner, United States Air Force Academy, CO 
+
+Paul Groves, South Pasadena HS, South Pasadena, CA (retired) 
+John Kotz, State University of New York, Oneonta, NY (retired) 
+
+Sarah Leite, Hopkins School, New Haven, CT 
+
+Michael A. Morgan, Francisco Bravo Medical Magnet HS, Los Angeles, CA 
+
+Jane Nagurney, Scranton Preparatory School, Scranton, PA (retired) 
+
+ 
+
+DIRECTIONS TO THE EXAMINER 
+
+ 
+This test is designed to be taken with an answer sheet on which the student records his or her responses. All answers are to be marked 
+on that sheet, not written in the booklet. Each student should be provided with an answer sheet and scratch paper, both of which must 
+be turned in with the test booklet at the end of the examination. Local Sections may use an answer sheet of their own choice. 
+ 
+The full examination consists of 60 multiple-choice questions representing a fairly wide range of difficulty. A periodic table and other 
+useful information are provided on page two of this exam booklet for student reference. 
+ 
+Only non-programmable calculators are to be used on the ACS Local Section exam.  The use of a programmable calculator, cell 
+phone, or any other device that can access the internet or make copies or photographs during the exam is grounds for disqualification.  
+ 
+
+Suggested Time: 60 questions—110 minutes 
+
+ 
+ 
+
+DIRECTIONS TO THE EXAMINEE 
+
+ 
+DO NOT TURN THE PAGE UNTIL DIRECTED TO DO SO. 
+ 
+This is a multiple-choice examination with four choices for each question. There is only one correct or best answer to each question. 
+When you select your choice, blacken the corresponding space on the answer sheet with your pencil. Make a heavy full mark, but no 
+stray marks. If you decide to change your answer, be certain to erase your original answer completely.  
+ 
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022 
+
+Distributed by the American Chemical Society, 1155 16th Street, N.W., Washington, DC 20036 
+All rights reserved. Printed in U.S.A. 
+
+
+ 
+
+ 
+ABBREVIATIONS AND SYMBOLS 
+ 
+CONSTANTS 
+
+amount of substance 
+n 
+
+Faraday constant 
+F 
+
+molar mass 
+M 
+
+ 
+
+R = 8.314 J mol–1 K–1 
+
+ampere 
+A 
+
+free energy 
+G 
+
+mole 
+mol 
+
+frequency 
+ν 
+
+atmosphere 
+atm 
+
+Planck’s constant 
+h 
+
+R = 0.08314 L bar mol–1 K–1 
+
+atomic mass unit 
+u 
+
+pressure 
+P 
+
+gas constant 
+R 
+
+F = 96,500 C mol–1 
+
+Avogadro constant 
+NA 
+
+rate constant 
+k 
+
+gram 
+g 
+
+F = 96,500 J V–1 mol–1 
+
+Celsius temperature 
+°C 
+
+reaction quotient 
+Q 
+
+hour 
+h 
+
+centi– prefix 
+c 
+
+second 
+s 
+
+NA = 6.022 × 1023 mol–1 
+
+joule 
+J 
+
+coulomb 
+C 
+
+speed of light 
+c 
+
+kelvin 
+K 
+
+h = 6.626 × 10–34 J s 
+
+density 
+d 
+
+temperature, K 
+T 
+
+kilo– prefix 
+k 
+
+c = 2.998 × 108 m s–1 
+
+electromotive force 
+E 
+
+time 
+t 
+
+liter 
+L 
+
+energy of activation 
+Ea 
+
+vapor pressure                 VP 
+volt 
+V 
+
+measure of pressure mm Hg 
+milli– prefix 
+m 
+
+0 °C = 273.15 K 
+
+enthalpy 
+H 
+
+1 atm = 1.013 bar = 760 mm Hg 
+
+entropy 
+     S  
+
+volume 
+V 
+
+molal 
+m 
+
+Specific heat capacity of H2O = 
+
+equilibrium constant 
+  K 
+
+ 
+
+molar 
+M 
+
+4.184 J g–1 K–1 
+
+ 
+ 
+ 
+
+EQUATIONS 
+
+   
+ 
+ 
+
+                        
+o
+ln
+RT
+E
+E
+Q
+nF
+=
+−
+                                
+
+
+
+−∆
+
+
+=
++
+
+
+
+
+
+
+
+
+1
+1
+ln
+a
+E
+k
+k
+R
+T
+T
+
+
+
+
+=
+−
+
+
+
+
+
+
+
+
+
+o
+1
+ln
+constant
+H
+K
+R
+T
+
+                       
+2
+
+ 
+
+1
+1
+2
+
+ 
+ 
+ 
+
+ 1  
+PERIODIC TABLE OF THE ELEMENTS 
+18 
+
+ 1A  
+ 
+8A 
+
+1 
+
+ 
+ 
+2 
+13 
+14 
+15 
+16 
+ 17 
+
+2 
+
+H 
+
+He 
+
+1.008 
+
+4.003 
+
+ 2A 
+3A 
+4A 
+5A 
+6A 
+ 7A 
+
+3 
+
+4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+5 
+
+6 
+
+7 
+
+8 
+
+9 
+F 
+
+10 
+
+Li 
+
+Be 
+
+B 
+
+C 
+
+N 
+
+O 
+
+Ne 
+
+6.941 
+
+9.012 
+
+10.81 
+
+12.01 
+
+14.01 
+
+16.00 
+
+19.00 
+
+20.18 
+
+11 
+
+12 
+
+ 
+ 3 
+
+ 
+ 4 
+
+ 
+ 5 
+
+ 
+ 6 
+
+ 
+ 7 
+
+ 
+ 8 
+
+ 
+ 9 
+
+ 
+ 10 
+
+ 
+  11 
+
+ 
+  12 
+
+13 
+Al 
+
+14 
+
+15 
+
+16 
+
+17 
+Cl 
+
+18 
+
+Na 
+
+Mg 
+
+Si 
+
+P 
+
+S 
+
+Ar 
+
+22.99 
+
+24.31 
+
+26.98 
+
+28.09 
+
+30.97 
+
+32.07 
+
+35.45 
+
+39.95 
+
+3B 
+
+4B 
+
+5B 
+
+6B 
+
+7B 
+
+8B 
+
+8B 
+
+8B 
+
+1B 
+
+2B 
+
+19 
+
+20 
+
+21 
+Sc 
+
+22 
+Ti 
+
+23 
+
+24 
+
+25 
+
+26 
+Fe 
+
+27 
+
+28 
+Ni 
+
+29 
+
+30 
+
+31 
+
+32 
+
+33 
+
+34 
+Se 
+
+35 
+
+36 
+
+K 
+
+Ca 
+
+V 
+
+Cr 
+
+Mn 
+54.94 
+
+Co 
+
+Cu 
+
+Zn 
+
+Ga 
+
+Ge 
+
+As 
+
+Br 
+
+Kr 
+
+39.10 
+
+40.08 
+
+44.96 
+
+47.88 
+
+50.94 
+
+52.00 
+
+55.85 
+
+58.93 
+
+58.69 
+
+63.55 
+
+65.39 
+
+69.72 
+
+72.61 
+
+74.92 
+
+78.97 
+
+79.90 
+
+83.80 
+
+37 
+
+38 
+Sr 
+
+39 
+
+40 
+
+41 
+
+42 
+
+43 
+
+44 
+
+45 
+
+46 
+
+47 
+
+48 
+
+49 
+In 
+
+50 
+
+51 
+
+52 
+
+53 
+
+54 
+
+Rb 
+
+Y 
+
+Zr 
+
+Nb 
+
+Mo 
+
+Tc 
+(98) 
+
+Ru 
+
+Rh 
+
+Pd 
+
+Ag 
+
+Cd 
+
+Sn 
+
+Sb 
+
+Te 
+
+I 
+
+Xe 
+
+85.47 
+
+87.62 
+
+88.91 
+
+91.22 
+
+92.91 
+
+95.95 
+
+101.1 
+
+102.9 
+
+106.4 
+
+107.9 
+
+112.4 
+
+114.8 
+
+118.7 
+
+121.8 
+
+127.6 
+
+126.9 
+
+131.3 
+
+55 
+
+56 
+
+57 
+
+72 
+
+73 
+
+74 
+W 
+
+75 
+
+76 
+
+77 
+
+78 
+Pt 
+
+79 
+
+80 
+
+81 
+Tl 
+
+82 
+
+83 
+Bi 
+
+84 
+
+85 
+At 
+
+86 
+
+Cs 
+
+Ba 
+
+La 
+
+Hf 
+
+Ta 
+
+Re 
+
+Os 
+
+Ir 
+
+Au 
+
+Hg 
+
+Pb 
+
+Po 
+
+Rn 
+
+132.9 
+
+137.3 
+
+138.9 
+
+178.5 
+
+180.9 
+
+183.8 
+
+186.2 
+
+190.2 
+
+192.2 
+
+195.1 
+
+197.0 
+
+200.6 
+
+204.4 
+
+207.2 
+
+209.0 
+
+(209) 
+
+(210) 
+
+(222) 
+
+87 
+Fr 
+
+88 
+
+89 
+
+104 
+
+105 
+
+106 
+
+107 
+
+108 
+
+109 
+
+110 
+
+111 
+
+112 
+
+113 
+
+114 
+
+115 
+
+116 
+
+117 
+
+118 
+
+Ra 
+
+Ac 
+
+Rf 
+
+Db 
+
+Sg 
+
+Bh 
+
+Hs 
+
+Mt 
+
+Ds 
+
+Rg 
+
+Cn 
+
+Nh 
+
+Fl 
+
+Mc 
+
+Lv 
+
+Ts 
+
+Og 
+
+(223) 
+
+(226) 
+
+(227) 
+
+(261) 
+
+(262) 
+
+(263) 
+
+(262) 
+
+(265) 
+
+(266) 
+
+(281) 
+
+(272) 
+
+(285) 
+
+(286) 
+
+(289) 
+
+(289) 
+
+(293) 
+
+(294) 
+
+(294) 
+
+ 
+
+ 
+ 
+ 
+58 
+
+59 
+Pr 
+
+60 
+
+61 
+
+62 
+
+63 
+
+64 
+
+65 
+
+66 
+
+67 
+
+68 
+
+69 
+
+70 
+
+71 
+
+Ce 
+
+Nd 
+
+Pm 
+(145) 
+
+Sm 
+
+Eu 
+
+Gd 
+
+Tb 
+
+Dy 
+
+Ho 
+
+Er 
+
+Tm 
+168.9 
+
+Yb 
+
+Lu 
+
+140.1 
+
+140.9 
+
+144.2 
+
+150.4 
+
+152.0 
+
+157.3 
+
+158.9 
+
+162.5 
+
+164.9 
+
+167.3 
+
+173.0 
+
+175.0 
+
+ 
+ 
+ 
+90 
+
+91 
+
+92 
+
+93 
+
+94 
+
+95 
+
+96 
+
+97 
+
+98 
+Cf 
+
+99 
+Es 
+
+100 
+Fm 
+(257) 
+
+101 
+Md 
+(258) 
+
+102 
+
+103 
+
+Th 
+
+Pa 
+
+U 
+
+Np 
+
+Pu 
+
+Am 
+(243) 
+
+Cm 
+(247) 
+
+Bk 
+
+No 
+
+Lr 
+
+232.0 
+
+231.0 
+
+238.0 
+
+(237) 
+
+(244) 
+
+(247) 
+
+(251) 
+
+(252) 
+
+(259) 
+
+(262) 
+
+Page 2 
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022 
+
+
+ 
+
+ 
+
+DIRECTIONS 
+
+ 
+When you have selected your answer to each question, blacken the corresponding space on the answer sheet using a soft, #2 
+pencil. Make a heavy, full mark, but no stray marks. If you decide to change an answer, erase the unwanted mark very carefully.  
+
+ 
+There is only one correct answer to each question. Any questions for which more than one response has been blackened will not 
+be counted.  
+
+ 
+Your score is based solely on the number of questions you answer correctly. It is to your advantage to answer every question. 
+
+ 
+
+1. Which potassium salt is 28.9% chlorine by mass? 
+
+6. 14.0 mL of 0.53 M barium nitrate solution and 16.0 mL 
+
+of 0.44 M sodium sulfate solution are mixed.  Which ion 
+is LEAST abundant in solution? 
+
+(A) KCl 
+(B) KClO 
+(C) KClO2 
+(D) KClO3 
+
+ 
+
+(A) Ba2+ 
+(B) NO3– 
+(C) Na+ 
+(D) SO42- 
+
+2. How many sulfur atoms are in 3.00 g of iron pyrite, FeS2 
+
+(M = 120.0)? 
+
+ 
+
+7. Which salt gives a colorless aqueous solution? 
+
+(A) 7.53 × 1021 
+(B) 1.51 × 1022 
+
+(A) NaClO4 
+(B) K2CrO4 
+
+(C) 3.01 × 1022 
+(D) 6.02 × 1023 
+
+(C) Ni(NO3)2 
+(D) CuSO4 
+
+ 
+
+ 
+
+3. A gas mixture contains 50 mol% H2 and 50 mol% He.  
+
+8. 100 mL of a 1.0 M solution of hydrochloric acid is 
+
+1.00-L samples of this gas mixture are mixed with 
+variable volumes of O2 (at 0 °C and 1 atm).  A spark is 
+introduced to allow the mixture to undergo complete 
+combustion.  The final volume is measured at 0 °C and 1 
+atm.  Which graph best depicts the final volume as a 
+function of the volume of added O2? 
+
+gradually added to a stirred mixture containing 0.01 mol 
+calcium hydroxide, 100 mL water, and a small amount of 
+phenolphthalein.  What changes are observed? 
+
+I. 
+The mixture changes from colorless to pink. 
+
+II. 
+The mixture changes from cloudy to clear. 
+
+(A) 
+
+(B) 
+
+(A) I only 
+(B) II only 
+
+(C) Both I and II 
+(D) Neither I nor II 
+
+ 
+
+9. Below is shown a section of a buret filled with titrant 
+
+before beginning a titration.  What initial volume should 
+be recorded? 
+
+ 
+
+ 
+
+(C) 
+
+(D) 
+
+ 
+
+(A) 1.20 mL 
+(B) 1.26 mL 
+
+ 
+
+ 
+
+ 
+
+(C) 2.74 mL 
+(D) 2.80 mL 
+
+4. What is the concentration of nitrate ions in 40.0 mL of a 
+
+ 
+
+0.25 M solution of copper(II) nitrate? 
+
+10. Titration with aqueous triiodide solution to a starch 
+
+endpoint would be LEAST suitable for which 
+determination? 
+
+(A) 0.010 M 
+(B) 0.020 M 
+
+(C) 0.050 M 
+(D) 0.50 M 
+
+(A) Analysis of nickel content in a Ni/Co alloy 
+
+ 
+
+5. 1.000 g of a transition metal carbonate, MCO3, is heated 
+
+(B) Determination of ascorbic acid in a vitamin C tablet 
+
+to produce the metal oxide and 0.383 g of carbon dioxide 
+(M = 44.01).  What is the identity of the metal M? 
+
+(C) Measurement of sulfite concentration in a white 
+
+wine 
+
+(A) Mn 
+(B) Ni 
+(C) Cu 
+(D) Zn 
+
+(D) Determination of waters of hydration in a sodium 
+
+ 
+
+thiosulfate sample 
+
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022  
+Page 3 
+
+
+ 
+
+11. Which liquid will NOT react with metallic sodium? 
+
+17. Which statement about sulfur, whose phase diagram is 
+
+shown below, is correct? 
+
+(A) Water 
+(B) Mineral oil 
+
+(C) Ethanol 
+(D) Carbon tetrachloride 
+
+ 
+
+12. The molar enthalpy of solution of a salt that dissolves 
+
+endothermically in water is measured in a coffee-cup 
+calorimeter by weighing a known amount of distilled 
+water into the cup and measuring its temperature, then 
+adding a known mass of the salt to the water and 
+measuring the temperature after the salt dissolves.  If 
+some water is initially present in the cup before the 
+weighed amount of water is added, what is the effect on 
+the experiment? 
+
+ 
+
+(A) Calculated ∆H°soln > True ∆H°soln 
+
+(A) Monoclinic sulfur sublimes at 1 atm pressure while 
+
+(B) Calculated ∆H°soln = True ∆H°soln 
+
+rhombic sulfur does not. 
+
+(C) Calculated ∆H°soln < True ∆H°soln 
+
+(B) Rhombic sulfur is less dense than monoclinic sulfur. 
+
+(D) The reaction will be calculated to be exothermic 
+
+(C) At temperatures above 119 °C, monoclinic sulfur 
+
+even though it is actually endothermic. 
+
+cannot exist at equilibrium. 
+
+ 
+
+(D) The conversion of rhombic sulfur to monoclinic 
+
+13. When liquid water converts to solid ice at 0 °C and 1 atm 
+
+sulfur is endothermic. 
+
+pressure, which of the following changes takes place? 
+
+ 
+
+(A) Heat flows out of the system. 
+
+18. Aluminum crystallizes in a face-centered cubic unit cell 
+
+with an edge length of 405 pm.  What is its density? 
+
+(B) The volume of the system decreases. 
+
+(A) 0.674 g cm-3 
+(B) 1.35 g cm-3 
+
+(C) The vapor pressure of water increases. 
+
+(C) 2.70 g cm-3 
+(D) 5.40 g cm-3 
+
+(D) The hydrogen bonds become weaker. 
+
+ 
+
+ 
+
+19. A container with 100.0 g of ice at 0 °C is placed in a 
+
+14. Which isomer of C4H8O2 has the greatest solubility in 
+
+humid room whose temperature is 40 °C.  The ice melts 
+as water vapor condenses into the container.  Assuming 
+that all the heat transferred to the container comes from 
+condensation, how much water will have condensed in 
+the container once all the ice is melted and has reached 
+40 °C?  The heat of fusion of ice is 334 J g-1 and the heat 
+of vaporization of water is 2260 J g-1. 
+
+water? 
+
+(A) 
+ 
+(B) 
+
+ 
+
+(C) 
+
+(D) 
+
+ 
+
+ 
+
+ 
+
+15. Which compound has the lowest normal boiling point? 
+
+(A) 13.8 g 
+(B) 14.8 g 
+(C) 22.2 g 
+(D) 677 g 
+
+ 
+
+(A) HF 
+(B) HCl 
+(C) HBr 
+(D) HI 
+
+20. The standard enthalpy of formation of hematite, Fe2O3(s), 
+
+ 
+
+is –825.5 kJ mol-1.  What is the standard enthalpy of 
+reaction for the reduction of hematite with carbon 
+monoxide to give metallic iron as shown below?   
+
+16. A sealed container contains a gaseous sample at 300.0 K 
+
+consisting of either pure ethane (C2H6), pure neon (Ne), 
+or a mixture of the two.  The pressure inside the container 
+at this temperature is 1.00 atm.  When the container is 
+cooled to 150.0 K, the pressure is 0.37 atm.  What is the 
+composition of the sample?  (The vapor pressure of C2H6 
+at 150 K is 0.10 atm; the critical temperature of Ne is    
+44 K.) 
+
+CO(g) + 1/2 O2(g) → 
+CO2(g) 
+
+∆H°rxn = –283.0 kJ mol-1 
+
+Fe2O3(s) + 3 CO(g) →  
+2 Fe(s) + 3 CO2(g) 
+
+∆H°rxn = ??? 
+
+ 
+
+(A) Pure ethane 
+
+(A) –23.5 kJ mol-1 
+(B) –542.5 kJ mol-1 
+
+(B) Pure neon 
+
+(C) –849.0 kJ mol-1 
+(D) –1674.5 kJ mol-1 
+
+ 
+
+(C) A mixture of ethane and neon. 
+
+(D) It cannot be determined from the information given. 
+
+ 
+
+Page 4  
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022 
+
+
+ 
+
+21. Which of the following equations correctly describe the 
+
+25. Dichromate ion is reduced by chloride ion according to 
+
+the equation below.  If [Cl–] is decreasing at a rate of 0.37 
+mol L-1 min-1, how is the concentration of Cr3+(aq) 
+changing? 
+
+change in internal energy, ΔE, of a reaction taking place 
+in a bomb calorimeter? 
+
+I. 
+∆E = q 
+
+14 H+(aq) + Cr2O72-(aq) + 6 Cl–(aq) → 
+
+II. 
+∆E = ∆H – V∆P 
+
+2 Cr3+(aq) + 3 Cl2(aq) + 7 H2O(l) 
+
+(A) I only 
+(B) II only 
+
+(A) Increasing by 0.12 mol L-1 min-1 
+
+(C) Both I and II 
+(D) Neither I nor II 
+
+ 
+
+(B) Increasing by 1.11 mol L-1 min-1 
+
+22. Cyclopropane isomerizes exothermically to propene as 
+
+(C) Decreasing by 0.12 mol L-1 min-1 
+
+shown. 
+
+(D) Decreasing by 1.11 mol L-1 min-1 
+
+ 
+
+26. The isotope cobalt-57 has a half-life of 272 d.  How long 
+
+will it take a sample of 57Co to decay to 38% of its 
+original activity? 
+
+ 
+
+The C–C single bond in propene has an estimated bond 
+dissociation enthalpy (BDE) of 345 kJ mol-1, while the 
+C=C double bond in propene has a BDE of 611 kJ mol-1.  
+Assuming that the C–H bonds in propene and 
+cyclopropane all have the same BDE, what is the 
+estimated BDE of a C–C single bond in cyclopropane? 
+
+(A) 103 d 
+(B) 337 d 
+(C) 188 d 
+(D) 380 d 
+
+ 
+
+27. Which statement best describes the variation of the rate 
+
+constant of a reaction with temperature? 
+
+(A) The rate constant does not change with temperature 
+because it is an unvarying characteristic of the 
+specific reaction. 
+
+(A) 308 kJ mol-1 
+(B) 329 kJ mol-1 
+
+(C) 423 kJ mol-1 
+(D) 924 kJ mol-1 
+
+(B) The rate constant typically decreases with increasing 
+temperature because fewer molecules are able to 
+adopt the required orientation at higher temperature. 
+
+ 
+
+23. Two reactions have similar ∆H°rxn values (∆H°rxn (1) ≈ 
+
+∆H°rxn (2)), but reaction (1) has a much smaller standard 
+entropy change than reaction (2) (∆S°rxn (1) << ∆S°rxn (2)).  
+At 298 K, which statements about these two reactions 
+must be correct? 
+
+(C) The rate constant typically increases with increasing 
+temperature because increasing the temperature 
+increases the fraction of collisions that result in 
+reaction. 
+
+I. 
+Reaction (1) must have a larger equilibrium 
+constant (Keq (1) > Keq (2)). 
+
+(D) The rate constant typically increases with increasing 
+temperature because most reactions become more 
+favorable as the temperature increases. 
+
+II. 
+Reaction (1) must have a larger Arrhenius 
+prefactor (A(1) > A(2)). 
+
+ 
+
+(A) I only 
+(B) II only 
+
+28. A mechanism for the reaction of nitric oxide with 
+
+(C) Both I and II 
+(D) Neither I nor II 
+
+hydrogen to form water and nitrogen gas is proposed 
+below.  What rate law is predicted by this mechanism? 
+
+ 
+
+24. Which reaction has ∆S°rxn > 0?  All reactants and 
+
+2 NO(g) ⇄ N2O2(g) 
+fast, unfavorable equilibrium 
+
+products are liquids. 
+
+N2O2(g) + H2(g) →  
+N2O(g) + H2O(g) 
+
+slow, irreversible 
+
+(A) 
+
+ 
+
+N2O(g) + H2(g) →  
+H2O(g) + N2(g) 
+
+fast, irreversible 
+
+(B) 
+
+ 
+
+(A) Rate = k[NO]2 
+
+ 
+
+(B) Rate = k[NO]2[H2] 
+
+(C) 
+
+(C) Rate = k[NO]2[H2]2 
+
+ 
+
+(D) 
+
+(D) 
+
+Rate = k
+[NO]2[H2]2
+
+[N2O][H2O]  
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022  
+Page 5 
+
+
+ 
+
+29. An irreversible reaction A + B → C is carried out under 
+
+33. In a solution prepared by dissolving 0.1 mol NaNO2 in 
+
+1.0 L pure water, which species has the lowest 
+concentration? 
+
+various conditions, but always with [B]0 >> [A]0.  Plots 
+of 1/[A] as a function of time for each reaction are linear, 
+and the slopes of these plots do not depend on the initial 
+concentration of B.  What is the rate law for the reaction 
+under these conditions? 
+
+(A) Na+ 
+(B) NO2– 
+(C) HNO2 
+(D) H3O+ 
+
+ 
+
+34. A saturated solution of which silver salt has the highest 
+
+concentration of Ag+? 
+
+(A) Rate = k[A] 
+(B) Rate = k[A][B] 
+
+(A) AgCl, Ksp = 1.8 × 10-10 
+
+(C) Rate = k[A]2 
+(D) Rate = k[A]2[B] 
+
+ 
+
+(B) Ag2CrO4, Ksp = 1.1 × 10-12 
+
+30. The reaction of H2(g) with C2H4(g) to form C2H6(g) is 
+
+catalyzed by metallic platinum.  Which statement most 
+accurately describes the impact of changing the catalyst 
+in this reaction? 
+
+(C) AgBr, Ksp = 5.0 × 10-13 
+
+(D) Ag2SO3, Ksp = 1.5 × 10-14 
+
+ 
+
+(A) The rate of the reaction would not change if a 
+greater mass of catalyst were used because the 
+platinum is a solid so its concentration is a fixed 
+number. 
+
+35. What is the pH of a 0.10 M solution of NH4F?  The Ka of 
+
+NH4+ is 5.6 × 10-10 and the Ka of HF is 6.8 × 10-4. 
+
+(A) 2.08 
+(B) 5.12 
+(C) 6.21 
+(D) 8.08 
+
+ 
+
+(B) The rate of the reaction would increase if more 
+finely divided platinum were used because the 
+reaction depends on the surface area of the catalyst. 
+
+36. 1.000 g of which salt, when titrated with 0.500 M HCl, 
+
+gives the titration curve shown? 
+
+(C) The ∆H° for the reaction would become more 
+negative if a greater mass of catalyst were used 
+because the catalyst adsorbs the reactants 
+exothermically. 
+
+(D) The ∆S° for the reaction would become more 
+negative if more finely divided platinum were used 
+because the catalyst absorbs gas-phase reactants to 
+form ordered surface species. 
+
+ 
+
+31. Lead(II) iodide has a solubility product constant of 1.4 × 
+
+10-8.  What is the concentration of I– in a saturated 
+solution of PbI2? 
+
+(A) 1.2 × 10-4 M 
+(B) 2.4 × 10-4 M 
+
+(C) 1.5 × 10-3 M 
+(D) 3.0 × 10-3 M 
+
+ 
+
+32. Sodium bicarbonate decomposes at high temperatures 
+
+ 
+
+according to the following equation: 
+
+(A) Potassium cyanide, KCN (M = 65.12, pKa of HCN = 
+
+2 NaHCO3(s) ⇆ Na2CO3(s) + CO2(g) + H2O(g) 
+
+9.2) 
+
+At a certain temperature, 50.0 g of NaHCO3 is allowed to 
+react in a 3.0 L evacuated vessel.  At equilibrium, the 
+total pressure is 6.25 atm, with some of both solids still 
+present.  If 100.0 g of NaHCO3 is allowed to react in the 
+same vessel at the same temperature, what will the 
+pressure be at equilibrium? 
+
+(B) Sodium nitrite, NaNO2 (M = 69.00, pKa of HNO2 = 
+
+3.4) 
+
+(C) Potassium phenoxide, K(C6H5O) (M = 116.20, pKa 
+
+of C6H5OH = 9.9) 
+
+(D) Sodium pivalate, Na(C4H9COO) (M = 124.11, pKa 
+
+(A) 6.25 atm 
+(B) 8.84 atm 
+
+of C4H9COOH = 4.9) 
+
+ 
+
+(C) 12.5 atm 
+(D) 25.0 atm 
+
+37. Romanèchite has the formula Ba2Mn5O10 • 2H2O.  What 
+
+ 
+ 
+ 
+
+is the average oxidation state of manganese in 
+romanèchite? 
+
+(A) +2.0 
+(B) +3.2 
+(C) +3.6 
+(D) +4.0 
+
+ 
+
+Page 6  
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022 
+
+
+ 
+
+38. Which element is being reduced in the following 
+
+45. Which change in principal quantum number n involves 
+
+equation? 
+
+the greatest change in energy? 
+
+3 Cu(s) + 8 HNO3(aq) → 
+
+(A) n = 1 → n = 2 in H 
+(B) n = 2 → n = 3 in He+ 
+
+2 NO(g) + 3 Cu(NO3)2(aq) + 4 H2O(l) 
+
+(C) n = 3 → n = 4 in Li2+ 
+(D) n = 4 → n = 5 in Be3+ 
+
+(A) Cu 
+(B) H 
+(C) N 
+(D) O 
+
+ 
+ 
+
+ 
+
+39. A galvanic cell is constructed under standard conditions 
+
+46. Which gas-phase ion has the greatest number of unpaired 
+
+using cobalt in cobalt(II) nitrate solution and indium in 
+indium(III) nitrate solution.  Which statements about this 
+cell are correct? 
+
+electrons in its ground state? 
+
+(A) Fe3+ 
+(B) Co3+ 
+(C) Ni3+ 
+(D) Cu3+ 
+
+ 
+
+Half-reaction 
+E°, V 
+
+47. Which principle restricts the occupancy of an atomic 
+
+Co2+(aq) + 2e– → Co(s) 
+–0.28 
+
+orbital to no more than two electrons? 
+
+In3+(aq) + 3e– → In(s) 
+–0.34 
+
+(A) The principle of conservation of energy 
+
+I. 
+The standard cell potential is 0.46 V. 
+
+(B) The principle of conservation of angular momentum 
+
+II. 
+Indium is the anode. 
+
+(C) The Pauli exclusion principle 
+
+(A) I only 
+(B) II only 
+
+(D) The Heisenberg uncertainty principle 
+
+(C) Both I and II 
+(D) Neither I nor II 
+
+ 
+
+ 
+
+48. When copper-64 decays by positron emission, what 
+
+40. Molten sodium chloride is electrolyzed for 10.0 minutes 
+
+daughter nuclide is formed? 
+
+with a constant current of 10.0 A.  What mass of sodium 
+metal is produced? 
+
+(A) 64Ni 
+(B) 65Ni 
+(C) 64Zn 
+(D) 65Zn 
+
+ 
+
+(A) 1.43 g 
+(B) 2.20 g 
+(C) 3.63 g 
+(D) 4.41 g 
+
+49. Which molecule has a nonzero dipole moment? 
+
+ 
+
+(A) CF4 
+(B) C2F4 
+(C) SF4 
+(D) SF6 
+
+41. The standard cell potential of a galvanic cell based on the 
+
+ 
+
+reaction below is 1.10 V.  Which concentrations would 
+result in the largest measured voltage? 
+
+50. How many π bonds are in cyanogen, NCCN? 
+
+(A) 2 
+(B) 4 
+(C) 6 
+(D) 7 
+
+Cu2+(aq) + Zn(s) → Zn2+(aq) + Cu(s) 
+
+ 
+
+(A) [Cu2+] = 1.0 M and [Zn2+] = 1.0 M 
+
+51. In azomethane, H3CNNCH3, what are the molecular 
+
+geometries around the carbon and nitrogen atoms, 
+respectively? 
+
+(B) [Cu2+] = 3.0 M and [Zn2+] = 1.0 M 
+
+(C) [Cu2+] = 1.0 M and [Zn2+] = 3.0 M 
+
+ (A) Tetrahedral at carbon, bent at nitrogen 
+
+(D) [Cu2+] = 3.0 M and [Zn2+] = 3.0 M 
+
+ (B) Tetrahedral at carbon, linear at nitrogen 
+
+ 
+
+ (C) Square planar at carbon, bent at nitrogen 
+
+42. The standard reduction potential of oxygen under acidic 
+
+conditions at 298 K is +1.23 V.  What is the standard 
+reduction potential for the four-electron reduction of 
+O2(g) under basic conditions? 
+
+ (D) Square planar at carbon, linear at nitrogen 
+
+ 
+
+52. What is the bond order of O2+? 
+
+(A) 1.23 V 
+(B) 1.02 V 
+(C) 0.83 V 
+(D) 0.40 V 
+
+(A) 1.0 
+(B) 1.5 
+(C) 2.0 
+(D) 2.5 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+43. Photons of what wavelength of light have an energy of 
+
+1.00 × 103 kJ mol-1? 
+
+(A) 2.00 × 1031 m 
+(B) 1.20 × 10-7 m 
+
+(C) 1.20 × 10-4 m 
+(D) 8.36 × 106 m 
+
+ 
+
+44. In which set are all three species isoelectronic? 
+
+(A) H+, Li+, Na+ 
+(B) C, N–, O2– 
+
+(C) Se2-, Br–, Rb+ 
+(D) I, Xe, Cs 
+
+ 
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022  
+Page 7 
+
+
+ 
+
+53. Which is the best explanation for phosphorus favoring 
+
+59. Which structure depicts the enantiomer of the diol 
+
+formation of P4 over P2 molecules, while nitrogen forms 
+only N2 molecules? 
+
+shown? 
+
+(A) Phosphorus-phosphorus π bonds are weaker than 
+
+nitrogen-nitrogen π bonds. 
+
+(B) Phosphorus can have an expanded octet while 
+
+ 
+
+nitrogen cannot. 
+
+(A) 
+
+(C) The nonbonding electrons on phosphorus occupy an 
+unhybridized s orbital while the nonbonding 
+electrons on nitrogen occupy hybrid orbitals. 
+
+ 
+
+(D) The larger size of phosphorus allows the bonding 
+
+(B) 
+
+electrons to be closer together. 
+
+ 
+
+ 
+
+54. In the octahedral complex Co(NH2CH2CO2)3, each 
+
+glycinate ion NH2CH2CO2– binds to cobalt through its 
+nitrogen atom and one of its oxygen atoms.  How many 
+stereoisomers of Co(NH2CH2CO2)3 are possible? 
+
+(C) 
+
+(A) 2 
+(B) 4 
+(C) 6 
+(D) 8 
+
+ 
+
+ 
+
+(D) The diol shown is achiral and does not have an 
+
+55. A molecule has the formula C5H10O.  Which functional 
+
+enantiomer. 
+
+groups might it contain? 
+
+ 
+
+I. 
+Alcohol 
+
+60. Which biomolecule does NOT contain C=O double 
+
+II. 
+Ketone 
+
+bonds? 
+
+(A) I only 
+(B) II only 
+
+(A) Sucrose (a carbohydrate) 
+
+(C) Either I or II 
+(D) Neither I nor II 
+
+(B) Glyceryl trioleate (a lipid) 
+
+ 
+
+(C) Phenylalanine tRNA (a nucleic acid) 
+
+56. How many distinct branched alkanes are there with the 
+
+formula C6H14? 
+
+(D) Trypsin (a protein) 
+
+ 
+ 
+
+(A) 1 
+(B) 2 
+(C) 3 
+(D) 4 
+
+ 
+
+END OF TEST 
+
+57. Which cycloalkane in its most stable conformation has 
+
+average internal C–C–C bond angles most different from 
+the value given? 
+
+ 
+ 
+ 
+
+ (A) Cyclopropane, 60° 
+
+ (B) Cyclobutane, 90° 
+
+(C) Cyclopentane, 108° 
+
+(D) Cyclohexane, 120° 
+
+ 
+
+58. Which gas is most reactive toward 1-hexene? 
+
+(A) N2 
+(B) O3 
+(C) N2O 
+(D) NH3 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+Page 8  
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2022 
+
+
+ 
+ 
+
+Olympiad 2022  
+
+USNCO Local Section Exam 
+
+KEY 
+
+ 
+ 
+ 
+
+Number 
+Answer 
+
+Number 
+Answer 
+
+ 1. 
+D 
+
+31. 
+D 
+
+ 2. 
+C 
+
+32. 
+A 
+
+ 3. 
+D 
+
+33. 
+D 
+
+ 4. 
+D 
+
+34. 
+B 
+
+ 5. 
+A 
+
+35. 
+C 
+
+ 6. 
+D 
+
+36. 
+C 
+
+ 7. 
+A 
+
+37. 
+B 
+
+ 8. 
+B 
+
+38. 
+C 
+
+ 9. 
+B 
+
+39. 
+B 
+
+10. 
+A 
+
+40. 
+A 
+
+11. 
+B 
+
+41. 
+B 
+
+12. 
+C 
+
+42. 
+D 
+
+13. 
+A 
+
+43. 
+B 
+
+14. 
+A 
+
+44. 
+C 
+
+15. 
+B 
+
+45. 
+A 
+
+16. 
+C 
+
+46. 
+A 
+
+17. 
+D 
+
+47. 
+C 
+
+18. 
+C 
+
+48. 
+A 
+
+19. 
+C 
+
+49. 
+C 
+
+20. 
+A 
+
+50. 
+B 
+
+21. 
+C 
+
+51. 
+A 
+
+22. 
+A 
+
+52. 
+D 
+
+23. 
+D 
+
+53. 
+A 
+
+24. 
+B 
+
+54. 
+B 
+
+25. 
+A 
+
+55. 
+C 
+
+26. 
+D 
+
+56. 
+D 
+
+27. 
+C 
+
+57. 
+D 
+
+28. 
+B 
+
+58. 
+B 
+
+29. 
+C 
+
+59. 
+A 
+
+                        30.  
+B 
+
+60. 
+A 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+
+
+### source: 2021-usnco-local-exam.pdf
+ 
+
+2021 U.S. NATIONAL 
+
+CHEMISTRY OLYMPIAD 
+
+LOCAL SECTION EXAM 
+
+Prepared by the American Chemical Society Chemistry Olympiad Examinations Task Force 
+
+OLYMPIAD EXAMINATIONS TASK FORCE 
+
+Seth N. Brown, Chair, University of Notre Dame, Notre Dame, IN 
+
+James Ayers, Colorado Mesa University, Grand Junction, CO 
+
+Jerry Bell, Simmons University, Boston, MA (retired) 
+
+Mark DeCamp, University of Michigan, Dearborn, MI (retired) 
+
+James Dohm, Exxon-Mobil Corporation, Houston, TX 
+
+Xu Duan, Holton-Arms School, Bethesda, MD 
+
+Valerie Ferguson, Moore HS, Moore, OK 
+
+Julie Furstenau, Thomas B. Doherty HS, Colorado Springs, CO (retired) 
+
+Kimberly Gardner, United States Air Force Academy, CO 
+
+Paul Groves, South Pasadena HS, South Pasadena, CA (retired) 
+John Kotz, State University of New York, Oneonta, NY (retired) 
+
+Sarah Leite, Hopkins School, New Haven, CT 
+
+Michael A. Morgan, Francisco Bravo Medical Magnet HS, Los Angeles, CA 
+
+Jane Nagurney, Scranton Preparatory School, Scranton, PA (retired) 
+
+Sheila Nguyen, Claremont Graduate University, Claremont, CA 
+
+ 
+
+DIRECTIONS TO THE EXAMINER 
+
+ 
+This test is designed to be taken with an answer sheet on which the student records his or her responses. All answers are to be marked 
+on that sheet, not written in the booklet. Each student should be provided with an answer sheet and scratch paper, both of which must 
+be turned in with the test booklet at the end of the examination. Local Sections may use an answer sheet of their own choice. 
+ 
+The full examination consists of 60 multiple-choice questions representing a fairly wide range of difficulty. A periodic table and other 
+useful information are provided on page two of this exam booklet for student reference. 
+ 
+Only non-programmable calculators are to be used on the ACS Local Section exam.  The use of a programmable calculator, cell 
+phone, or any other device that can access the internet or make copies or photographs during the exam is grounds for disqualification.  
+ 
+
+Suggested Time: 60 questions—110 minutes 
+
+ 
+ 
+
+DIRECTIONS TO THE EXAMINEE 
+
+ 
+DO NOT TURN THE PAGE UNTIL DIRECTED TO DO SO. 
+ 
+This is a multiple-choice examination with four choices for each question. There is only one correct or best answer to each question. 
+When you select your choice, blacken the corresponding space on the answer sheet with your pencil. Make a heavy full mark, but no 
+stray marks. If you decide to change your answer, be certain to erase your original answer completely.  
+ 
+ 
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021 
+
+Distributed by the American Chemical Society, 1155 16th Street, N.W., Washington, DC 20036 
+All rights reserved. Printed in U.S.A. 
+
+
+ 
+
+ 
+ABBREVIATIONS AND SYMBOLS 
+ 
+CONSTANTS 
+
+amount of substance 
+n 
+
+Faraday constant 
+F 
+
+molar mass 
+M 
+
+ 
+
+R = 8.314 J mol–1 K–1 
+
+ampere 
+A 
+
+free energy 
+G 
+
+mole 
+mol 
+
+frequency 
+ν 
+
+atmosphere 
+atm 
+
+Planck’s constant 
+h 
+
+R = 0.08314 L bar mol–1 K–1 
+
+atomic mass unit 
+u 
+
+pressure 
+P 
+
+gas constant 
+R 
+
+F = 96,500 C mol–1 
+
+Avogadro constant 
+NA 
+
+rate constant 
+k 
+
+gram 
+g 
+
+F = 96,500 J V–1 mol–1 
+
+Celsius temperature 
+°C 
+
+reaction quotient 
+Q 
+
+hour 
+h 
+
+centi– prefix 
+c 
+
+second 
+s 
+
+NA = 6.022 × 1023 mol–1 
+
+joule 
+J 
+
+coulomb 
+C 
+
+speed of light 
+c 
+
+kelvin 
+K 
+
+h = 6.626 × 10–34 J s 
+
+density 
+d 
+
+temperature, K 
+T 
+
+kilo– prefix 
+k 
+
+c = 2.998 × 108 m s–1 
+
+electromotive force 
+E 
+
+time 
+t 
+
+liter 
+L 
+
+energy of activation 
+Ea 
+
+vapor pressure                 VP 
+volt 
+V 
+
+measure of pressure mm Hg 
+milli– prefix 
+m 
+
+0 °C = 273.15 K 
+
+enthalpy 
+H 
+
+1 atm = 1.013 bar = 760 mm Hg 
+
+entropy 
+     S  
+
+volume 
+V 
+
+molal 
+m 
+
+Specific heat capacity of H2O = 
+
+equilibrium constant 
+  K 
+
+year 
+y 
+
+molar 
+M 
+
+4.184 J g–1 K–1 
+
+ 
+ 
+ 
+
+EQUATIONS 
+
+   
+ 
+ 
+
+                        
+o
+ln
+RT
+E
+E
+Q
+nF
+=
+−
+                                
+
+
+
+−∆
+
+
+=
++
+
+
+
+
+
+
+
+
+o
+1
+ln
+constant
+H
+K
+R
+T
+
+1
+1
+ln
+a
+E
+k
+k
+R
+T
+T
+
+
+
+
+=
+−
+
+
+
+
+
+
+
+
+
+                       
+2
+
+ 
+
+1
+1
+2
+
+ 
+ 
+ 
+
+ 1  
+PERIODIC TABLE OF THE ELEMENTS 
+18 
+
+ 1A  
+ 
+8A 
+
+1 
+
+2 
+
+ 
+ 
+2 
+13 
+14 
+15 
+16 
+ 17 
+
+H 
+
+He 
+
+1.008 
+
+4.003 
+
+ 2A 
+3A 
+4A 
+5A 
+6A 
+ 7A 
+
+3 
+
+4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+5 
+
+6 
+
+7 
+
+8 
+
+9 
+F 
+
+10 
+
+Li 
+
+Be 
+
+B 
+
+C 
+
+N 
+
+O 
+
+Ne 
+
+6.941 
+
+9.012 
+
+10.81 
+
+12.01 
+
+14.01 
+
+16.00 
+
+19.00 
+
+20.18 
+
+11 
+
+12 
+
+13 
+Al 
+
+14 
+
+15 
+
+16 
+
+17 
+Cl 
+
+18 
+
+ 
+ 3 
+
+ 
+ 4 
+
+ 
+ 5 
+
+ 
+ 6 
+
+ 
+ 7 
+
+ 
+ 8 
+
+ 
+ 9 
+
+ 
+ 10 
+
+ 
+  11 
+
+ 
+  12 
+
+Na 
+
+Mg 
+
+Si 
+
+P 
+
+S 
+
+Ar 
+
+22.99 
+
+24.31 
+
+26.98 
+
+28.09 
+
+30.97 
+
+32.07 
+
+35.45 
+
+39.95 
+
+3B 
+
+4B 
+
+5B 
+
+6B 
+
+7B 
+
+8B 
+
+8B 
+
+8B 
+
+1B 
+
+2B 
+
+19 
+
+20 
+
+21 
+Sc 
+
+22 
+Ti 
+
+23 
+
+24 
+
+25 
+
+26 
+Fe 
+
+27 
+
+28 
+Ni 
+
+29 
+
+30 
+
+31 
+
+32 
+
+33 
+
+34 
+Se 
+
+35 
+
+36 
+
+K 
+
+Ca 
+
+V 
+
+Cr 
+
+Mn 
+54.94 
+
+Co 
+
+Cu 
+
+Zn 
+
+Ga 
+
+Ge 
+
+As 
+
+Br 
+
+Kr 
+
+39.10 
+
+40.08 
+
+44.96 
+
+47.88 
+
+50.94 
+
+52.00 
+
+55.85 
+
+58.93 
+
+58.69 
+
+63.55 
+
+65.39 
+
+69.72 
+
+72.61 
+
+74.92 
+
+78.97 
+
+79.90 
+
+83.80 
+
+37 
+
+38 
+Sr 
+
+39 
+
+40 
+
+41 
+
+42 
+
+43 
+
+44 
+
+45 
+
+46 
+
+47 
+
+48 
+
+49 
+In 
+
+50 
+
+51 
+
+52 
+
+53 
+
+54 
+
+Rb 
+
+Y 
+
+Zr 
+
+Nb 
+
+Mo 
+
+Tc 
+(98) 
+
+Ru 
+
+Rh 
+
+Pd 
+
+Ag 
+
+Cd 
+
+Sn 
+
+Sb 
+
+Te 
+
+I 
+
+Xe 
+
+85.47 
+
+87.62 
+
+88.91 
+
+91.22 
+
+92.91 
+
+95.95 
+
+101.1 
+
+102.9 
+
+106.4 
+
+107.9 
+
+112.4 
+
+114.8 
+
+118.7 
+
+121.8 
+
+127.6 
+
+126.9 
+
+131.3 
+
+55 
+
+56 
+
+57 
+
+72 
+
+73 
+
+74 
+W 
+
+75 
+
+76 
+
+77 
+
+78 
+Pt 
+
+79 
+
+80 
+
+81 
+Tl 
+
+82 
+
+83 
+Bi 
+
+84 
+
+85 
+At 
+
+86 
+
+Cs 
+
+Ba 
+
+La 
+
+Hf 
+
+Ta 
+
+Re 
+
+Os 
+
+Ir 
+
+Au 
+
+Hg 
+
+Pb 
+
+Po 
+
+Rn 
+
+132.9 
+
+137.3 
+
+138.9 
+
+178.5 
+
+180.9 
+
+183.8 
+
+186.2 
+
+190.2 
+
+192.2 
+
+195.1 
+
+197.0 
+
+200.6 
+
+204.4 
+
+207.2 
+
+209.0 
+
+(209) 
+
+(210) 
+
+(222) 
+
+87 
+Fr 
+
+88 
+
+89 
+
+104 
+
+105 
+
+106 
+
+107 
+
+108 
+
+109 
+
+110 
+
+111 
+
+112 
+
+113 
+
+114 
+
+115 
+
+116 
+
+117 
+
+118 
+
+Ra 
+
+Ac 
+
+Rf 
+
+Db 
+
+Sg 
+
+Bh 
+
+Hs 
+
+Mt 
+
+Ds 
+
+Rg 
+
+Cn 
+
+Nh 
+
+Fl 
+
+Mc 
+
+Lv 
+
+Ts 
+
+Og 
+
+(223) 
+
+(226) 
+
+(227) 
+
+(261) 
+
+(262) 
+
+(263) 
+
+(262) 
+
+(265) 
+
+(266) 
+
+(281) 
+
+(272) 
+
+(285) 
+
+(286) 
+
+(289) 
+
+(289) 
+
+(293) 
+
+(294) 
+
+(294) 
+
+ 
+
+ 
+ 
+ 
+58 
+
+59 
+Pr 
+
+60 
+
+61 
+
+62 
+
+63 
+
+64 
+
+65 
+
+66 
+
+67 
+
+68 
+
+69 
+
+70 
+
+71 
+
+Ce 
+
+Nd 
+
+Pm 
+(145) 
+
+Sm 
+
+Eu 
+
+Gd 
+
+Tb 
+
+Dy 
+
+Ho 
+
+Er 
+
+Tm 
+168.9 
+
+Yb 
+
+Lu 
+
+140.1 
+
+140.9 
+
+144.2 
+
+150.4 
+
+152.0 
+
+157.3 
+
+158.9 
+
+162.5 
+
+164.9 
+
+167.3 
+
+173.0 
+
+175.0 
+
+ 
+ 
+ 
+90 
+
+91 
+
+92 
+
+93 
+
+94 
+
+95 
+
+96 
+
+97 
+
+98 
+Cf 
+
+99 
+Es 
+
+100 
+Fm 
+(257) 
+
+101 
+Md 
+(258) 
+
+102 
+
+103 
+
+Th 
+
+Pa 
+
+U 
+
+Np 
+
+Pu 
+
+Am 
+(243) 
+
+Cm 
+(247) 
+
+Bk 
+
+No 
+
+Lr 
+
+232.0 
+
+231.0 
+
+238.0 
+
+(237) 
+
+(244) 
+
+(247) 
+
+(251) 
+
+(252) 
+
+(259) 
+
+(262) 
+
+Page 2 
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021  
+
+
+ 
+
+ 
+
+DIRECTIONS 
+
+ 
+When you have selected your answer to each question, blacken the corresponding space on the answer sheet using a soft, #2 
+pencil. Make a heavy, full mark, but no stray marks. If you decide to change an answer, erase the unwanted mark very carefully.  
+
+ 
+There is only one correct answer to each question. Any questions for which more than one response has been blackened will not 
+be counted.  
+
+ 
+Your score is based solely on the number of questions you answer correctly. It is to your advantage to answer every question. 
+
+ 
+
+1. At 120 °C and 1 atm pressure, 1.00 L of methane, CH4, 
+
+6. The concentration of an aqueous solution of a 
+
+reacts completely with excess oxygen to form carbon 
+dioxide and water. What volumes of the two products are 
+produced at this pressure and temperature? 
+
+nonvolatile, monoprotic acid is measured first by freezing 
+point depression and then by boiling point elevation.  The 
+solution is found to be 0.93 m by freezing point 
+depression and to be 0.82 m by boiling point elevation.  
+Which is the best explanation for this discrepancy? 
+
+(A) 1.00 L CO2 and 2.00 L H2O 
+
+(B) 1.00 L CO2 and 4.00 L H2O 
+
+(A) Ionization of the acid is markedly exothermic. 
+
+(C) 2.00 L CO2 and 2.00 L H2O 
+
+(B) The solute associates partially into dimers at lower 
+
+temperatures. 
+
+(D) 2.00 L CO2 and 4.00 L H2O 
+
+ 
+
+(C) The volume of the solution is greater at higher 
+
+2. Polypropylene is made by polymerizing propene, C3H6 
+
+temperatures. 
+
+(M = 42.1).  How many molecules of propene must be 
+polymerized to make 3.50 g polypropylene? 
+
+(D) The boiling point elevation constant for water is 
+
+smaller than its freezing point depression constant. 
+
+(A) 1.43 × 1022 
+(B) 5.01 × 1022 
+
+ 
+
+7. When substances are separated by fractional distillation, 
+
+(C) 6.02 × 1023 
+(D) 2.11 × 1024 
+
+which property is least typical of the substance that 
+distills first? 
+
+ 
+
+3. An organic compound contains only carbon, hydrogen, 
+
+nitrogen, and oxygen.  It is 61.71% C, 4.03% H, and 
+16.00% N by mass.  What is its empirical formula? 
+
+(A) Highest molar mass 
+
+(B) Weakest intermolecular forces 
+
+(A) C5H4NO 
+(B) C9H7N2O2 
+
+(C) Greatest vapor pressure 
+
+(C) C10H8N2O 
+(D) C11H8NO2 
+
+(D) Lowest boiling point 
+
+ 
+
+ 
+
+4. 100.0 mL of 0.500 M CaBr2 and 50.0 mL of 1.00 M 
+
+8. Which element is most abundant (by mass) in the Earth’s 
+
+NaBr are mixed.  What is the concentration of bromide 
+ion in the resulting solution? 
+
+crust? 
+
+(A) Carbon 
+(B) Oxygen 
+
+(A) 0.500 M 
+(B) 
+ 0.667 M 
+
+(C) Magnesium 
+(D) Silicon 
+
+(C) 0.750 M 
+(D) 
+1.00 M 
+
+ 
+
+ 
+
+9. Which gas has the highest molar solubility in water at      
+
+5. 1.00 g of hydrated potassium carbonate, K2CO3•nH2O,   
+
+25 °C and 1 atm? 
+
+is heated to 250 °C to give 0.836 g anhydrous K2CO3.  
+What is the value of n? 
+
+(A) CO2 
+(B) NH3 
+(C) O2 
+(D) H2S 
+
+ 
+
+(A) 0.16 
+(B) 1.0 
+(C) 1.5 
+(D) 2.0 
+
+10. Which compound is colorless? 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+(A) NaMnO4 
+(B) CrAsO4 
+
+(C) RbIO4 
+(D) BaCrO4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021  
+Page 3 
+
+
+ 
+
+11. Chlorine gas is bubbled into a colorless aqueous solution 
+
+15. What is the principal intermolecular force that must be 
+
+of sodium iodide.  Which is the best description of what 
+takes place? 
+
+overcome when n-hexane (C6H14, bp = 69 °C) is 
+vaporized? 
+
+(A) A precipitate of white NaCl forms. 
+
+(A) Hydrogen bonding 
+
+(B) A precipitate of metallic Na forms. 
+
+(B) Covalent bonding between carbon atoms 
+
+(C) The solution turns pale green as the chlorine 
+
+(C) Dipole-dipole forces 
+
+dissolves. 
+
+(D) London dispersion forces 
+
+(D) The solution turns yellow-brown as iodide reacts 
+
+ 
+
+with the chlorine. 
+
+16. The melting point of water decreases with increasing 
+
+pressure.  Which is the best explanation for this 
+observation? 
+
+ 
+
+12. A student determines the number of moles of water in a 
+
+hydrated metal oxide by weighing a clean, dry crucible 
+and lid while the crucible is empty, then reweighing the 
+crucible and lid with a sample of the hydrate, heating the 
+crucible and lid with a Bunsen burner and then 
+reweighing the crucible and lid with the sample after 
+cooling to room temperature.  Which error will result in 
+too high a value for the amount of water of hydration? 
+
+(A) Liquid water is denser than solid water at 0 °C. 
+
+(B) Melting of ice is endothermic at 0 °C. 
+
+(C) The vapor pressure of liquid water is lower than the 
+
+vapor pressure of solid water at 0 °C. 
+
+(D) Solid and liquid water cannot coexist at equilibrium 
+
+at 0 °C at pressures different from 1 atm. 
+
+(A) The heating is conducted only once instead of the 
+
+ 
+
+three times recommended by the procedure. 
+
+17. A cylinder containing a mixture of CO and CO2 has a 
+
+(B) The lid is left off the crucible when it is weighed 
+
+pressure of 2.00 atm at 93 °C (366 K).  The cylinder is 
+then cooled to –90 °C (183 K), where CO is still a gas but 
+CO2 is a solid with a vapor pressure of 0.25 atm.  The 
+pressure in the cylinder at this temperature is 0.90 atm.  
+What is the mole fraction of CO2 in the cylinder? 
+
+with the hydrated oxide. 
+
+(C) The metal oxide reacts partially with oxygen in the 
+
+air, forming a compound in a higher oxidation state. 
+
+(D) Some of the heated oxide is spilled from the crucible 
+
+(A) 0.10 
+
+before it can be weighed. 
+
+ 
+
+(B) 0.28 
+
+13. The diagram is a microscopic view of a snapshot of a 
+
+(C) 0.35 
+
+substance at equilibrium, with the circles representing 
+molecules and the arrows the molecules’ velocities.  
+What state of matter is depicted? 
+
+(D) It cannot be determined from the information given. 
+
+ 
+
+18. A mineral containing only copper and oxygen adopts the 
+
+cubic unit cell shown below.  What is the formula of this 
+mineral? 
+
+ 
+
+ 
+
+(A) Cu2O 
+(B) CuO 
+(C) Cu3O2 
+(D) Cu4O9 
+
+(A) Solid 
+(B) Liquid 
+(C) Gas 
+(D) Plasma 
+
+ 
+
+ 
+
+19. Burning 48.0 g of graphite in excess oxygen under 
+
+14. The vapor density of which fluorocarbon is 6.17 g L–1 at 
+
+standard conditions releases 1574.0 kJ of heat.  What is 
+∆H°f of CO2(g)? 
+
+23 °C and 1.00 atm? 
+
+(A) C3F6 
+(B) C3F8 
+(C) C4F6 
+(D) C4F8 
+
+(A) 1574 kJ mol-1 
+(B) –1574 kJ mol-1 
+
+ 
+ 
+ 
+ 
+
+(C) –394 kJ mol-1 
+(D) 32.8 kJ mol-1 
+
+ 
+
+Page 4  
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021 
+
+
+ 
+
+20. Two metal samples, labeled A and B, absorb the same 
+
+25. In the reaction 
+
+amount of heat.  Sample A has a mass of 10.0 g, and its 
+temperature increases by 38 °C.  Sample B has a mass of 
+20.0 g, and its temperature increases by 23 °C.  Which 
+sample has the greater specific heat capacity? 
+
+ 
+
+Cl2(g) + 3 F2(g) → 2 ClF3(g) 
+
+ 
+the rate of disappearance of F2(g) is 1.0 M s-1.  What is 
+the rate of appearance of ClF3(g)? 
+
+(A) Sample A 
+
+(A) 0.33 M s-1 
+(B) 0.67 M s-1 
+
+(B) Sample B 
+
+(C) 1.0 M s-1 
+(D) 1.5 M s-1 
+
+(C) Both samples have the same specific heat capacity. 
+
+ 
+
+(D) It is impossible to determine from the information 
+
+26. When the rate of the reversible reaction A + B   C is 
+
+given. 
+
+studied under a certain set of conditions, it is found that 
+the rate of the forward reaction is kf[A].  What can be 
+concluded about the rate law for the reverse reaction 
+under these conditions? 
+
+ 
+
+21. A reaction has ∆S° > 0 and ∆H° > 0.  Which statement 
+
+about this reaction must be correct? 
+
+(A) If carried out in a well-insulated flask, the 
+
+(A) Rate = kr[C] 
+
+temperature of the reaction mixture will decrease. 
+
+(B) Rate = kr
+[C]
+
+[B] 
+
+(B) It will occur spontaneously at 298 K and 1 atm 
+
+pressure. 
+
+(C) The rate law of the reverse reaction cannot be 
+
+determined from the information given. 
+
+(C) As the temperature is raised, Keq for this reaction 
+
+decreases. 
+
+(D) An error must have been made, since if the reaction 
+is reversible, the forward rate law must be           
+Rate = kf[A][B]. 
+
+(D) The reaction has more moles of products than it has 
+
+moles of reactants. 
+
+ 
+
+ 
+
+27. A substance A decomposes irreversibly to form B.  A 
+
+22. What is the boiling point of water in a pressure cooker 
+
+plot of ln([A]) as a function of time from the beginning 
+of the reaction until A is 97% consumed is a straight line 
+with a negative slope.  What is the reaction order in A? 
+
+with a pressure of 2.00 atm?  (The enthalpy of 
+vaporization of water is 40.7 kJ mol–1.) 
+
+(A) 101 °C 
+(B) 121 °C 
+(C) 141 °C 
+(D) 200 °C 
+
+(A) Zero order 
+(B) First order 
+
+ 
+
+23. The gas-phase bromination of propene has a standard 
+
+(C) Second order 
+(D) Third order 
+
+enthalpy of reaction of –122.5 kJ mol-1. 
+ 
+
+ 
+
+28. Which statement about catalysis is correct? 
+
+C3H6(g) + Br2(g) → C3H6Br2(g) 
+
+(A) If a catalyst increases the forward rate of a reaction 
+by a factor of two, it must increase the rate of the 
+reverse reaction by a factor of two. 
+
+∆H° = –122.5 kJ mol-1 
+
+ 
+
+Substance 
+∆H°f, kJ mol-1 
+
+C3H6(g) 
+20.4 
+
+(B) If a catalyst increases the rate of formation of a 
+product by a factor of two, it must increase the rate 
+of formation of the mirror image of the product by a 
+factor of two. 
+
+Br2(g) 
+30.9 
+
+ 
+
+What is the standard enthalpy of formation of 
+C3H6Br2(g)? 
+
+(C) A catalyst must be in the same phase as the reactants 
+
+and products of the reaction. 
+
+(A) –71.2 kJ mol-1 
+(B) –102.1 kJ mol-1 
+
+(D) A catalyzed reaction must proceed by the same 
+mechanism as the uncatalyzed reaction, but with a 
+lower activation energy. 
+
+(C) –142.9 kJ mol-1 
+(D) –173.8 kJ mol-1 
+
+ 
+
+24. Titanium has a normal melting point of 1668 °C and a 
+
+molar enthalpy of fusion of 14.15 kJ mol-1.  The standard 
+molar entropy of liquid titanium is 97.53 J mol-1 K-1 at 
+1668 °C.  What is the standard molar entropy of solid 
+titanium at this temperature? 
+
+ 
+
+29. The isotope 226Ra has a half-life for radioactive decay of 
+
+1600 y.  How long will it take the amount of 226Ra in a 
+sample of 226RaCl2 to decrease by 25%? 
+
+(A) 660 y 
+(B) 800 y 
+(C) 1200 y 
+(D) 1600 y 
+
+(A) 89.05 J mol-1 K-1 
+(B) 90.24 J mol-1 K-1 
+
+ 
+ 
+
+(C) 97.52 J mol-1 K-1 
+(D) 104.82 J mol-1 K-1 
+
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021  
+Page 5 
+
+
+ 
+
+30. The oxidation of sulfite ion by triiodide ion is proposed 
+
+35. Consider the reaction:   
+
+to take place by the following mechanism: 
+ 
+
+ 
+
+H2(g)  +  I2(g)    2 HI(g)   
+Keq = ??? 
+
+I3–   I2 + I– 
+fast, unfavorable 
+
+ 
+Into a 1.00 L vessel, 1.00 mol H2(g) and 1.00 mol I2(g) 
+are placed at a high temperature.  When the reaction 
+mixture stops changing, it is found that 79.0% of the 
+H2(g) has reacted.  What is the equilibrium constant for 
+this reaction at this temperature? 
+
+SO32-  + I2 → ISO3– + I– 
+slow 
+
+ISO3– + H2O → HSO4– + I– + H+ 
+fast 
+
+ 
+What rate law is predicted by this mechanism? 
+
+ (A) Rate = k[I3–] 
+
+(A) 14.2 
+(B) 17.9 
+(C) 35.8 
+(D) 56.6 
+
+(B) Rate = k[I3–][SO32-] 
+
+ 
+
+36. A triprotic acid is titrated with sodium hydroxide to give 
+
+(C) Rate = 
+𝑘𝑘[I3–][SO32−]
+
+[I–]
+ 
+
+the titration curve below.  What are the pKa values of the 
+three acidic hydrogens? 
+
+(D) Rate = 
+𝑘𝑘[I3–][SO32−]
+
+[H+]
+ 
+
+ 
+
+31. What is the correct equilibrium expression for the given 
+
+reaction? 
+ 
+Cu(OH)2(s) + 4 NH3(aq)   Cu(NH3)42+(aq) + 2 OH–(aq) 
+
+(A) Keq = 
+[Cu(NH3)42+][OH–]
+
+[NH3]
+ 
+
+(B) Keq = 
+[Cu(NH3)42+][2 OH–]
+
+[4 NH3]
+ 
+
+(C) Keq = 
+[Cu(NH3)42+][OH–]2
+
+[NH3]4
+ 
+
+ 
+
+(D) Keq = 
+[Cu(NH3)42+][2 OH–]2
+
+[4 NH3]4
+ 
+
+(A) 2.6, 5.0, 8.2 
+(B) 3.8, 6.6, 10.6 
+
+ 
+
+(C) 3.8, 8.2, 12.7 
+(D) 5.0, 8.2, 12.7 
+
+  32. 0.100 mol of HF (Ka = 6.6 × 10-4) is added to water to 
+
+ 
+
+make 1.00 L of solution.  Which statement is correct at 
+equilibrium? 
+
+37. What is the average oxidation state of tin in the mineral 
+
+abhurite, Sn21Cl16(OH)14O6? 
+
+(A) [H3O+] = [HF] 
+(B) [H3O+] = 0.100 M 
+
+(A) +1.71 
+(B) +2.00 
+(C) +2.76 
+(D) +3.43 
+
+ 
+
+(C) [HF] > [F–] 
+(D) [H3O+] > [HF] 
+
+38. If used in an electrochemical cell, which of the following 
+
+ 
+
+half-reactions would require an inert electrode? 
+ 
+I. 2 Cl–(aq) ⇄ Cl2(g) + 2 e– 
+II. Fe(CN)63-(aq) + e– ⇄ Fe(CN)64-(aq) 
+
+  33. What is the solubility of silver oxalate, Ag2C2O4           
+
+(Ksp = 3.5 × 10-11), in a 0.050 M sodium oxalate solution? 
+
+(A) 1.4 × 10-8 M 
+(B) 5.9 × 10-6 M 
+
+(C) 1.3 × 10-5 M 
+(D) 2.1 × 10-4 M 
+
+(A) I only 
+(B) II only 
+
+ 
+
+(C) Both I and II 
+(D) Neither I nor II 
+
+34. A pure sample of a monoprotic acid is dissolved in water.  
+
+ 
+
+The sample is titrated with sodium hydroxide solution.  
+At the point where 20.0 mL of the NaOH solution has 
+been added, the pH is 4.15.  The phenolphthalein 
+endpoint of the titration is observed when 50.0 mL of 
+NaOH have been added.  What is the pKa of the acid? 
+
+39. Chromium is electroplated industrially by the electrolysis 
+
+of solutions of K2Cr2O7.  How much time would be 
+required to deposit 1.00 kg of Cr using a current of 200.0 
+A? 
+
+(A) 2.58 h 
+(B) 7.74 h 
+(C) 15.5 h 
+(D) 31.0 h 
+
+(A) 4.15 
+(B) 4.33 
+(C) 4.55 
+(D) 5.19 
+
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+Page 6  
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021 
+
+
+ 
+
+40. What is the standard reduction potential of Cr3+(aq) to 
+
+45. Which is the ground-state electron configuration of gas-
+
+phase Co2+? 
+
+form metallic chromium? 
+ 
+
+(A) 1s22s22p63s23p64s23d7 
+
+Half-reaction 
+E°, V 
+
+(B) 1s22s22p63s23p64s23d5 
+
+Cr3+(aq) + e– → Cr2+(aq) 
+–0.41 
+
+Cr2+(aq) + 2e– → Cr(s) 
+–0.91 
+
+(C) 1s22s22p63s23p64s24d5 
+
+Cr3+(aq) + 3e– → Cr(s) 
+??? 
+
+(D) 1s22s22p63s23p63d7 
+
+ 
+
+(A) –0.74 V 
+(B) –1.32 V 
+
+ 
+
+46. A fluorescent dye absorbs a photon of light of 485 nm 
+
+(C) –1.73 V 
+(D) –2.23 V 
+
+and emits a photon of light at 540 nm.  How much energy 
+is lost as heat? 
+
+ 
+
+41. What is the equilibrium constant at 298 K for the 
+
+disproportionation of uranium(V) in acidic solution as 
+shown below? 
+ 
+
+(A) 4.17 × 10-20 J 
+(B) 3.68 × 10-19 J 
+
+(C) 4.10 × 10-19 J 
+(D) 3.06 × 10-18 J 
+
+ 
+
+2 UO2+(aq) + 4 H+(aq) ⇄  
+UO22+(aq) + U4+(aq) + 2 H2O(l)   
+
+Keq = ??? 
+
+47. Which gas-phase atom releases the most energy when an 
+
+electron is added to it? 
+
+ 
+
+Half-reaction 
+E°, V 
+
+(A) Na 
+(B) Cl 
+(C)  K 
+(D) Br 
+
+UO22+(aq) + e– → UO2+(aq) 
++0.16 
+
+ 
+
+UO2+(aq) + 4 H+(aq) + e– →  
+
++0.27 
+
+48. The isotope 44Ti undergoes electron capture.  Which 
+
+U4+(aq) + 2 H2O(l) 
+
+daughter isotope is produced? 
+
+ 
+
+(A) 1.9 × 10-4 
+ (B) 73 
+
+(A) 40K 
+(B) 40Ca 
+(C) 44Sc 
+(D) 44V 
+
+ 
+
+(C) 5300 
+ (D) 1.9 × 107 
+
+49. Which species has the strongest carbon-oxygen bond? 
+
+ 
+
+(A) CO 
+(B) CO2 
+
+42. The standard reduction potential E° for the reduction of 
+
+permanganate in acidic solution is +1.51 V.  What is the 
+reduction potential for this half-reaction at pH = 5.00? 
+ 
+
+(C) CH2O 
+(D) CH3OH 
+
+ 
+
+50. Which molecule has a nonzero dipole moment? 
+
+MnO4–(aq) + 8 H+(aq) + 5 e– → 
+Mn2+(aq) + 4 H2O(l) 
+
+E° = +1.51 V 
+
+(A) O2 
+(B) O3 
+(C) S8 
+(D) SO3 
+
+ 
+
+ 
+
+(A) +1.50 V 
+(B) +1.42 V 
+
+51. Which statement best describes the structure and bonding 
+
+in nitromethane, H3C–NO2? 
+
+(C) +1.04 V 
+(D) –0.85 V 
+
+ 
+
+(A) Each of the three bonds to nitrogen is a different 
+
+43. Which is a possible set of quantum numbers n, l, ml, ms 
+
+length. 
+
+for a valence electron of sulfur (S)? 
+
+(B) The molecule is Lewis acidic because the nitrogen 
+
+(A) 3, 2, 2, 1/2 
+(B) 3, 1, –1, 1/2 
+
+does not obey the octet rule. 
+
+(C) 2, 1, 0, 1/2 
+(D) 3, 2, 0, –1/2 
+
+(C) The molecule is Lewis basic because the nitrogen 
+
+ 
+
+has a lone pair. 
+
+44. Which period 3 element has these successive ionization 
+
+(D) The nitrogen atom has a trigonal planar geometry. 
+
+energies (in kJ mol-1)?   
+ 
+
+ 
+
+52. Which statements about the superoxide ion, O2–, are 
+
+IE1 
+IE2 
+IE3 
+IE4 
+
+correct? 
+ 
+I. It has a bond order of 2.0. 
+II. It has exactly one unpaired electron. 
+
+786.5 
+1577.1 
+3231.6 
+4355.5 
+
+IE5 
+IE6 
+IE7 
+ 
+
+16091 
+19805 
+23780 
+ 
+
+ 
+
+(A) Al 
+(B) Si 
+(C) P 
+(D) S 
+
+(A) I only 
+(B) II only 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+(C) Both I and II 
+(D) Neither I nor II 
+
+ 
+ 
+ 
+
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021  
+Page 7 
+
+
+ 
+
+53. Which structure best depicts the three-dimensional shape 
+
+59. Which conformation of cyclohexane (C6H12) is most 
+
+of the P4 molecule? 
+
+stable? 
+
+(A) 
+
+(B) 
+
+(A) 
+
+(B) 
+
+ 
+
+ 
+
+ 
+
+ 
+
+(C) 
+
+(D) 
+
+(C) 
+
+(D) 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+60. Which element is NOT present in DNA? 
+
+ 
+
+54. How many isomers are there of the octahedral 
+
+(A) H 
+(B) N 
+(C) P 
+(D) S 
+
+coordination complex Co(NH3)3Cl3? 
+
+ 
+ 
+
+(A) 1 
+(B) 2 
+(C) 3 
+(D) 4 
+
+ 
+
+END OF TEST 
+
+55. Which is NOT a valid representation of 3-methyl-1-
+
+ 
+ 
+ 
+
+butene? 
+
+(A) (CH3)2CHCH=CH2 
+(B) CH2CHCH(CH3)2 
+
+(C) 
+
+(D) 
+
+ 
+
+ 
+
+ 
+
+56. What is the relationship between the two compounds 
+
+shown? 
+
+ 
+
+(A) Identical 
+(B) Structural isomers 
+
+(C) Geometric isomers 
+(D) Mirror image isomers 
+
+ 
+
+57. An amine with the formula C4H11N will have which of 
+
+these properties? 
+
+(A) Unpleasant odor 
+
+ (B) Boiling point greater than 100 °C 
+
+(C) Absorption of light with λ > 450 nm 
+
+(D) Water solubility less than 10 g/L 
+
+ 
+
+58. Which combination of reactants and catalyst will produce 
+
+methyl propanoate, CH3CH2COOCH3, upon heating? 
+
+(A) CH3CH2OH and CH3COOH with catalytic NaOH 
+
+(B) CH3CH2OH and CH3COOH with catalytic H2SO4 
+
+(C) CH3OH and CH3CH2COOH with catalytic NaOH 
+
+(D) CH3OH and CH3CH2COOH with catalytic H2SO4 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+Page 8  
+Property of ACS USNCO – Not for use as USNCO Local Section Exam after March 31, 2021 
+
+
+ 
+ 
+
+Olympiad 2021  
+
+USNCO Local Section Exam 
+
+KEY 
+
+ 
+ 
+ 
+
+Number 
+Answer 
+
+Number 
+Answer 
+
+ 1. 
+A 
+
+31. 
+C 
+
+ 2. 
+B 
+
+32. 
+C 
+
+ 3. 
+B 
+
+33. 
+C 
+
+ 4. 
+D 
+
+34. 
+B 
+
+ 5. 
+C 
+
+35. 
+D 
+
+ 6. 
+A 
+
+36. 
+A 
+
+ 7. 
+A 
+
+37. 
+B 
+
+ 8. 
+B 
+
+38. 
+C 
+
+ 9. 
+B 
+
+39. 
+C 
+
+10. 
+C 
+
+40. 
+A 
+
+11. 
+D 
+
+41. 
+B 
+
+12. 
+D 
+
+42. 
+C 
+
+13. 
+B 
+
+43. 
+B 
+
+14. 
+A 
+
+44. 
+B 
+
+15. 
+D 
+
+45. 
+D 
+
+16. 
+A 
+
+46. 
+A 
+
+17. 
+C 
+
+47. 
+B 
+
+18. 
+A 
+
+48. 
+C 
+
+19. 
+C 
+
+49. 
+A 
+
+20. 
+A 
+
+50. 
+B 
+
+21. 
+A 
+
+51. 
+D 
+
+22. 
+B 
+
+52. 
+B 
+
+23. 
+A 
+
+53. 
+D 
+
+24. 
+B 
+
+54. 
+B 
+
+25. 
+B 
+
+55. 
+C 
+
+26. 
+B 
+
+56. 
+C 
+
+27. 
+B 
+
+57. 
+A 
+
+28. 
+A 
+
+58. 
+D 
+
+29. 
+A 
+
+59. 
+B 
+
+                        30.  
+C 
+
+60. 
+D 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 

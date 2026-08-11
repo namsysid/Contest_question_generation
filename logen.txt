@@ -1,0 +1,48 @@
+1) Replace OpenAI() with a client pointed at your Ollama box
+On the other device (Python client machine):
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://<LAPTOP_IP>:11434/v1",  # Ollama OpenAI-compat base
+    api_key="ollama",                        # required by SDK; Ollama typically ignores
+)
+Ollama supports OpenAI-compatible endpoints under /v1/... including chat/completions.
+2) Replace chat completions call
+Your current code:
+resp = client.chat.completions.create(
+    model=model,
+    temperature=temperature,
+    messages=[...],
+    response_format={"type":"json_object"},
+)
+Use with Ollama + Qwen
+model = "qwen2.5:7b-instruct"
+
+resp = client.chat.completions.create(
+    model=model,
+    temperature=temperature,
+    messages=[
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ],
+)
+
+text = resp.choices[0].message.content
+print(text)
+About response_format={"type":"json_object"}
+Ollama’s support for “JSON mode / structured outputs” has historically been less 1:1 than OpenAI’s, depending on endpoint/version. Ollama documents structured outputs via response_format, but details vary, and some OpenAI JSON modes have been discussed as compatibility gaps.
+Practical replacement that works well:
+set temperature=0
+add an instruction in the system prompt like:
+“Return only valid JSON. No markdown. No extra keys.”
+then json.loads() + retry on failure.
+If you do want schema-constrained output, use Ollama’s structured outputs capability where available.
+3) Replace embeddings
+Important: Qwen instruct ≠ embedding model
+For embeddings, you should use an embedding model pulled into Ollama (e.g. nomic-embed-text, bge-m3, etc.), not qwen2.5:7b-instruct.
+Option A: OpenAI-compatible embeddings endpoint (if your Ollama version supports it)
+emb = client.embeddings.create(
+    model="qwen3-embedding",
+    input=sk_texts,
+)
+vectors = [d.embedding for d in emb.data]
