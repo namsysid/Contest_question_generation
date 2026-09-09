@@ -11,6 +11,47 @@ CHOICE_RE = re.compile(
     re.DOTALL,
 )
 
+# These patterns intentionally target unmistakable out-of-scope subject matter rather
+# than isolated words such as "light" (which is common in "light string") or "current"
+# (which can be ordinary prose). This is a guardrail in addition to the prompt; it is
+# not intended to classify every possible physics question.
+FORBIDDEN_FMA_PATTERNS = (
+    ("electricity/circuits", re.compile(
+        r"\b(?:electric\s+(?:field|potential|current)|magnetic\s+(?:field|flux)|"
+        r"circuit|resistor|electrical\s+resistance|capacitor|capacitance|inductor|inductance|"
+        r"battery|voltage|ohm(?:'s)?\s+law|coulomb(?:'s)?\s+law)\b",
+        re.IGNORECASE,
+    )),
+    ("optics", re.compile(
+        r"\b(?:light\s+ray|ray\s+of\s+light|beam\s+of\s+(?:monochromatic\s+)?light|"
+        r"thin\s+(?:film|lens)|focal\s+length|image\s+distance|refractive\s+index|"
+        r"angle\s+of\s+refraction|snell(?:'s)?\s+law|diffraction|interference)\b",
+        re.IGNORECASE,
+    )),
+    ("thermodynamics", re.compile(
+        r"\b(?:ideal\s+gas|adiabatic|isothermal|thermodynamic|entropy|heat\s+engine|"
+        r"specific\s+heat|latent\s+heat)\b",
+        re.IGNORECASE,
+    )),
+    ("waves", re.compile(
+        r"\b(?:sound\s+wave|wave\s+speed|wavelength|standing\s+wave|"
+        r"harmonic\s+mode|vibrating\s+string)\b",
+        re.IGNORECASE,
+    )),
+    ("modern physics", re.compile(
+        r"\b(?:photoelectric|photon|radioactive|half-life|quantum|nuclear\s+(?:decay|reaction)|"
+        r"special\s+relativity|general\s+relativity)\b",
+        re.IGNORECASE,
+    )),
+)
+
+
+def forbidden_fma_topic(text: str) -> str | None:
+    for topic, pattern in FORBIDDEN_FMA_PATTERNS:
+        if pattern.search(text):
+            return topic
+    return None
+
 SYSTEM_PROMPT = """You generate F=ma-style high-school physics contest multiple-choice problems.
 
 Hard constraints:
@@ -139,6 +180,10 @@ def pack_exemplars(
         # Do not teach the model that an MCQ without choices is an acceptable exemplar.
         if "CHOICES:\n(none listed)" in exemplar:
             continue
+        # The source corpus can contain general-physics contamination even when the
+        # generation task is F=ma. Never expose those rows as demonstrations.
+        if forbidden_fma_topic(exemplar):
+            continue
         block = f"### PHYSICS EXEMPLAR {len(packed) + 1}\n{exemplar}\n"
         if packed and used + len(block) > max_prompt_chars:
             break
@@ -220,6 +265,9 @@ def validate_problem(candidate: Dict[str, Any]) -> Tuple[Dict[str, Any] | None, 
     # system prompt. The question is still subject to downstream blind F=ma grading.
     domain = str(candidate.get("domain") or "physics").strip().lower()
 
+    topic_text = "\n".join([question, *choices.values(), solution])
+    forbidden_topic = forbidden_fma_topic(topic_text)
+
     if domain != "physics":
         errors.append("domain must be `physics`")
     if not question:
@@ -230,6 +278,8 @@ def validate_problem(candidate: Dict[str, Any]) -> Tuple[Dict[str, Any] | None, 
         errors.append(f"answer must resolve to one letter A-E (received {raw_answer!r})")
     if not solution:
         errors.append("solution is missing")
+    if forbidden_topic:
+        errors.append(f"problem is outside F=ma mechanics scope ({forbidden_topic})")
     if errors:
         return None, errors
 

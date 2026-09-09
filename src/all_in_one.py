@@ -130,6 +130,7 @@ def build_stage_commands_for_paths(
         "--input", str(input_path),
         "--out", str(enriched_path),
         "--model", args.enrich_model,
+        "--provider", args.generation_provider,
         "--corpus", args.corpus,
         "--year", str(args.year),
         "--variant", args.variant,
@@ -149,6 +150,7 @@ def build_stage_commands_for_paths(
     commands["02"] = [
         "--input", str(enriched_path),
         "--embed_model", args.embed_model,
+        "--provider", args.generation_provider,
         "--anchor_frac", str(args.anchor_frac),
         "--k_density", str(args.k_density),
         "--out_skel", str(skeleton_embedded_path),
@@ -174,38 +176,65 @@ def build_stage_commands_for_paths(
         "--out", str(bundles_path),
         "--seed", str(args.seed),
     ]
+    if args.preferred_source_years:
+        commands["03"].extend(["--preferred_years", *map(str, args.preferred_source_years)])
+    if args.min_preferred_question_number > 0:
+        commands["03"].extend([
+            "--min_preferred_question_number", str(args.min_preferred_question_number),
+        ])
+    if args.strict_preferred_sources:
+        commands["03"].append("--strict_preferred_sources")
+    # This score is a lightweight retrieval heuristic (feature headings + graph edges),
+    # not the finished-item difficulty. Keep it permissive enough to retrieve several real
+    # exemplars; the strict difficulty enforcement belongs in stages 04 and 05.
+    difficulty_complexity_floor = {1: 0, 2: 0, 3: 4, 4: 5, 5: 6}[args.target_difficulty]
     if args.require_skeleton_text:
         commands["03"].append("--require_skeleton_text")
-    if args.require_insight_seed:
+    if args.require_insight_seed or args.target_difficulty >= 3:
         commands["03"].append("--require_insight_seed")
-    if args.require_insight_solution_exemplars:
+    if args.require_insight_solution_exemplars or args.target_difficulty >= 3:
         commands["03"].append("--require_insight_solution_exemplars")
-    if args.min_seed_complexity > 0:
-        commands["03"].extend(["--min_seed_complexity", str(args.min_seed_complexity)])
-    if args.min_sol_ex_complexity > 0:
-        commands["03"].extend(["--min_sol_ex_complexity", str(args.min_sol_ex_complexity)])
+    min_seed_complexity = max(args.min_seed_complexity, difficulty_complexity_floor)
+    min_sol_ex_complexity = max(args.min_sol_ex_complexity, difficulty_complexity_floor)
+    if min_seed_complexity > 0:
+        commands["03"].extend(["--min_seed_complexity", str(min_seed_complexity)])
+    if min_sol_ex_complexity > 0:
+        commands["03"].extend(["--min_sol_ex_complexity", str(min_sol_ex_complexity)])
 
     commands["04"] = [
         "--bundles", str(bundles_path),
         "--out", str(generated_skeletons_path),
         "--model", args.graph_model,
         "--domain", stage_domain,
+        "--provider", args.generation_provider,
+        "--target-difficulty", str(args.target_difficulty),
+        "--num-choices", str(args.num_choices),
+        "--max-attempts", str(args.generation_max_attempts),
         *shared_limit,
         *common_debug,
     ]
+    if args.required_topic:
+        commands["04"].extend(["--required-topic", args.required_topic])
+    if args.verify_model:
+        commands["04"].extend(["--verify-model", args.verify_model])
 
     commands["05"] = [
         "--bundles", str(bundles_path),
         "--skeletons", str(generated_skeletons_path),
         "--out", str(generated_problems_path),
         "--model", args.question_model,
+        "--provider", args.generation_provider,
         "--max_q_exemplars", str(args.max_q_exemplars),
         "--max_paired_exemplars", str(args.max_paired_exemplars),
         "--repair_max", str(args.repair_max),
+        "--competition", args.competition,
+        "--num-choices", str(args.num_choices),
         "--sleep", str(args.sleep),
         *shared_limit,
         *common_debug,
     ]
+    if args.required_topic:
+        commands["05"].extend(["--required-topic", args.required_topic])
     if args.verify_model:
         commands["05"].extend(["--verify_model", args.verify_model])
 
@@ -713,6 +742,12 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument("--graph-model", default="qwen2.5:7b-instruct")
     pipe.add_argument("--question-model", default="qwen2.5:7b-instruct")
     pipe.add_argument("--verify-model", default="")
+    pipe.add_argument("--generation-provider", choices=["ollama", "openai"], default="ollama")
+    pipe.add_argument("--required-topic", default="")
+    pipe.add_argument("--competition", default="F=ma")
+    pipe.add_argument("--num-choices", type=int, choices=(4, 5), default=5)
+    pipe.add_argument("--target-difficulty", type=int, choices=range(1, 6), default=3,
+                      help="Finished-item difficulty: 1 easy, 3 normal competition, 5 challenge")
 
     pipe.add_argument("--corpus", default="unknown")
     pipe.add_argument("--year", type=int, default=0)
@@ -733,10 +768,13 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument("--tail-min", type=float, default=0.30)
     pipe.add_argument("--k-solution", type=int, default=4)
     pipe.add_argument("--k-question", type=int, default=4)
+    pipe.add_argument("--strict-preferred-sources", action="store_true")
     pipe.add_argument("--k-paired", type=int, default=3)
     pipe.add_argument("--mmr-lambda-solution", type=float, default=0.7)
     pipe.add_argument("--mmr-lambda-question", type=float, default=0.7)
     pipe.add_argument("--seed", type=int, default=0)
+    pipe.add_argument("--preferred-source-years", nargs="*", type=int, default=[])
+    pipe.add_argument("--min-preferred-question-number", type=int, default=0)
     pipe.add_argument("--require-skeleton-text", action=argparse.BooleanOptionalAction, default=True)
     pipe.add_argument("--require-insight-seed", action="store_true")
     pipe.add_argument("--require-insight-solution-exemplars", action="store_true")
@@ -746,6 +784,7 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument("--max-q-exemplars", type=int, default=4)
     pipe.add_argument("--max-paired-exemplars", type=int, default=3)
     pipe.add_argument("--repair-max", type=int, default=1)
+    pipe.add_argument("--generation-max-attempts", type=int, default=4)
     pipe.add_argument("--sleep", type=float, default=0.0)
 
     bucket = sub.add_parser(
@@ -770,7 +809,13 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.add_argument("--embed-model", default="qwen3-embedding")
     bucket.add_argument("--graph-model", default="qwen2.5:7b-instruct")
     bucket.add_argument("--question-model", default="qwen2.5:7b-instruct")
+    bucket.add_argument("--target-difficulty", type=int, choices=range(1, 6), default=3,
+                        help="Finished-item difficulty: 1 easy, 3 normal competition, 5 challenge")
     bucket.add_argument("--verify-model", default="")
+    bucket.add_argument("--generation-provider", choices=["ollama", "openai"], default="ollama")
+    bucket.add_argument("--required-topic", default="")
+    bucket.add_argument("--competition", default="F=ma")
+    bucket.add_argument("--num-choices", type=int, choices=(4, 5), default=5)
 
     bucket.add_argument("--corpus", default="unknown")
     bucket.add_argument("--year", type=int, default=0)
@@ -791,10 +836,13 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.add_argument("--tail-min", type=float, default=0.30)
     bucket.add_argument("--k-solution", type=int, default=4)
     bucket.add_argument("--k-question", type=int, default=4)
+    bucket.add_argument("--strict-preferred-sources", action="store_true")
     bucket.add_argument("--k-paired", type=int, default=3)
     bucket.add_argument("--mmr-lambda-solution", type=float, default=0.7)
     bucket.add_argument("--mmr-lambda-question", type=float, default=0.7)
     bucket.add_argument("--seed", type=int, default=0)
+    bucket.add_argument("--preferred-source-years", nargs="*", type=int, default=[])
+    bucket.add_argument("--min-preferred-question-number", type=int, default=0)
     bucket.add_argument("--require-skeleton-text", action=argparse.BooleanOptionalAction, default=True)
     bucket.add_argument("--require-insight-seed", action="store_true")
     bucket.add_argument("--require-insight-solution-exemplars", action="store_true")
@@ -804,6 +852,7 @@ def build_parser() -> argparse.ArgumentParser:
     bucket.add_argument("--max-q-exemplars", type=int, default=4)
     bucket.add_argument("--max-paired-exemplars", type=int, default=3)
     bucket.add_argument("--repair-max", type=int, default=1)
+    bucket.add_argument("--generation-max-attempts", type=int, default=4)
     bucket.add_argument("--sleep", type=float, default=0.0)
 
     return parser

@@ -61,6 +61,7 @@ def main() -> None:
         "--input", args.input,
         "--out", str(generated_out),
         "--model", args.chat_model,
+        "--allow-direct-ablation",
     ]
     if args.limit:
         cmd_07 += ["--limit", str(args.limit)]

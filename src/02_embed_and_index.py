@@ -21,7 +21,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 from dotenv import load_dotenv
-from ollama_client import embed_texts as ollama_embed_texts
+from circuit_lab.model_client import embed_texts as model_embed_texts
 
 load_dotenv()
 
@@ -205,7 +205,7 @@ def safe_get_question_text(r: Dict[str, Any]) -> str:
     return ""
 
 
-def embed_texts(model: str, texts: List[str], batch: int = 64) -> List[List[float]]:
+def embed_texts(model: str, texts: List[str], batch: int = 64, provider: str = "ollama") -> List[List[float]]:
     embedding_dim = None
     embs: List[List[float]] = []
 
@@ -219,7 +219,7 @@ def embed_texts(model: str, texts: List[str], batch: int = 64) -> List[List[floa
                 non_empty_indices.append(j)
 
         if non_empty_chunk:
-            resp = ollama_embed_texts(model, non_empty_chunk)
+            resp = model_embed_texts(model, non_empty_chunk, provider=provider)
             if embedding_dim is None and resp:
                 embedding_dim = len(resp[0])
 
@@ -233,7 +233,7 @@ def embed_texts(model: str, texts: List[str], batch: int = 64) -> List[List[floa
             embs.extend(chunk_embs)
         else:
             if embedding_dim is None:
-                test_resp = ollama_embed_texts(model, ["test"])
+                test_resp = model_embed_texts(model, ["test"], provider=provider)
                 embedding_dim = len(test_resp[0])
             zero_vec = [0.0] * embedding_dim
             embs.extend([zero_vec for _ in chunk])
@@ -260,6 +260,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True, help="Enriched problems JSONL (has question + graph/skeleton)")
     ap.add_argument("--embed_model", default="qwen3-embedding")
+    ap.add_argument("--provider", choices=["ollama", "openai"], default="ollama")
     ap.add_argument("--anchor_frac", type=float, default=0.18, help="15–20% recommended (e.g. 0.15–0.20)")
     ap.add_argument("--k_density", type=int, default=20, help="kNN size for density proxy")
     ap.add_argument("--out_skel", default="./data/skeleton_embedded.jsonl")
@@ -275,8 +276,8 @@ def main() -> None:
     graph_texts = [safe_get_graph_text(r) for r in rows]
     q_texts = [safe_get_question_text(r) for r in rows]
 
-    graph_embs = embed_texts(args.embed_model, graph_texts)
-    q_embs = embed_texts(args.embed_model, q_texts)
+    graph_embs = embed_texts(args.embed_model, graph_texts, provider=args.provider)
+    q_embs = embed_texts(args.embed_model, q_texts, provider=args.provider)
 
     sk_out: List[Dict[str, Any]] = []
     q_out: List[Dict[str, Any]] = []

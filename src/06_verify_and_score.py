@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import ssl
 import sys
 import time
@@ -49,6 +50,17 @@ Return strict JSON only:
     "notes": "at most 60 words"
   }
 }
+"""
+
+TOPIC_CHECK_INSTRUCTIONS = """
+Also classify the problem by its central tested skill, not by incidental quantities. Return this
+additional top-level object:
+"topic_assessment": {
+  "primary_topic": "kinematics|forces|energy|momentum|circular_gravity|rotation|oscillations|fluids",
+  "matches_required": true,
+  "notes": "at most 40 words"
+}
+Set matches_required true only when REQUIRED_TOPIC is the primary category.
 """
 
 
@@ -129,7 +141,7 @@ def api_json(
         raise ValueError(f"OpenAI returned an invalid JSON grading response: {body}") from exc
 
 
-def validate_score(score: Dict[str, Any]) -> Tuple[bool, str]:
+def validate_score(score: Dict[str, Any], require_topic: bool = False) -> Tuple[bool, str]:
     try:
         solve = score["solve_attempt"]
         difficulty = score["difficulty_assessment"]
@@ -146,9 +158,45 @@ def validate_score(score: Dict[str, Any]) -> Tuple[bool, str]:
         ]
         if any(not isinstance(value, int) or not 1 <= value <= 5 for value in values):
             return False, "all scores must be integers from 1 to 5"
+        if require_topic:
+            topic = score["topic_assessment"]
+            if topic.get("primary_topic") not in {
+                "kinematics", "forces", "energy", "momentum", "circular_gravity",
+                "rotation", "oscillations", "fluids",
+            }:
+                return False, "invalid primary topic"
+            if not isinstance(topic.get("matches_required"), bool):
+                return False, "matches_required must be boolean"
     except (KeyError, TypeError):
         return False, "missing required grading fields"
     return True, ""
+
+
+def normalize_score(score: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalize harmless response-shape variations before strict validation."""
+    solve = score.get("solve_attempt")
+    if not isinstance(solve, dict):
+        return score
+    issue_notes = solve.get("issue_notes")
+    if issue_notes is None or issue_notes == "":
+        solve["issue_notes"] = []
+    elif isinstance(issue_notes, str):
+        solve["issue_notes"] = [issue_notes.strip()]
+    # Some models derive the right choice and state it explicitly but emit a stale
+    # selected_answer field. Prefer the final explicit conclusion in the derivation.
+    reasoning = str(solve.get("reasoning_summary") or "")
+    conclusions = re.findall(
+        r"(?:answer|choice)\s*(?:is|:|=)?\s*(?:choice\s*)?([A-E])\b|"
+        r"\b([A-E])\s+is\s+(?:the\s+)?correct\b|"
+        r"\bmatches\s+(?:choice\s+)?([A-E])\b",
+        reasoning,
+        flags=re.IGNORECASE,
+    )
+    if conclusions:
+        letters = [letter.upper() for groups in conclusions for letter in groups if letter]
+        if letters:
+            solve["selected_answer"] = letters[-1]
+    return score
 
 
 def completed_count(path: Path) -> int:
@@ -182,6 +230,8 @@ def main() -> None:
     parser.add_argument("--openai-base-url", default=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"))
     parser.add_argument("--ca-bundle", help="PEM CA bundle; defaults to SSL_CERT_FILE or certifi")
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--check-topic", action="store_true",
+                        help="Classify each item and verify its _meta.topic_key quota")
     args = parser.parse_args()
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
@@ -209,6 +259,8 @@ def main() -> None:
 
     exemplars = load_exemplars(args.exemplars, args.exemplar_limit, args.exemplar_max_chars)
     system = build_system(args.subject, args.competition, exemplars)
+    if args.check_topic:
+        system += TOPIC_CHECK_INSTRUCTIONS
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     start = completed_count(out_path) if args.resume else 0
@@ -226,25 +278,39 @@ def main() -> None:
             retry_note = ""
             for attempt in range(1, args.max_attempts + 1):
                 user = "PROBLEM_JSON:\n" + json.dumps(problem, ensure_ascii=False)
+                if args.check_topic:
+                    topic_key = str((row.get("_meta") or {}).get("topic_key") or "")
+                    user += f"\nREQUIRED_TOPIC: {topic_key}"
                 if retry_note:
                     user += f"\nPrevious grading output was rejected: {retry_note}. Return the exact schema."
-                score = api_json(
-                    api_key,
-                    args.openai_base_url,
-                    ca_bundle,
-                    args.model,
-                    system,
-                    user,
-                    args.max_output_tokens,
-                    args.timeout_seconds,
-                )
-                valid, retry_note = validate_score(score)
+                try:
+                    score = normalize_score(api_json(
+                        api_key,
+                        args.openai_base_url,
+                        ca_bundle,
+                        args.model,
+                        system,
+                        user,
+                        args.max_output_tokens,
+                        args.timeout_seconds,
+                    ))
+                except (RuntimeError, ValueError) as exc:
+                    retry_note = str(exc)
+                    if args.debug:
+                        print(
+                            f"[{index}/{len(rows)}] request attempt {attempt} failed: {retry_note}",
+                            file=sys.stderr,
+                        )
+                    if attempt < args.max_attempts:
+                        time.sleep(min(2 ** (attempt - 1), 8))
+                    continue
+                valid, retry_note = validate_score(score, require_topic=args.check_topic)
                 if valid:
                     break
                 if args.debug:
                     print(f"[{index}/{len(rows)}] rejected attempt {attempt}: {retry_note}", file=sys.stderr)
             else:
-                raise RuntimeError(f"grader failed validation after {args.max_attempts} attempts: {retry_note}")
+                raise RuntimeError(f"grader failed after {args.max_attempts} attempts: {retry_note}")
 
             out_row = {
                 "id": row.get("id"),

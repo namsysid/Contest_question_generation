@@ -117,6 +117,33 @@ def has_insight(graph_text: str) -> bool:
     return c["auxiliary"] > 0 or c["trap"] > 0 or c["constraint"] > 0
 
 
+def source_year(problem_id: str) -> int | None:
+    """Extract a four-digit source year from canonical exam IDs."""
+    match = re.search(r"(?:^|[-_])(20\d{2})(?:[-_]|$)", str(problem_id or ""))
+    return int(match.group(1)) if match else None
+
+
+def source_question_number(problem_id: str) -> int | None:
+    match = re.search(r"(?:_Q|-)(\d+)$", str(problem_id or ""), flags=re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
+def split_preferred_indices(
+    indices: List[int], ids: List[str], preferred_years: set[int], min_question_number: int = 0,
+) -> Tuple[List[int], List[int]]:
+    """Keep similarity order within recent and fallback source pools."""
+    if not preferred_years:
+        return list(indices), []
+    def preferred_source(index: int) -> bool:
+        number = source_question_number(ids[index])
+        return source_year(ids[index]) in preferred_years and (
+            min_question_number <= 0 or (number is not None and number >= min_question_number)
+        )
+    preferred = [i for i in indices if preferred_source(i)]
+    fallback = [i for i in indices if not preferred_source(i)]
+    return preferred, fallback
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--skeleton_embedded", required=True)
@@ -126,6 +153,18 @@ def main():
     ap.add_argument("--require_skeleton_text", action="store_true")
     ap.add_argument("--require_insight_seed", action="store_true")
     ap.add_argument("--require_insight_solution_exemplars", action="store_true")
+    ap.add_argument(
+        "--preferred_years", nargs="*", type=int, default=[],
+        help="Prefer sources from these years; older sources are used only when the preferred pool cannot fill a bundle.",
+    )
+    ap.add_argument(
+        "--min_preferred_question_number", type=int, default=0,
+        help="Within preferred years, prioritize later exam questions at or above this number.",
+    )
+    ap.add_argument(
+        "--strict_preferred_sources", action="store_true",
+        help="Never backfill seeds or exemplars outside the preferred year/question-number pool.",
+    )
     ap.add_argument("--min_seed_complexity", type=int, default=0)
     ap.add_argument("--min_sol_ex_complexity", type=int, default=0)
     ap.add_argument("-n","--num_bundles", type=int, default=25)
@@ -141,6 +180,7 @@ def main():
     ap.add_argument("--out", default="retrieval_bundles.jsonl")
     ap.add_argument("--seed", type=int, default=0)
     args=ap.parse_args()
+    preferred_years = set(args.preferred_years)
 
     if args.seed:
         random.seed(args.seed); np.random.seed(args.seed)
@@ -164,6 +204,16 @@ def main():
     skel_index_by_id={sid:i for i,sid in enumerate(skel_ids)}
     q_index_by_id={qid:i for i,qid in enumerate(q_ids)}
 
+    available_preferred_years = sorted(
+        {year for sid in skel_ids if (year := source_year(sid)) in preferred_years},
+        reverse=True,
+    )
+    if preferred_years and not available_preferred_years:
+        print(
+            "WARNING: none of the preferred source years are present in the structural index; "
+            "retrieval will use older fallback sources."
+        )
+
     try:
         with open(args.anchors,"r",encoding="utf-8") as f:
             anchors_obj=json.load(f)
@@ -179,6 +229,10 @@ def main():
     anchor_ids=[aid for aid in anchor_ids if aid in skel_by_id]
     if not anchor_ids:
         raise RuntimeError("No valid anchors found.")
+
+    preferred_anchor_ids = [aid for aid in anchor_ids if source_year(aid) in preferred_years]
+    if preferred_anchor_ids:
+        anchor_ids = preferred_anchor_ids
 
     anchor_vecs=[(aid, skel_mat[skel_index_by_id[aid]]) for aid in anchor_ids]
 
@@ -214,7 +268,22 @@ def main():
         if not idxs:
             idxs=np.argsort(dists).tolist()
             idxs=[i for i in idxs if skel_ids[i]!=aid][:160]
-        pick=random.choice(idxs)
+        preferred, _ = split_preferred_indices(
+            idxs, skel_ids, preferred_years, args.min_preferred_question_number
+        )
+        if preferred_years and not preferred and available_preferred_years:
+            preferred = [
+                i for i in np.argsort(dists).tolist()
+                if skel_ids[i] != aid
+                and source_year(skel_ids[i]) in preferred_years
+                and (
+                    args.min_preferred_question_number <= 0
+                    or (source_question_number(skel_ids[i]) or 0) >= args.min_preferred_question_number
+                )
+            ][:160]
+        if args.strict_preferred_sources and not preferred:
+            raise RuntimeError("No seed satisfies the strict preferred-source cutoff")
+        pick=random.choice(preferred or idxs)
         return skel_ids[pick], float(dists[pick])
 
     def retrieve_solution_exemplars(seed_id: str, k:int) -> List[Dict[str,Any]]:
@@ -222,7 +291,13 @@ def main():
         sims = skel_mat @ qv
         idx = np.argsort(-sims).tolist()
         idx = [i for i in idx if skel_ids[i] != seed_id][:220]
-        chosen = mmr_select(qv, idx, skel_mat, k=k*3, lambda_mult=args.mmr_lambda_solution)
+        preferred, fallback = split_preferred_indices(
+            idx, skel_ids, preferred_years, args.min_preferred_question_number
+        )
+        # Oversample each tier because graph-complexity and insight checks happen below.
+        chosen = mmr_select(qv, preferred, skel_mat, k=k*6, lambda_mult=args.mmr_lambda_solution)
+        if not args.strict_preferred_sources:
+            chosen += mmr_select(qv, fallback, skel_mat, k=k*6, lambda_mult=args.mmr_lambda_solution)
         out=[]
         for i in chosen:
             sid=skel_ids[i]
@@ -231,7 +306,12 @@ def main():
                 continue
             if args.require_insight_solution_exemplars and not has_insight(gt):
                 continue
-            out.append({"id":sid,"graph_text":gt,"skeleton_text":gt,"topic":skel_by_id.get(sid,{}).get("topic"),"difficulty":skel_by_id.get(sid,{}).get("difficulty")})
+            out.append({
+                "id": sid, "graph_text": gt, "skeleton_text": gt,
+                "question_text": get_question_text(sid),
+                "topic": skel_by_id.get(sid,{}).get("topic"),
+                "difficulty": skel_by_id.get(sid,{}).get("difficulty"),
+            })
             if len(out) >= k:
                 break
         return out
@@ -241,7 +321,12 @@ def main():
         sims = q_mat @ qv
         idx = np.argsort(-sims).tolist()
         idx = [i for i in idx if q_ids[i] != seed_id][:220]
-        chosen = mmr_select(qv, idx, q_mat, k=k, lambda_mult=args.mmr_lambda_question)
+        preferred, fallback = split_preferred_indices(
+            idx, q_ids, preferred_years, args.min_preferred_question_number
+        )
+        chosen = mmr_select(qv, preferred, q_mat, k=k, lambda_mult=args.mmr_lambda_question)
+        if len(chosen) < k and not args.strict_preferred_sources:
+            chosen += mmr_select(qv, fallback, q_mat, k=k-len(chosen), lambda_mult=args.mmr_lambda_question)
         return [{"id": q_ids[i], "question_text": get_question_text(q_ids[i]), "topic": q_by_id.get(q_ids[i],{}).get("topic"), "difficulty": q_by_id.get(q_ids[i],{}).get("difficulty")} for i in chosen]
 
     bundles=[]
@@ -286,11 +371,13 @@ def main():
         bundles.append({
             "bundle_id": f"bundle_{len(bundles):05d}",
             "seed_id": seed_id,
+            "seed_source_year": source_year(seed_id),
             "mode": mode,
             "anchor_id": aid,
             "anchor_distance": adist,
             "seed_graph_text": seed_graph_txt,
             "seed_skeleton_text": seed_graph_txt,
+            "seed_question_text": get_question_text(seed_id),
             "seed_topic": skel_by_id.get(seed_id,{}).get("topic"),
             "seed_difficulty": skel_by_id.get(seed_id,{}).get("difficulty"),
             "solution_exemplars": sol_ex,
@@ -299,6 +386,15 @@ def main():
             "_diagnostics": {
                 "seed_complexity": complexity_score(seed_graph_txt),
                 "seed_graph_features": graph_feature_counts(seed_graph_txt),
+                "preferred_source_years": args.preferred_years,
+                "available_preferred_source_years": available_preferred_years,
+                "min_preferred_question_number": args.min_preferred_question_number,
+                "preferred_solution_exemplar_count": sum(
+                    source_year(ex.get("id", "")) in preferred_years for ex in sol_ex
+                ),
+                "preferred_question_exemplar_count": sum(
+                    source_year(ex.get("id", "")) in preferred_years for ex in q_ex
+                ),
             }
         })
 

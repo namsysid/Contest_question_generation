@@ -23,10 +23,17 @@ def generate_json(
     max_output_tokens: int = 1200,
     json_schema: Optional[Dict[str, Any]] = None,
     base_url: Optional[str] = None,
-    timeout: float = 300.0,
+    timeout: Optional[float] = None,
     seed: Optional[int] = None,
+    think: Optional[bool] = None,
 ) -> Dict[str, Any]:
-    options: Dict[str, Any] = {"temperature": temperature, "num_predict": max_output_tokens}
+    if timeout is None:
+        timeout = float(os.getenv("OLLAMA_GENERATION_TIMEOUT_SECONDS", "900"))
+    options: Dict[str, Any] = {
+        "temperature": temperature,
+        "num_predict": max_output_tokens,
+        "num_ctx": int(os.getenv("OLLAMA_NUM_CTX", "8192")),
+    }
     if seed is not None:
         options["seed"] = seed
     payload = {
@@ -37,6 +44,11 @@ def generate_json(
         "format": json_schema or "json",
         "options": options,
     }
+    if model.casefold().startswith("qwen3"):
+        if think is None:
+            think_setting = os.getenv("OLLAMA_THINK", "true").strip().casefold()
+            think = think_setting not in {"0", "false", "no", "off"}
+        payload["think"] = think
     req = request.Request(
         f"{resolve_base_url(base_url)}/api/generate",
         data=json.dumps(payload).encode("utf-8"),

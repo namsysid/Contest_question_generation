@@ -33,7 +33,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from dotenv import load_dotenv
-from ollama_client import generate_json, generate_text
+from circuit_lab.model_client import generate_json
 
 load_dotenv()
 
@@ -83,7 +83,7 @@ def split_stem_and_choices(qtext: str) -> Tuple[str, List[str], Optional[str]]:
 def infer_domain(raw: Dict[str, Any]) -> str:
     if raw.get("domain"):
         d = str(raw["domain"]).lower()
-        if d in ("fma", "usnco"):
+        if d in ("fma", "usnco", "chem", "chemistry"):
             return d
     src = (raw.get("source_pdf") or "").lower()
     if "f" in src and "ma" in src:
@@ -226,6 +226,7 @@ def llm_enrich(
     has_diagram: bool,
     diagram_files: List[str],
     model: str,
+    provider: str,
     limits: Dict[str, Optional[int]],
 ) -> Dict[str, Any]:
     def budget_text(value: Optional[int]) -> str:
@@ -247,14 +248,22 @@ def llm_enrich(
         max_edges=budget_text(limits["max_edges"]),
     )
 
-    try:
-        return generate_json(model, user, system=SYSTEM, temperature=0.2)
-    except Exception as exc:
+    last_error: Exception | None = None
+    for attempt in range(3):
         try:
-            raw = generate_text(model, user, system=SYSTEM, temperature=0.2)
-        except Exception:
-            raise exc
-        raise ValueError(f"Model returned invalid JSON. Raw output was:\n{raw}") from exc
+            result = generate_json(
+                model, user, provider=provider, system=SYSTEM, temperature=0.2,
+                max_output_tokens=4000, ollama_think=False if provider == "ollama" else None,
+            )
+            graph = result.get("problem_graph") if isinstance(result, dict) else None
+            if not isinstance(graph, dict) or not graph.get("nodes") or not graph.get("edges"):
+                raise ValueError("enrichment response has no non-empty problem graph")
+            return result
+        except (RuntimeError, ValueError) as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(attempt + 1)
+    raise RuntimeError(f"enrichment failed after 3 attempts: {last_error}")
 
 
 # ----------------------------
@@ -628,6 +637,9 @@ def graph_to_text(graph: Dict[str, Any], metrics: Optional[Dict[str, Any]] = Non
 def build_schema(raw: Dict[str, Any], corpus_name: str = "unknown", year: Optional[int] = None, variant: Optional[str] = None) -> Dict[str, Any]:
     domain = infer_domain(raw)
     stem, choices, answer_key = split_stem_and_choices(raw.get("question_text", ""))
+    supplied_answer = str(raw.get("answer_key") or "").strip().upper()
+    if len(supplied_answer) == 1 and supplied_answer in "ABCDE":
+        answer_key = supplied_answer
 
     diagrams = []
     for f in raw.get("diagram_files", []) or []:
@@ -707,6 +719,7 @@ def main() -> None:
     ap.add_argument("--input", required=True, help="raw JSONL from 00_pdf-to-txt.py")
     ap.add_argument("--out", default="enriched.jsonl")
     ap.add_argument("--model", default="qwen2.5:7b-instruct")
+    ap.add_argument("--provider", choices=["ollama", "openai"], default="ollama")
     ap.add_argument("--corpus", default="unknown")
     ap.add_argument("--year", type=int, default=0)
     ap.add_argument("--variant", default="")
@@ -754,6 +767,7 @@ def main() -> None:
                 has_diagram=has_diagram,
                 diagram_files=diagram_files,
                 model=args.model,
+                provider=args.provider,
                 limits=limits,
             )
 

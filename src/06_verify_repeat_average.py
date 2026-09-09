@@ -147,6 +147,9 @@ def main() -> int:
     input_path = Path(args.input)
     if not input_path.is_file():
         raise ValueError(f"Input file not found: {input_path}")
+    expected_rows = len(read_jsonl(input_path))
+    if args.limit > 0:
+        expected_rows = min(expected_rows, args.limit)
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     if args.runs_dir:
@@ -178,6 +181,20 @@ def main() -> int:
 
     for i in range(1, args.repeats + 1):
         run_out = runs_dir / f"{i}.jsonl"
+        existing_rows = read_jsonl(run_out) if run_out.is_file() else []
+        if len(existing_rows) > expected_rows:
+            raise RuntimeError(
+                f"run {i} contains {len(existing_rows)} rows, above expected {expected_rows}"
+            )
+        if len(existing_rows) == expected_rows:
+            aggregate_input_rows.extend(existing_rows)
+            per_run_stats.append({
+                "run_index": i,
+                "out_file": str(run_out),
+                **aggregate_rows(existing_rows),
+            })
+            print(f"[repeat-verify] run {i}/{args.repeats}: already complete; rows={len(existing_rows)}", flush=True)
+            continue
         cmd = [
             sys.executable,
             str(VERIFY_SCRIPT),
@@ -192,6 +209,8 @@ def main() -> int:
             "--competition",
             args.competition,
         ]
+        if existing_rows:
+            cmd.append("--resume")
         if args.exemplars:
             cmd.extend(["--exemplars", *args.exemplars])
             cmd.extend(["--exemplar-limit", str(args.exemplar_limit)])
