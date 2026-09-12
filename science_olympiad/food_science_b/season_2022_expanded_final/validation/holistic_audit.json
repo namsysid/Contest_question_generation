@@ -1,0 +1,106 @@
+{
+  "overall_good": false,
+  "mcq_good": false,
+  "frq_good": false,
+  "coverage_good": true,
+  "difficulty_good": false,
+  "repetition_good": true,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-generated-210",
+    "food-science-b-generated-211",
+    "food-science-b-curated-mcq-004",
+    "food-science-b-curated-mcq-006",
+    "food-science-b-frq-306",
+    "food-science-b-frq-308",
+    "food-science-b-curated-frq-001",
+    "food-science-b-curated-frq-002",
+    "food-science-b-curated-frq-003"
+  ],
+  "duplicate_or_near_duplicate_ids": [],
+  "missing_areas": [
+    "experimental_analysis"
+  ],
+  "issues": [
+    {
+      "item_id": "food-science-b-generated-210",
+      "type": "stem_style",
+      "detail": "Overly long, tutorial-style scenario for a single conceptual point; more verbose and explanatory than typical 2022 B Food Science stems. Could be shortened to a direct conceptual question about pH effects on enzyme active sites."
+    },
+    {
+      "item_id": "food-science-b-generated-211",
+      "type": "content_accuracy",
+      "detail": "Claim that a protein-stabilized emulsion will destabilize faster than one with a small nonionic emulsifier at high salt is not clearly correct at this level; salt effects on protein vs small-molecule emulsifiers are nuanced and this framing risks penalizing partially correct reasoning."
+    },
+    {
+      "item_id": "food-science-b-generated-211",
+      "type": "stem_style",
+      "detail": "Scenario is long and somewhat speculative relative to calibration items, which favor more direct conceptual questions."
+    },
+    {
+      "item_id": "food-science-b-curated-mcq-004",
+      "type": "difficulty_mismatch",
+      "detail": "Reads as an everyday common-sense question about vitamin loss in boiling vs steaming; likely too trivial for Division B invitational/national-level written tests compared with calibration items."
+    },
+    {
+      "item_id": "food-science-b-curated-mcq-006",
+      "type": "generic_arithmetic",
+      "detail": "Primarily a plug-and-chug density calculation with no food-specific conceptual twist; calibration items rarely use multi-step arithmetic as the main challenge."
+    },
+    {
+      "item_id": "food-science-b-frq-306",
+      "type": "generic_arithmetic",
+      "detail": "Straightforward percentage and kcal-to-grams conversion; difficulty comes almost entirely from basic arithmetic rather than food-science reasoning. This style is underrepresented in the calibration corpus."
+    },
+    {
+      "item_id": "food-science-b-frq-308",
+      "type": "generic_arithmetic",
+      "detail": "Multi-step mass/volume/density calculation dominated by algebra and rounding; food context is superficial. This is more math-contest style than Food Science 2022 style."
+    },
+    {
+      "item_id": "food-science-b-frq-308",
+      "type": "overly_complex_numeric",
+      "detail": "For Division B, the chained beaker-mass and dilution steps are more elaborate than typical numeric items in the calibration set, which tend to be single-step factual or simple proportional calculations."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-001",
+      "type": "rubric_ambiguity",
+      "detail": "Prompt asks to \"explain\" using protein–enzyme ideas but is only worth 2 points and does not specify whether naming the enzyme, describing denaturation, or both are required. Calibration FRQs are usually more tightly scoped (name/number/list)."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-001",
+      "type": "style_mismatch",
+      "detail": "Open-ended explanatory style is less aligned with the short, fact-based FRQs in the 2022 calibration set, which favor concise factual responses."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-002",
+      "type": "rubric_ambiguity",
+      "detail": "Asks for two named reactions in order but does not clarify acceptable phrasing (e.g., \"caramelization\" vs \"sugar caramelization\"; \"Maillard reaction\" vs \"non-enzymatic browning\"). Minor but could cause grading inconsistency at 2 points."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-002",
+      "type": "style_mismatch",
+      "detail": "Two-part naming question in a single short-answer slot is slightly more multipart than typical numeric/name-only FRQs in the calibration set."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-003",
+      "type": "generic_arithmetic",
+      "detail": "Pure dilution/concentration calculation; the challenge is algebraic rather than conceptual food chemistry. Calibration numeric items more often test recall of specific values or simple proportional reasoning."
+    },
+    {
+      "item_id": "bank_level",
+      "type": "difficulty_distribution",
+      "detail": "Generated bank is skewed toward difficulty 2–3 with only one item at difficulty 4 and relatively few at difficulty 1, whereas the provided source distribution is heavier at difficulty 1 and 2 with a small tail at 4."
+    },
+    {
+      "item_id": "bank_level",
+      "type": "competition_faithfulness",
+      "detail": "Several items (notably 210, 211, 308) use long, tutorial, or multi-step quantitative setups that feel more like classroom worksheets than the concise, fact-focused style of the 2022 calibration tests."
+    },
+    {
+      "item_id": "bank_level",
+      "type": "coverage_gap",
+      "detail": "Only one experimental_analysis MCQ and one FRQ are present; given the source counts and calibration style, experimental/analytical questions are underrepresented and the existing numeric experimental item is overly math-heavy."
+    }
+  ]
+}

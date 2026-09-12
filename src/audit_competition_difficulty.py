@@ -75,7 +75,7 @@ ITEMS:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("input", type=Path)
+    parser.add_argument("input", type=Path, nargs="+")
     parser.add_argument("--competition", required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--model", default="qwen3:14b-q4_K_M")
@@ -85,7 +85,10 @@ def main() -> int:
     parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
 
-    rows = read_jsonl(args.input)
+    rows = [row for path in args.input for row in read_jsonl(path)]
+    row_ids = [str(row.get("id")) for row in rows]
+    if len(row_ids) != len(set(row_ids)):
+        raise RuntimeError("duplicate ids across audit inputs")
     if args.ids:
         selected = set(args.ids)
         rows = [row for row in rows if str(row.get("id")) in selected]

@@ -1,0 +1,42 @@
+{
+  "overall_good": true,
+  "checks": {
+    "requested_counts": true,
+    "schema_and_scope": true,
+    "topic_breadth": true,
+    "pair_similarity_below_0_875": true,
+    "source_question_similarity_below_0_94": true,
+    "source_structure_similarity_below_0_92": true
+  },
+  "response_counts": {
+    "multiple_choice": 12,
+    "short_answer": 7,
+    "numeric": 1
+  },
+  "difficulty_counts": {
+    "2": 11,
+    "1": 4,
+    "3": 4,
+    "4": 1
+  },
+  "topic_counts": {
+    "food_safety_preservation": 3,
+    "food_chemistry_reactions": 10,
+    "carbohydrates_sweeteners": 10,
+    "proteins_enzymes": 5,
+    "nutrition_processing": 7,
+    "lipids_emulsions": 4,
+    "analytical_tests": 2,
+    "experimental_analysis": 2
+  },
+  "maximum_pairwise_similarity": {
+    "score": 0.708550751209259,
+    "ids": [
+      "food-science-b-curated-mcq-010",
+      "food-science-b-curated-frq-005"
+    ]
+  },
+  "maximum_source_question_similarity": 0.711663007736206,
+  "maximum_source_structure_similarity": 0.8503513336181641,
+  "validation_errors": {}
+}

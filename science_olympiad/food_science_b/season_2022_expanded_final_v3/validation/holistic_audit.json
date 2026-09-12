@@ -1,0 +1,63 @@
+{
+  "overall_good": false,
+  "mcq_good": true,
+  "frq_good": false,
+  "coverage_good": true,
+  "difficulty_good": true,
+  "repetition_good": true,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-frq-301",
+    "food-science-b-curated-frq-001",
+    "food-science-b-curated-frq-002",
+    "food-science-b-curated-frq-003",
+    "food-science-b-curated-frq-004",
+    "food-science-b-curated-frq-005"
+  ],
+  "duplicate_or_near_duplicate_ids": [],
+  "missing_areas": [],
+  "issues": [
+    {
+      "item_id": "food-science-b-frq-301",
+      "type": "frq_style_mismatch",
+      "severity": "medium",
+      "detail": "Prompt is acceptable but rubric is overly generic and short compared with calibration short-answer items that often expect a specific term or brief explanation. This is minor but contributes to weaker FRQ bank quality."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-001",
+      "type": "frq_excessive_explanation",
+      "severity": "high",
+      "detail": "Three-point explanatory FRQ with multi-sentence mechanistic explanation is more verbose and tutorial than same-season calibration, which favors short direct responses or brief descriptions. Rubric is multi-step and closer to an extended-response than the short constructed responses in the corpus."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-002",
+      "type": "frq_excessive_explanation",
+      "severity": "high",
+      "detail": "Requires conceptual comparison of intolerance vs allergy with explanation of immune response. This is a multi-idea explanation; calibration FRQs are typically single fact/number or very concise description. Style drifts toward textbook explanation rather than short constructed response."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-003",
+      "type": "frq_excessive_explanation",
+      "severity": "medium",
+      "detail": "Two-part mechanistic explanation of crystallization and texture. While on-topic, it is more elaborate than typical 1–2 point short-answer items in the calibration set, which usually ask for a term or brief description without scenario-heavy narrative."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-004",
+      "type": "frq_excessive_explanation",
+      "severity": "medium",
+      "detail": "Asks for identification plus mechanistic explanation about solubility and excretion. This is somewhat longer-form than most calibration numeric/short-answer items, though still closer than the 3–4 point explanations. Rubric expects two conceptual elements."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-005",
+      "type": "frq_structure_and_style",
+      "severity": "high",
+      "detail": "Four-point multipart-style FRQ (identify IV, DV, and two controls) is more like a mini-lab design question than the single-response FRQs in the calibration corpus. The prompt is scenario-heavy and rubric is multi-element, which diverges from the source style that uses one short answer or numeric response per item."
+    },
+    {
+      "item_id": null,
+      "type": "competition_faithfulness_frq_bank",
+      "severity": "high",
+      "detail": "Several FRQs are multi-idea explanatory questions with 2–4 rubric elements, resembling extended-response items. Same-season calibration FRQs are predominantly single-term or single-number responses with at most brief description. The FRQ bank therefore drifts from the source style even though topics and difficulty are reasonable."
+    }
+  ]
+}

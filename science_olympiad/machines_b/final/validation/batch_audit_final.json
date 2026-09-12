@@ -1,0 +1,176 @@
+{
+  "overall_good": false,
+  "coverage_good": false,
+  "difficulty_distribution_good": true,
+  "repetition_good": false,
+  "competition_faithful": false,
+  "duplicate_or_near_duplicate_ids": [
+    "machines-b-generated-001",
+    "machines-b-generated-010",
+    "machines-b-generated-115",
+    "machines-b-generated-127",
+    "machines-b-generated-160",
+    "machines-b-generated-155"
+  ],
+  "weak_item_ids": [
+    "machines-b-generated-128",
+    "machines-b-generated-135",
+    "machines-b-generated-156",
+    "machines-b-generated-157",
+    "machines-b-generated-158",
+    "machines-b-generated-159",
+    "machines-b-generated-161",
+    "machines-b-generated-160"
+  ],
+  "missing_areas": [
+    "explicit AMA-from-load-and-effort warmup (non-efficiency context)",
+    "basic pulley segment-count IMA computation",
+    "simple compound-machine IMA multiplication (e.g., lever + ramp)",
+    "any direct efficiency = AMA/IMA numeric item",
+    "any direct work = F·d numeric item",
+    "any Newton’s-law / acceleration item tied to machines context",
+    "any static/kinetic friction coefficient computation from angle or forces",
+    "any moment-of-inertia / rotational-energy item",
+    "any explicit wedge-IMA numeric item"
+  ],
+  "issues": [
+    {
+      "type": "coverage",
+      "item_ids": [
+        "machines-b-generated-001",
+        "machines-b-generated-022",
+        "machines-b-generated-127",
+        "machines-b-generated-128",
+        "machines-b-generated-135",
+        "machines-b-generated-161",
+        "machines-b-generated-156",
+        "machines-b-generated-157",
+        "machines-b-generated-158",
+        "machines-b-generated-159",
+        "machines-b-generated-010",
+        "machines-b-generated-118",
+        "machines-b-generated-123",
+        "machines-b-generated-129",
+        "machines-b-generated-140",
+        "machines-b-generated-160",
+        "machines-b-generated-107",
+        "machines-b-generated-114",
+        "machines-b-generated-115",
+        "machines-b-generated-155"
+      ],
+      "description": "Set is heavily weighted toward levers/torque, wheel-and-axle/screws, gears, and qualitative efficiency tradeoffs. It omits several core written-test themes present in the calibration set: direct AMA and efficiency formula practice, simple pulley-segment IMA counting, compound-machine IMA multiplication, basic work = F·d numerics, Newton’s-law acceleration items in a machines context, friction-coefficient warmups, and any rotational inertia content. For a 20-item bank, breadth is narrower than expected from the source examples."
+    },
+    {
+      "type": "repetition",
+      "item_ids": [
+        "machines-b-generated-001",
+        "machines-b-generated-010",
+        "machines-b-generated-115"
+      ],
+      "description": "Three lever/torque items all require balancing torques about a pivot with downward forces. 001 is IMA via arm ratio, 010 is two-force torque balance, 115 is three-force torque balance including beam weight. While not literal duplicates, they emphasize similar lever-torque reasoning; for a 20-item set this cluster is somewhat heavy relative to other topics."
+    },
+    {
+      "type": "repetition",
+      "item_ids": [
+        "machines-b-generated-127",
+        "machines-b-generated-160",
+        "machines-b-generated-155"
+      ],
+      "description": "Pulley coverage is skewed: 127 is conceptual fixed vs movable, 160 is a comparative efficiency/work-loss scenario, and 155 is a Weston differential hoist with IMA and efficiency. All three are higher-level conceptual/compound uses; there is no basic numeric pulley IMA-from-segments or AMA-from-load/effort warmup. The pulley content is thus unbalanced and misses foundational skills while revisiting efficiency themes."
+    },
+    {
+      "type": "style_faithfulness",
+      "item_ids": [
+        "machines-b-generated-128",
+        "machines-b-generated-161",
+        "machines-b-generated-156",
+        "machines-b-generated-157",
+        "machines-b-generated-158",
+        "machines-b-generated-159"
+      ],
+      "description": "Several difficulty-1 items are more verbose and wordy than necessary for calibration-style level-1 questions. Stems often include multiple sentences of narrative and explicit restatement of formulas (e.g., 128, 161) where the real examples tend to be tighter. This is a moderate style mismatch, though still acceptable individually; the cumulative effect is a bank that reads more like a textbook than a tournament test."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-128"
+      ],
+      "description": "Ramp IMA numeric warmup is conceptually fine, but the stem is long relative to the simple computation and explicitly supplies the formula. For a difficulty-1 item this is acceptable once, but here it adds verbosity without testing interpretation or selection of the correct relation. Could be tightened or combined with a follow-up to add value."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-135"
+      ],
+      "description": "Scissors identification item is essentially a recall/recognition of a standard textbook example (two levers + wedges). Distractors are somewhat weak (e.g., “single first-class lever with no wedge action” is easy to dismiss). As a one-off conceptual ID it is acceptable, but it does not probe any quantitative or deeper reasoning and feels less aligned with the more analytical flavor of the calibration set."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-156"
+      ],
+      "description": "Conceptual IMA vs AMA vs efficiency question is sound but somewhat leading: the stem explicitly notes that only friction changes and that arm distances stay fixed, making “IMA stays the same; AMA and efficiency decrease” almost directly stated. For a difficulty-1 item this is borderline trivial and could use more subtle distractors or a less telegraphed setup."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-157"
+      ],
+      "description": "Wheel-and-axle tradeoff item is conceptually correct but the answer choice that doubles effort and doubles lift per turn is almost directly implied by the phrase “axle radius is doubled” in an ideal system. Distractors are weak (two options halve effort, which contradicts the given geometry). This makes the item easier than intended and not very discriminating."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-158"
+      ],
+      "description": "Torque-equivalence item is a straightforward F·d comparison with all forces perpendicular. Only one option preserves the torque magnitude; others are obviously smaller. As a single warmup this is fine, but combined with other simple torque items it contributes to overemphasis on very basic torque arithmetic."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-159"
+      ],
+      "description": "Screw pitch tradeoff item is conceptually fine but again somewhat telegraphed: larger pitch obviously advances farther per turn, and the idea that this reduces IMA is standard. Distractors include symmetric “half/half” patterns that are easy to rule out. Difficulty-1 label is appropriate, but the item is not very discriminating and overlaps conceptually with 157’s force-distance tradeoff."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-161"
+      ],
+      "description": "Work vs power comparison is correct but nearly restates the answer: same load and height (same work), half the time (double power). For a difficulty-1 item this is acceptable as a single calibration question, but in this small bank it adds another very direct conceptual item with limited challenge."
+    },
+    {
+      "type": "weak_item",
+      "item_ids": [
+        "machines-b-generated-160"
+      ],
+      "description": "Pulley efficiency/work-loss comparison is more complex in wording than in computation. Once students compute input and output work, the conclusion that both lose 80 J and that B has higher efficiency is straightforward. The item is somewhat contrived and overlaps with other efficiency-focused questions (129, 140, 114, 155) without adding a distinct skill."
+    },
+    {
+      "type": "difficulty_label",
+      "item_ids": [
+        "machines-b-generated-140"
+      ],
+      "description": "Labeled difficulty 2, but combining gear ratio, drum torque, and efficiency is multi-step and closer to the more involved efficiency items in the calibration set (e.g., wedge and ramp efficiency at level 3). This could reasonably be labeled difficulty 3."
+    },
+    {
+      "type": "difficulty_label",
+      "item_ids": [
+        "machines-b-generated-155"
+      ],
+      "description": "Labeled difficulty 4, but the reasoning is essentially: compute IMA from a given formula, then apply efficiency to find effort. This is conceptually similar in complexity to the differential pulley items in the calibration set that are labeled difficulty 3. The 4 label seems inflated relative to the source scale."
+    },
+    {
+      "type": "competition_faithfulness",
+      "item_ids": [
+        "machines-b-generated-118",
+        "machines-b-generated-129",
+        "machines-b-generated-140",
+        "machines-b-generated-107",
+        "machines-b-generated-114",
+        "machines-b-generated-155"
+      ],
+      "description": "These items are generally on-topic and use appropriate mechanics, but the bank as a whole leans heavily into multi-step numeric calculations and gear/hoist scenarios. The real calibration set interleaves more varied contexts (parachute, ladder, friction-angle experiments, compound machines) and a mix of conceptual and numeric items. The generated set feels more homogeneous and slightly more textbook-problem-like than a typical Science Olympiad written test."
+    }
+  ]
+}

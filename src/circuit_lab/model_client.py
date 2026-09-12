@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import ssl
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 from urllib import error, request
 
@@ -18,6 +20,34 @@ except ImportError:  # Scripts executed directly from src/ import circuit_lab as
 load_dotenv()
 
 
+def _ssl_context() -> ssl.SSLContext:
+    ca_bundle = os.getenv("SSL_CERT_FILE", "").strip()
+    if not ca_bundle:
+        try:
+            import certifi
+        except ImportError:
+            certifi = None
+        if certifi is not None:
+            ca_bundle = certifi.where()
+    return ssl.create_default_context(cafile=ca_bundle or None)
+
+
+def _log_usage(endpoint: str, model: str, body: dict[str, Any]) -> None:
+    path = os.getenv("OPENAI_USAGE_LOG", "").strip()
+    if not path:
+        return
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "endpoint": endpoint,
+        "model": model,
+        "status": body.get("status"),
+        "usage": body.get("usage") or {},
+    }
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
 def _post(endpoint: str, payload: dict[str, Any], timeout: float = 75.0) -> dict[str, Any]:
     key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
@@ -26,7 +56,7 @@ def _post(endpoint: str, payload: dict[str, Any], timeout: float = 75.0) -> dict
     req = request.Request(f"{base}/{endpoint}", data=json.dumps(payload).encode(),
                           headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"}, method="POST")
     try:
-        with request.urlopen(req, timeout=timeout, context=ssl.create_default_context()) as response:
+        with request.urlopen(req, timeout=timeout, context=_ssl_context()) as response:
             return json.loads(response.read().decode())
     except error.HTTPError as exc:
         raise RuntimeError(f"OpenAI request failed ({exc.code}): {exc.read().decode(errors='replace')}") from exc
@@ -71,6 +101,11 @@ def generate_json(model: str, prompt: str, *, provider: str, system: str = "", t
         return ollama_generate_json(model, prompt, system=system, temperature=temperature,
                                     max_output_tokens=max_output_tokens, seed=seed,
                                     json_schema=json_schema, think=ollama_think)
+    # GPT-5 and o-series models reject non-default temperature values. Some older
+    # callers do not set reasoning_effort, so route them through Responses with a
+    # conservative default instead of falling through to Chat Completions.
+    if reasoning_effort is None and model.startswith(("gpt-5", "o1", "o3", "o4")):
+        reasoning_effort = "low"
     if reasoning_effort:
         response_format: dict[str, Any] = {"type": "json_object"}
         if json_schema:
@@ -85,7 +120,15 @@ def generate_json(model: str, prompt: str, *, provider: str, system: str = "", t
             "reasoning": {"effort": reasoning_effort},
             "text": {"format": response_format, "verbosity": "low"},
         }, timeout=float(os.getenv("OPENAI_REASONING_TIMEOUT_SECONDS", "900")))
+        _log_usage("responses", model, body)
         raw_text = _responses_output_text(body)
+        if body.get("status") == "incomplete":
+            details = body.get("incomplete_details") or {}
+            usage = body.get("usage") or {}
+            raise ValueError(
+                "OpenAI Responses API output was incomplete "
+                f"(reason={details.get('reason')}, output_tokens={usage.get('output_tokens')})"
+            )
         if not raw_text:
             details = body.get("incomplete_details") or {}
             usage = body.get("usage") or {}
@@ -104,6 +147,7 @@ def generate_json(model: str, prompt: str, *, provider: str, system: str = "", t
         "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
         "max_completion_tokens": max_output_tokens, "temperature": temperature,
         "response_format": chat_format})
+    _log_usage("chat/completions", model, body)
     try:
         return _parse_json_text(body["choices"][0]["message"]["content"], "OpenAI chat API")
     except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
@@ -114,6 +158,7 @@ def embed_texts(model: str, texts: list[str], *, provider: str) -> list[list[flo
     if provider == "ollama":
         return ollama_embed_texts(model, texts)
     body = _post("embeddings", {"model": model, "input": texts, "encoding_format": "float"})
+    _log_usage("embeddings", model, body)
     try:
         return [row["embedding"] for row in sorted(body["data"], key=lambda row: row["index"])]
     except (KeyError, TypeError) as exc:

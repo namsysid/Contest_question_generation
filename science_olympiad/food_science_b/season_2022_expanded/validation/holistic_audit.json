@@ -1,0 +1,219 @@
+{
+  "overall_good": false,
+  "mcq_good": false,
+  "frq_good": false,
+  "coverage_good": true,
+  "difficulty_good": false,
+  "repetition_good": false,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-generated-201",
+    "food-science-b-generated-202",
+    "food-science-b-generated-203",
+    "food-science-b-generated-204",
+    "food-science-b-generated-205",
+    "food-science-b-generated-206",
+    "food-science-b-generated-208",
+    "food-science-b-generated-209",
+    "food-science-b-generated-210",
+    "food-science-b-generated-211",
+    "food-science-b-generated-212",
+    "food-science-b-frq-301",
+    "food-science-b-frq-302",
+    "food-science-b-frq-303",
+    "food-science-b-frq-304"
+  ],
+  "duplicate_or_near_duplicate_ids": [
+    "food-science-b-generated-201",
+    "food-science-b-generated-212"
+  ],
+  "missing_areas": [],
+  "issues": [
+    {
+      "item_id": "food-science-b-generated-201",
+      "type": "difficulty_mismatch",
+      "severity": "medium",
+      "message": "Concept (4 kcal/g for nutritive sugars) is appropriate, but the stem is more verbose and scenario-based than calibration items, which typically ask this fact directly. Difficulty 1 is acceptable, but style is more tutorial than source corpus."
+    },
+    {
+      "item_id": "food-science-b-generated-201",
+      "type": "near_duplicate",
+      "severity": "high",
+      "message": "This item is essentially duplicated by food-science-b-generated-212 (same fact, nearly identical options). Retain at most one."
+    },
+    {
+      "item_id": "food-science-b-generated-202",
+      "type": "style_verbose",
+      "severity": "medium",
+      "message": "Overly wordy scenario for a simple conceptual question about emulsifier function. Calibration MCQs are shorter and more direct."
+    },
+    {
+      "item_id": "food-science-b-generated-203",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "Stem is long and tutorial, with explicit guidance about glycemic impact and fiber types. Source questions rarely embed this much explanation in a single 1-point MCQ."
+    },
+    {
+      "item_id": "food-science-b-generated-203",
+      "type": "difficulty_tagging",
+      "severity": "low",
+      "message": "Tagged as difficulty 2 but scaffolded heavily; could be answered by elimination and prior nutrition basics, making it closer to difficulty 1 in the given corpus."
+    },
+    {
+      "item_id": "food-science-b-generated-204",
+      "type": "reasoning_mismatch",
+      "severity": "medium",
+      "message": "Assumes a simplified relationship between solute concentration, density, and viscosity and asks students to infer both. This multi-step physical-chemistry reasoning is more elaborate than typical Div B Food Science MCQs for 1 point."
+    },
+    {
+      "item_id": "food-science-b-generated-204",
+      "type": "style_verbose",
+      "severity": "medium",
+      "message": "Long, tutorial-style stem with explicit description of methods and assumptions, unlike concise calibration items."
+    },
+    {
+      "item_id": "food-science-b-generated-205",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "The stem explains enzyme pH dependence in detail and then restates the conclusion in the keyed option. This is more like a reading-comprehension item than a content recall or brief reasoning question, diverging from source style."
+    },
+    {
+      "item_id": "food-science-b-generated-205",
+      "type": "difficulty_tagging",
+      "severity": "low",
+      "message": "Tagged difficulty 3, but the answer is essentially given in the stem (highest rate at pH 6), making it easier than typical difficulty-3 calibration items."
+    },
+    {
+      "item_id": "food-science-b-generated-206",
+      "type": "style_tutorial",
+      "severity": "high",
+      "message": "Very long, scenario-heavy stem with multiple processing details and explicit hints about aw, pH, oxygen, and spores. This is substantially more verbose and guided than calibration MCQs."
+    },
+    {
+      "item_id": "food-science-b-generated-206",
+      "type": "difficulty_tagging",
+      "severity": "medium",
+      "message": "Tagged difficulty 4, but the stem heavily leads students to spore-formers in low-aw, low-O2 conditions. This reduces functional difficulty compared to source difficulty-4 items that expect more recall and synthesis."
+    },
+    {
+      "item_id": "food-science-b-generated-207",
+      "type": "style_ok_but_simple",
+      "severity": "low",
+      "message": "Concept and difficulty are appropriate, but the stem uses a mild scenario instead of the very direct phrasing typical of calibration items. Acceptable but slightly more narrative than needed."
+    },
+    {
+      "item_id": "food-science-b-generated-208",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "Stem explicitly states that some toxins survive pasteurization and that some hazards are toxins vs microbes, then asks which could remain. This is more guided than source MCQs and reads like a mini-lesson."
+    },
+    {
+      "item_id": "food-science-b-generated-208",
+      "type": "difficulty_tagging",
+      "severity": "low",
+      "message": "Tagged difficulty 2, but with the explicit hint about heat-stable toxins, the item is closer to difficulty 1 in practice."
+    },
+    {
+      "item_id": "food-science-b-generated-209",
+      "type": "style_verbose",
+      "severity": "medium",
+      "message": "Long narrative about a student and test reagents for what is essentially a straightforward recall question (Benedict’s for reducing sugars). Calibration items ask this more directly."
+    },
+    {
+      "item_id": "food-science-b-generated-210",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "Stem includes a mini-lesson on reducing sugars, anomeric carbons, and sucrose vs glucose. This level of explanation is not typical for 1-point MCQs in the calibration set."
+    },
+    {
+      "item_id": "food-science-b-generated-211",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "Extended explanation of emulsions and lecithin before a simple stability comparison. Source items are more concise and assume more prior knowledge rather than teaching in the stem."
+    },
+    {
+      "item_id": "food-science-b-generated-211",
+      "type": "difficulty_tagging",
+      "severity": "low",
+      "message": "Tagged difficulty 3, but the stem essentially tells students that more oil with fixed emulsifier reduces stability, making the reasoning straightforward."
+    },
+    {
+      "item_id": "food-science-b-generated-212",
+      "type": "near_duplicate",
+      "severity": "high",
+      "message": "Asks for caloric value of digestible sugar with options identical in meaning to food-science-b-generated-201. This is a near-duplicate concept and structure."
+    },
+    {
+      "item_id": "food-science-b-generated-212",
+      "type": "style_redundant",
+      "severity": "medium",
+      "message": "Redundant coverage of 4 kcal/g sugar already tested in item 201; source corpus does not repeat the same basic fact in multiple MCQs within such a small bank."
+    },
+    {
+      "item_id": "food-science-b-frq-301",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "Multipart FRQ uses a long narrative and explicit interpretation rule (less separated volume = more stable). Source calibration FRQs/short answers are more concise and less scaffolded."
+    },
+    {
+      "item_id": "food-science-b-frq-301",
+      "type": "rubric_depth",
+      "severity": "low",
+      "message": "Parts (a) and (b) are simple arithmetic and direct interpretation; only (c) probes conceptual understanding. Overall depth per point is lower than typical high-difficulty calibration FRQs, though difficulty tag 2 is consistent."
+    },
+    {
+      "item_id": "food-science-b-frq-302",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "The stem explains Maillard requirements and defines browning index, then provides explicit data. This is more guided than calibration items, which assume more prior knowledge and provide less narrative."
+    },
+    {
+      "item_id": "food-science-b-frq-302",
+      "type": "arithmetic_emphasis",
+      "severity": "low",
+      "message": "Part (b) is generic percent-change arithmetic; while present in some tests, the bank should avoid overusing generic math steps that do not strongly probe Food Science content."
+    },
+    {
+      "item_id": "food-science-b-frq-303",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "The model is heavily simplified and explicitly states that values are classroom-only. The stem walks through aw and pH limits in a way that feels more like a teaching exercise than a competition FRQ."
+    },
+    {
+      "item_id": "food-science-b-frq-303",
+      "type": "difficulty_tagging",
+      "severity": "low",
+      "message": "Tagged difficulty 3, but the logic is mostly table look-up and simple comparison; functional difficulty may be closer to 2 compared to calibration difficulty-3/4 items."
+    },
+    {
+      "item_id": "food-science-b-frq-304",
+      "type": "style_tutorial",
+      "severity": "medium",
+      "message": "Long, stepwise description of the pectinase experiment with explicit control and conditions. Calibration items on experiments are generally more compact and expect students to infer more."
+    },
+    {
+      "item_id": "food-science-b-frq-304",
+      "type": "difficulty_distribution",
+      "severity": "medium",
+      "message": "All parts are tagged difficulty 4, but several (a, b, c) are straightforward identification or single-step calculations once the stem is read. The heavy scaffolding reduces effective difficulty relative to calibration difficulty-4 items."
+    },
+    {
+      "item_id": null,
+      "type": "repetition",
+      "severity": "medium",
+      "message": "Multiple items rely on long, narrative stems that explicitly teach the concept (e.g., enzyme pH dependence, Maillard requirements, aw/pH hurdles) before asking a relatively simple question. This repeated tutorial style diverges from the more concise, recall- and concept-focused calibration corpus."
+    },
+    {
+      "item_id": null,
+      "type": "competition_faithfulness",
+      "severity": "medium",
+      "message": "Overall, the bank leans toward classroom-worksheet style with heavy scaffolding and narrative context, whereas the same-season calibration examples are shorter, more direct, and less guided. This affects both MCQ and FRQ authenticity for Science Olympiad Division B Food Science 2022."
+    },
+    {
+      "item_id": null,
+      "type": "difficulty_profile",
+      "severity": "medium",
+      "message": "While the topic coverage roughly matches the source distribution, the functional difficulty is often lower than the assigned tags due to extensive hints and explanations in stems, especially for items labeled difficulty 3–4."
+    }
+  ]
+}

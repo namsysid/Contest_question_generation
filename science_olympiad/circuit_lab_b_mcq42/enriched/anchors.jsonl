@@ -1,0 +1,42 @@
+{"id": "circuit-lab-b-test-mc-01", "response_type": "multiple_choice", "topics": ["history", "ac_household"]}
+{"id": "circuit-lab-b-test-mc-02", "response_type": "multiple_choice", "topics": ["history", "scientist identification", "Faraday cage"]}
+{"id": "circuit-lab-b-test-mc-03", "response_type": "multiple_choice", "topics": ["electrostatics", "charge transfer", "triboelectric effect"]}
+{"id": "circuit-lab-b-test-mc-04", "response_type": "multiple_choice", "topics": ["taxonomy labels"]}
+{"id": "circuit-lab-b-test-mc-05", "response_type": "multiple_choice", "topics": ["electrostatics", "elementary charge", "fundamental constants"]}
+{"id": "circuit-lab-b-test-mc-06", "response_type": "multiple_choice", "topics": ["Ohm's Law", "Famous Scientists", "Electrical Laws"]}
+{"id": "circuit-lab-b-test-mc-07", "response_type": "multiple_choice", "topics": ["electrostatics", "electric field direction", "point charges"]}
+{"id": "circuit-lab-b-test-mc-08", "response_type": "multiple_choice", "topics": ["electrostatics", "electric force", "charge interaction", "Coulomb's law"]}
+{"id": "circuit-lab-b-test-mc-09", "response_type": "multiple_choice", "topics": ["transformers", "electromagnetic induction", "AC circuits"]}
+{"id": "circuit-lab-b-test-mc-10", "response_type": "multiple_choice", "topics": ["transformers", "AC circuits", "ratios", "magnetism"]}
+{"id": "circuit-lab-b-test-mc-11", "response_type": "multiple_choice", "topics": ["component identification", "resistor types", "sensor components"]}
+{"id": "circuit-lab-b-test-mc-12", "response_type": "multiple_choice", "topics": ["ac_household", "quantities_ohms_law"]}
+{"id": "circuit-lab-b-test-mc-13", "response_type": "multiple_choice", "topics": ["fuses", "circuit breakers", "circuit protection devices", "safety devices"]}
+{"id": "circuit-lab-b-test-mc-14", "response_type": "multiple_choice", "topics": ["electrostatics", "conductors", "electric field"]}
+{"id": "circuit-lab-b-test-mc-15", "response_type": "multiple_choice", "topics": ["ac_vs_dc", "electrocution", "safety", "physiological_effects"]}
+{"id": "circuit-lab-b-test-mc-16", "response_type": "multiple_choice", "topics": ["Van de Graaff generator", "electric current", "electric voltage", "safety", "electrostatics"]}
+{"id": "circuit-lab-b-test-mc-17", "response_type": "multiple_choice", "topics": ["Kirchhoff's Laws", "Conservation Laws", "Basic Circuit Theory"]}
+{"id": "circuit-lab-b-test-mc-18", "response_type": "multiple_choice", "topics": ["Kirchhoff's Laws", "Conservation Laws", "Basic Circuit Principles"]}
+{"id": "circuit-lab-b-test-mc-19", "response_type": "multiple_choice", "topics": ["quantities_ohms_law", "circuit_analysis"]}
+{"id": "circuit-lab-b-test-mc-20", "response_type": "multiple_choice", "topics": ["current", "charge", "time", "quantities_ohms_law"]}
+{"id": "circuit-lab-b-test-mc-21", "response_type": "multiple_choice", "topics": ["AC signals", "frequency", "period", "cycles", "time calculation"]}
+{"id": "circuit-lab-b-test-mc-22", "response_type": "multiple_choice", "topics": ["power", "resistance", "Ohm's Law"]}
+{"id": "circuit-lab-b-test-mc-23", "response_type": "multiple_choice", "topics": ["ac_household", "wire_color_codes"]}
+{"id": "circuit-lab-b-test-mc-24", "response_type": "multiple_choice", "topics": ["controls_safety", "led", "switch_types"]}
+{"id": "circuit-lab-b-test-mc-25", "response_type": "multiple_choice", "topics": ["switching circuits", "SPDT switches", "lighting control", "household wiring"]}
+{"id": "circuit-lab-b-test-mc-26", "response_type": "multiple_choice", "topics": ["LED", "voltage drop", "component properties"]}
+{"id": "circuit-lab-b-test-mc-27", "response_type": "multiple_choice", "topics": ["resistors", "equivalent resistance", "series and parallel circuits"]}
+{"id": "circuit-lab-b-test-mc-28", "response_type": "multiple_choice", "topics": ["capacitors", "equivalent capacitance", "series and parallel combinations"]}
+{"id": "circuit-lab-b-test-mc-29", "response_type": "multiple_choice", "topics": ["capacitors", "series and parallel circuits", "circuit configuration"]}
+{"id": "circuit-lab-b-test-mc-30", "response_type": "multiple_choice", "topics": ["magnetic fields", "current loops", "right-hand rule"]}
+{"id": "circuit-lab-b-test-mc-31", "response_type": "multiple_choice", "topics": ["magnetic field", "current", "loops", "electromagnetism"]}
+{"id": "circuit-lab-b-test-mc-32", "response_type": "multiple_choice", "topics": ["solenoid", "magnetic field", "radius effect", "magnetism"]}
+{"id": "circuit-lab-b-test-mc-33", "response_type": "multiple_choice", "topics": ["magnetism", "induced current", "Faraday's Law", "Lenz's Law"]}
+{"id": "circuit-lab-b-test-mc-34", "response_type": "multiple_choice", "topics": ["electric fields", "magnetic fields", "charged particle motion", "Lorentz force"]}
+{"id": "circuit-lab-b-test-mc-35", "response_type": "multiple_choice", "topics": ["electric fields", "magnetic fields", "charged particle motion"]}
+{"id": "circuit-lab-b-test-mc-36", "response_type": "multiple_choice", "topics": ["RC circuits", "time constant", "resistance", "capacitance"]}
+{"id": "circuit-lab-b-test-mc-37", "response_type": "multiple_choice", "topics": ["RC circuits", "charging process", "current", "capacitor voltage", "capacitor charge"]}
+{"id": "circuit-lab-b-test-mc-38", "response_type": "multiple_choice", "topics": ["magnetic fields", "Earth's magnetism", "field line direction"]}
+{"id": "circuit-lab-b-test-mc-39", "response_type": "multiple_choice", "topics": ["LED", "light emission", "particle types"]}
+{"id": "circuit-lab-b-test-mc-40", "response_type": "multiple_choice", "topics": ["LEDs", "band gap", "semiconductor physics"]}
+{"id": "circuit-lab-b-test-mc-41", "response_type": "multiple_choice", "topics": ["ac_vs_dc", "power_distribution", "transformers", "household_electronics"]}
+{"id": "circuit-lab-b-test-mc-42", "response_type": "multiple_choice", "topics": ["electromagnetism", "electromagnets", "magnetic field strength", "factors affecting electromagnets"]}

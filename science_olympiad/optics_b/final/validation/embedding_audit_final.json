@@ -1,0 +1,127 @@
+{
+  "method": "cosine similarity of text-embedding-3-small question embeddings",
+  "generated_near_duplicate_threshold": 0.875,
+  "source_rewrite_threshold": 0.94,
+  "maximum_generated_pair": {
+    "similarity": 0.7048335075378418,
+    "ids": [
+      "optics-b-final-013",
+      "optics-b-final-014"
+    ]
+  },
+  "generated_pairs_at_or_above_threshold": [],
+  "maximum_source_similarity": 0.7554416656494141,
+  "source_hits": [
+    {
+      "id": "optics-b-final-001",
+      "source_id": "usc-test-23",
+      "similarity": 0.5168337821960449
+    },
+    {
+      "id": "optics-b-final-002",
+      "source_id": "bullso-test-9",
+      "similarity": 0.5534582138061523
+    },
+    {
+      "id": "optics-b-final-003",
+      "source_id": "purdue-test-Color theory 2",
+      "similarity": 0.5324532985687256
+    },
+    {
+      "id": "optics-b-final-004",
+      "source_id": "purdue-test-Mirrors and Lenses 1",
+      "similarity": 0.5932157635688782
+    },
+    {
+      "id": "optics-b-final-005",
+      "source_id": "usc-test-11",
+      "similarity": 0.4441717267036438
+    },
+    {
+      "id": "optics-b-final-006",
+      "source_id": "bullso-test-17",
+      "similarity": 0.4742817282676697
+    },
+    {
+      "id": "optics-b-final-007",
+      "source_id": "bullso-test-13",
+      "similarity": 0.5947436690330505
+    },
+    {
+      "id": "optics-b-final-008",
+      "source_id": "bullso-test-11",
+      "similarity": 0.6474247574806213
+    },
+    {
+      "id": "optics-b-final-009",
+      "source_id": "usc-test-9",
+      "similarity": 0.42099541425704956
+    },
+    {
+      "id": "optics-b-final-010",
+      "source_id": "usc-test-29",
+      "similarity": 0.46317559480667114
+    },
+    {
+      "id": "optics-b-final-011",
+      "source_id": "bullso-test-9",
+      "similarity": 0.5251145958900452
+    },
+    {
+      "id": "optics-b-final-012",
+      "source_id": "usc-test-16",
+      "similarity": 0.6119200587272644
+    },
+    {
+      "id": "optics-b-final-013",
+      "source_id": "bullso-test-24",
+      "similarity": 0.7554416656494141
+    },
+    {
+      "id": "optics-b-final-014",
+      "source_id": "bullso-test-24",
+      "similarity": 0.6858047246932983
+    },
+    {
+      "id": "optics-b-final-015",
+      "source_id": "bullso-test-24",
+      "similarity": 0.6529583930969238
+    },
+    {
+      "id": "optics-b-final-016",
+      "source_id": "bullso-test-6",
+      "similarity": 0.552496612071991
+    },
+    {
+      "id": "optics-b-final-017",
+      "source_id": "purdue-test-Mirrors and Lenses 5",
+      "similarity": 0.5627554655075073
+    },
+    {
+      "id": "optics-b-final-018",
+      "source_id": "usc-test-11",
+      "similarity": 0.6080693602561951
+    }
+  ],
+  "difficulty_counts": {
+    "1": 10,
+    "2": 6,
+    "3": 2
+  },
+  "response_type_counts": {
+    "multiple_choice": 16,
+    "short_answer": 1,
+    "numeric": 1
+  },
+  "topic_counts": {
+    "refraction_tir": 4,
+    "lenses_images": 4,
+    "physical_optics": 3,
+    "reflection_mirrors": 2,
+    "light_photons": 2,
+    "human_eye_vision": 1,
+    "color_spectra": 1,
+    "optical_instruments": 1
+  },
+  "passes": true
+}

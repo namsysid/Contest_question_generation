@@ -1,0 +1,77 @@
+{
+  "overall_good": false,
+  "mcq_good": false,
+  "frq_good": false,
+  "coverage_good": false,
+  "difficulty_good": true,
+  "repetition_good": false,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-generated-212",
+    "food-science-b-curated-mcq-006",
+    "food-science-b-frq-303",
+    "food-science-b-frq-306",
+    "food-science-b-frq-308",
+    "food-science-b-curated-frq-003"
+  ],
+  "duplicate_or_near_duplicate_ids": [
+    "food-science-b-curated-frq-002"
+  ],
+  "missing_areas": [
+    "nutrition_processing",
+    "food_chemistry_reactions",
+    "carbohydrates_sweeteners"
+  ],
+  "issues": [
+    {
+      "item_id": "food-science-b-generated-212",
+      "type": "style_difficulty_mismatch",
+      "detail": "Multi-line scenario with pH and aw data is substantially more complex and scenario-heavy than typical Division B calibration items; closer to upper high-school/college food microbiology than 2022 B-level style."
+    },
+    {
+      "item_id": "food-science-b-curated-mcq-006",
+      "type": "needless_calculation",
+      "detail": "Density computation is straightforward but wrapped in an overlong narrative about layering; distractors hinge on trivial arithmetic rather than Food Science content, making it more of a generic density math problem."
+    },
+    {
+      "item_id": "food-science-b-frq-303",
+      "type": "overly_tutorial_rubric",
+      "detail": "Rubric walks through intermediate reasoning steps (identifying nearest double bond, then subtracting) for a 1-number response, which is more detailed than needed for a short numeric FRQ at this level."
+    },
+    {
+      "item_id": "food-science-b-frq-306",
+      "type": "generic_arithmetic",
+      "detail": "Problem is essentially a percent-of-total and division calculation with minimal Food Science content beyond labeling calories per gram; comparable items exist but this version is more math-focused than necessary."
+    },
+    {
+      "item_id": "food-science-b-frq-308",
+      "type": "decorative_calculation",
+      "detail": "Multi-step mass and volume data plus dilution are unnecessary for the target concept; final density could be assessed with far simpler givens, making much of the arithmetic decorative rather than Food Science–focused."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-003",
+      "type": "generic_dilution_math",
+      "detail": "Uses C1V1=C2V2 style dilution with no specific Food Science twist beyond naming fruit juice; reasoning is repeated from other experimental/density items and leans heavily on generic solution-concentration algebra."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-002",
+      "type": "near_duplicate_content",
+      "detail": "Concept (caramelization vs Maillard browning, sugars vs proteins) substantially overlaps with existing MCQ about browning reactions; risks repetition of the same reasoning rather than expanding coverage."
+    },
+    {
+      "item_id": null,
+      "type": "coverage_imbalance",
+      "detail": "Compared to projected topic counts, the bank underrepresents nutrition_processing and food_chemistry_reactions and is light on carbohydrates_sweeteners relative to their prominence in the source corpus."
+    },
+    {
+      "item_id": null,
+      "type": "competition_faithfulness",
+      "detail": "Several FRQs include multi-step, tutorial-style rubrics and extended numeric setups that go beyond the concise, single-step short-answer/numeric style seen in the 2022 Division B calibration examples."
+    },
+    {
+      "item_id": null,
+      "type": "repetition_of_reasoning",
+      "detail": "Multiple items emphasize similar generic density/dilution arithmetic (MCQ-006, FRQ-308, FRQ-003), leading to repeated reasoning patterns without adding distinct Food Science content."
+    }
+  ]
+}

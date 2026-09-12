@@ -63,7 +63,10 @@ def topic_text(row: dict[str, Any]) -> str:
 
 
 def matches_topic(row: dict[str, Any], topic_key: str) -> bool:
-    return classify_topic(row) == topic_key
+    """Return whether a row materially matches a topic, allowing cross-topic membership."""
+    problem = row.get("problem") if isinstance(row.get("problem"), dict) else {}
+    stem = str(problem.get("stem") or "").casefold()
+    return bool(re.search(TOPICS[topic_key][1], stem, flags=re.IGNORECASE))
 
 
 def classify_topic(row: dict[str, Any]) -> str | None:
@@ -100,6 +103,10 @@ def main() -> int:
     parser.add_argument("--min-topic-sources", type=int, default=12)
     parser.add_argument("--topic-key", choices=TOPICS)
     parser.add_argument("--official-only", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument(
+        "--allow-multitopic", action="store_true",
+        help="Allow a source row into each matching topic shard instead of forcing one label.",
+    )
     args = parser.parse_args()
     enriched = read_jsonl(args.enriched)
     skeletons = {str(row["id"]): row for row in read_jsonl(args.skeleton_embeddings)}
@@ -108,7 +115,9 @@ def main() -> int:
         {args.topic_key: TOPICS[args.topic_key]} if args.topic_key else TOPICS
     )
     for topic_key, (label, _) in selected_topics.items():
-        selected = [row for row in enriched if classify_topic(row) == topic_key
+        selected = [row for row in enriched if (
+                        matches_topic(row, topic_key) if args.allow_multitopic else classify_topic(row) == topic_key
+                    )
                     and (not args.official_only or is_official_fma_source(row))
                     and not bool((row.get("analysis") or {}).get("diagram_required"))
                     and str(row.get("id")) in skeletons and str(row.get("id")) in questions]

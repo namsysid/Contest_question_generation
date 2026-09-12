@@ -200,6 +200,10 @@ def build_stage_commands_for_paths(
         commands["03"].extend(["--min_seed_complexity", str(min_seed_complexity)])
     if min_sol_ex_complexity > 0:
         commands["03"].extend(["--min_sol_ex_complexity", str(min_sol_ex_complexity)])
+    if args.min_source_difficulty > 0:
+        commands["03"].extend(["--min_source_difficulty", str(args.min_source_difficulty)])
+    if getattr(args, "required_seed_ids", []):
+        commands["03"].extend(["--required_seed_ids", *args.required_seed_ids])
 
     commands["04"] = [
         "--bundles", str(bundles_path),
@@ -217,6 +221,8 @@ def build_stage_commands_for_paths(
         commands["04"].extend(["--required-topic", args.required_topic])
     if args.verify_model:
         commands["04"].extend(["--verify-model", args.verify_model])
+    if getattr(args, "seed_faithful_hard", False):
+        commands["04"].append("--seed-faithful-hard")
 
     commands["05"] = [
         "--bundles", str(bundles_path),
@@ -780,11 +786,17 @@ def build_parser() -> argparse.ArgumentParser:
     pipe.add_argument("--require-insight-solution-exemplars", action="store_true")
     pipe.add_argument("--min-seed-complexity", type=int, default=0)
     pipe.add_argument("--min-sol-ex-complexity", type=int, default=0)
+    pipe.add_argument("--min-source-difficulty", type=int, default=0)
+    pipe.add_argument("--required-seed-ids", nargs="*", default=[])
 
     pipe.add_argument("--max-q-exemplars", type=int, default=4)
     pipe.add_argument("--max-paired-exemplars", type=int, default=3)
     pipe.add_argument("--repair-max", type=int, default=1)
     pipe.add_argument("--generation-max-attempts", type=int, default=4)
+    pipe.add_argument(
+        "--seed-faithful-hard", action="store_true",
+        help="Generate D4/D5 parallel forms by preserving the hard seed's solution topology.",
+    )
     pipe.add_argument("--sleep", type=float, default=0.0)
 
     bucket = sub.add_parser(

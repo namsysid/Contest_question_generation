@@ -1,0 +1,31 @@
+{
+  "overall_good": true,
+  "checks": {
+    "five_items": true,
+    "difficulty_1_3_1": true,
+    "mcq_and_constructed_response": true,
+    "five_distinct_primary_topics": true,
+    "schema_scope_and_word_caps": true,
+    "question_pair_similarity_below_0_875": true,
+    "source_question_similarity_below_0_94": true,
+    "source_structure_similarity_below_0_92": true
+  },
+  "difficulty_counts": {
+    "1": 1,
+    "2": 3,
+    "3": 1,
+    "4": 0,
+    "5": 0
+  },
+  "maximum_pairwise_question_similarity": {
+    "score": 0.42750078439712524,
+    "ids": [
+      "food-science-b-generated-006",
+      "food-science-b-generated-101"
+    ]
+  },
+  "maximum_source_question_similarity": 0.6002708077430725,
+  "maximum_source_structure_similarity": 0.7413479685783386,
+  "deterministic_errors": {},
+  "length_errors": {}
+}

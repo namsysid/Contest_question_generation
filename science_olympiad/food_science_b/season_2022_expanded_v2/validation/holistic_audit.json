@@ -1,0 +1,121 @@
+{
+  "overall_good": false,
+  "mcq_good": false,
+  "frq_good": false,
+  "coverage_good": false,
+  "difficulty_good": false,
+  "repetition_good": false,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-generated-203",
+    "food-science-b-generated-204",
+    "food-science-b-generated-206",
+    "food-science-b-generated-208",
+    "food-science-b-generated-209",
+    "food-science-b-generated-210",
+    "food-science-b-generated-211",
+    "food-science-b-generated-212",
+    "food-science-b-frq-301",
+    "food-science-b-frq-302",
+    "food-science-b-frq-303",
+    "food-science-b-frq-304"
+  ],
+  "duplicate_or_near_duplicate_ids": [],
+  "missing_areas": [
+    "analytical_tests",
+    "experimental_analysis",
+    "food_safety_preservation"
+  ],
+  "issues": [
+    {
+      "item_id": "food-science-b-generated-203",
+      "type": "style_depth_mismatch",
+      "detail": "Overly long, tutorial-style scenario for a single conceptual Maillard vs caramelization distinction; calibration items are much more concise and direct."
+    },
+    {
+      "item_id": "food-science-b-generated-204",
+      "type": "overly_tutorial_stem",
+      "detail": "Prompt embeds meta-interpretation of the phrase 'oxidizing sugars' and explanation of redox roles; source items state the fact more simply."
+    },
+    {
+      "item_id": "food-science-b-generated-206",
+      "type": "difficulty_miscalibration",
+      "detail": "HLB-number reasoning and matching to specific products is more advanced than typical Div B 2022 items and may be closer to Div C depth."
+    },
+    {
+      "item_id": "food-science-b-generated-208",
+      "type": "distractor_quality",
+      "detail": "Mixes process-survival and pre-formed toxin in one stem; options are not parallel and the stem over-explains pasteurization design."
+    },
+    {
+      "item_id": "food-science-b-generated-209",
+      "type": "generic_arithmetic_reasoning",
+      "detail": "Essentially a trivial ratio comparison framed in words; similar numeric-comparison skills are already exercised elsewhere in the bank."
+    },
+    {
+      "item_id": "food-science-b-generated-210",
+      "type": "generic_physics_reasoning",
+      "detail": "Hydrometer/density setup is generic physical-science reasoning with minimal food-specific content; calibration corpus tends to keep questions tightly tied to food chemistry or nutrition."
+    },
+    {
+      "item_id": "food-science-b-generated-211",
+      "type": "overly_elaborate_scenario",
+      "detail": "Four-condition pineapple–gelatin setup is more verbose than needed for the classic bromelain-denaturation concept tested in Div B."
+    },
+    {
+      "item_id": "food-science-b-generated-212",
+      "type": "safety_model_mismatch",
+      "detail": "Botulism control in garlic-in-oil with specific pH and aw values is more like upper-level food microbiology/HACCP than typical Div B 2022 expectations."
+    },
+    {
+      "item_id": "food-science-b-frq-301",
+      "type": "multipart_structure_issue",
+      "detail": "Part (b) depends on (a) only superficially (simple percent), and (c) is conceptually independent; the shared scenario does not create strong multi-step depth beyond basic arithmetic plus recall."
+    },
+    {
+      "item_id": "food-science-b-frq-302",
+      "type": "repeated_reasoning",
+      "detail": "Multiple parts (a, c, d) all ask for experimental-design interpretation around the same Maillard dataset; this is denser and more repetitive than single-part calibration questions."
+    },
+    {
+      "item_id": "food-science-b-frq-302",
+      "type": "difficulty_miscalibration",
+      "detail": "Combined interpretation, percent-change calculation, control justification, and variable-control reasoning in one 7-point item is more complex than typical Div B 2022 style."
+    },
+    {
+      "item_id": "food-science-b-frq-303",
+      "type": "topic_leakage_and_depth",
+      "detail": "Abstract aw–pH growth-limit modeling with multiple organisms and a hurdle-technology explanation is closer to advanced food micro; calibration examples do not go this deep on preservation modeling."
+    },
+    {
+      "item_id": "food-science-b-frq-303",
+      "type": "repeated_reasoning",
+      "detail": "Parts (a), (b), and (d) all require similar inequality checks against the same aw/pH thresholds, leading to repetitive logic."
+    },
+    {
+      "item_id": "food-science-b-frq-304",
+      "type": "overly_advanced_experimental_design",
+      "detail": "Part (e) asks for designing a denaturation vs reversible-temperature-effect experiment, which is more sophisticated than the short factual or simple-design prompts in the calibration set."
+    },
+    {
+      "item_id": "food-science-b-frq-304",
+      "type": "multipart_structure_issue",
+      "detail": "Several parts are loosely connected (basic variable ID, percent increase, choice of temperature, mechanism explanation, then a new design task), making the item feel like a mini-lab writeup rather than a single focused question as in the source corpus."
+    },
+    {
+      "item_id": null,
+      "type": "coverage_distribution",
+      "detail": "Compared to source topic counts, the bank underrepresents analytical_tests and experimental_analysis as standalone foci and overweights multi-part experimental FRQs, diverging from the mostly single-question calibration style."
+    },
+    {
+      "item_id": null,
+      "type": "difficulty_distribution",
+      "detail": "Generated set has relatively more difficulty 3–4 multi-step reasoning items than the source, which is dominated by short, single-step questions even at difficulty 4."
+    },
+    {
+      "item_id": null,
+      "type": "competition_style_mismatch",
+      "detail": "Many stems are written in a narrative, classroom-activity tone with extended context and explicit modeling language, whereas calibration items are terse, test-like prompts with minimal scenario text."
+    }
+  ]
+}

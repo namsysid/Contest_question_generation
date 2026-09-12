@@ -1,0 +1,127 @@
+{
+  "overall_good": false,
+  "mcq_good": false,
+  "frq_good": false,
+  "coverage_good": true,
+  "difficulty_good": false,
+  "repetition_good": true,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-generated-201",
+    "food-science-b-generated-202",
+    "food-science-b-generated-203",
+    "food-science-b-generated-206",
+    "food-science-b-generated-207",
+    "food-science-b-generated-208",
+    "food-science-b-generated-209",
+    "food-science-b-generated-302",
+    "food-science-b-frq-305",
+    "food-science-b-frq-307"
+  ],
+  "duplicate_or_near_duplicate_ids": [],
+  "missing_areas": [],
+  "issues": [
+    {
+      "item_id": "food-science-b-generated-201",
+      "type": "difficulty_miscalibration",
+      "severity": "medium",
+      "message": "Calorie-per-gram of sugar is a very basic fact; difficulty 1 is acceptable, but the stem adds an unnecessary label context that does not increase rigor. Consider making the stem more direct or slightly richer conceptually (e.g., comparing macronutrient energy densities)."
+    },
+    {
+      "item_id": "food-science-b-generated-201",
+      "type": "trivial_distractors",
+      "severity": "medium",
+      "message": "Options 0 kcal/g and 2 kcal/g are implausible for Division B students familiar with basic nutrition; 4 vs 9 is the only realistic contrast. Revise distractors to include more plausible carbohydrate energy values or related misconceptions."
+    },
+    {
+      "item_id": "food-science-b-generated-202",
+      "type": "verbose_tutorial_stem",
+      "severity": "medium",
+      "message": "The stem references an unspecified 'fruit puree scenario' and then essentially defines an enzyme in option A. This reads like a teaching example rather than a competition item. Make the scenario explicit and shorten the correct option to avoid restating the definition verbatim."
+    },
+    {
+      "item_id": "food-science-b-generated-202",
+      "type": "trivial_distractors",
+      "severity": "medium",
+      "message": "Options B–D are obviously wrong (energy source, building material, preservative) and do not reflect realistic misconceptions about enzymes. Introduce more nuanced distractors (e.g., cofactor, substrate, structural protein) to increase discrimination."
+    },
+    {
+      "item_id": "food-science-b-generated-203",
+      "type": "trivial_distractors",
+      "severity": "low",
+      "message": "Only option B is plausible; A, C, and D are clearly incorrect and not aligned with common misunderstandings about emulsifiers. Consider distractors about temporary vs permanent emulsions, or confusing emulsifiers with thickeners."
+    },
+    {
+      "item_id": "food-science-b-generated-206",
+      "type": "generic_arithmetic",
+      "severity": "medium",
+      "message": "The item is dominated by simple proportional reasoning (mass halved, calories per gram doubled) with minimal food-science content beyond a single assumption. This is more of a generic math question; consider adding a conceptual twist (e.g., accounting for non-water mass loss) or replacing with a more chemistry-focused item."
+    },
+    {
+      "item_id": "food-science-b-generated-207",
+      "type": "overly_leading_stem",
+      "severity": "medium",
+      "message": "The stem describes a textbook Benedict’s test outcome and option B essentially restates the definition of a reducing sugar. This is acceptable but somewhat didactic; consider asking which functional group or sugar type is present instead of directly labeling it as a reducing sugar."
+    },
+    {
+      "item_id": "food-science-b-generated-207",
+      "type": "trivial_distractors",
+      "severity": "medium",
+      "message": "Options C and D are weak: higher concentration alone cannot explain the color change, and claiming the test failed is not a realistic keyed alternative. Replace with more content-based distractors (e.g., non-reducing disaccharide, sugar alcohol)."
+    },
+    {
+      "item_id": "food-science-b-generated-208",
+      "type": "generic_physics_arithmetic",
+      "severity": "medium",
+      "message": "The item focuses on density and viscosity comparisons with minimal explicit food-science framing beyond salt solution vs water. While not invalid, it leans toward generic physical-science reasoning; consider tying it more directly to food systems (e.g., syrups, brines) or adding a food-relevant inference."
+    },
+    {
+      "item_id": "food-science-b-generated-209",
+      "type": "trivial_distractors",
+      "severity": "medium",
+      "message": "Sucralose as a reducing sugar and 'sucrose and sucralose' are not plausible for students familiar with basic structures; the only realistic contenders are sucrose vs glucose. Strengthen distractors by including another monosaccharide or sugar alcohol to test structural understanding."
+    },
+    {
+      "item_id": "food-science-b-generated-302",
+      "type": "generic_arithmetic",
+      "severity": "high",
+      "message": "The Q10-style doubling-per-10°C rule is generic enzyme kinetics math and not clearly grounded in the 2022 Division B Food Science rules or calibration corpus, which emphasize factual recall and conceptual understanding over multi-step rate calculations. This may be off-level and off-style for the event."
+    },
+    {
+      "item_id": "food-science-b-frq-305",
+      "type": "topic_mismatch",
+      "severity": "medium",
+      "message": "Omega classification is a lipids/emulsions topic, but this item is tagged as food_chemistry_reactions. Retag to lipids_emulsions for consistency with the source corpus and to avoid misleading topic statistics."
+    },
+    {
+      "item_id": "food-science-b-frq-305",
+      "type": "repeated_reasoning",
+      "severity": "low",
+      "message": "This is conceptually very similar to item 303 (omega number from double-bond position). Having two near-duplicate numeric omega-classification FRQs in a small bank is redundant; consider varying the lipid concept (e.g., saturation vs health effects) or removing one."
+    },
+    {
+      "item_id": "food-science-b-frq-307",
+      "type": "overly_complex_for_style",
+      "severity": "high",
+      "message": "The multi-indicator pH inference with midpoints and numeric averaging is substantially more mathematically involved than typical 1–2 point Division B FRQs in the calibration set, which favor direct factual or single-step numeric answers. This feels more like an Olympiad chemistry problem than Food Science B 2022 style."
+    },
+    {
+      "item_id": "food-science-b-frq-307",
+      "type": "style_mismatch",
+      "severity": "medium",
+      "message": "The assumption about 'midpoint of its pH range' and combining three indicators is not reflected in the calibration corpus, which uses simpler numeric prompts (e.g., single wavelength, single RDI). Simplify to one indicator or a direct pH reading to better match event style."
+    },
+    {
+      "item_id": "bank_level",
+      "type": "difficulty_distribution_mismatch",
+      "severity": "medium",
+      "message": "Generated bank skews toward difficulty 1–3 with only one clear difficulty-4 MCQ and one difficulty-4 FRQ. Given the source counts include several difficulty-4 items and some very challenging factual recall, consider adding more high-difficulty, fact-heavy or integrative items, especially in carbohydrates_sweeteners and nutrition_processing."
+    },
+    {
+      "item_id": "bank_level",
+      "type": "competition_style_mismatch",
+      "severity": "medium",
+      "message": "Several items (e.g., 202, 206, 302, 307) lean into tutorial wording or multi-step quantitative reasoning not strongly represented in the 2022 calibration examples, which favor concise factual recall, simple numeric facts, and short conceptual stems. Tighten wording and reduce multi-step math to better match Science Olympiad Food Science B 2022 style."
+    }
+  ]
+}

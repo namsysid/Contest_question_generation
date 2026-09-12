@@ -1,0 +1,107 @@
+{
+  "overall_good": false,
+  "coverage_good": false,
+  "difficulty_distribution_good": false,
+  "repetition_good": true,
+  "competition_faithful": true,
+  "duplicate_or_near_duplicate_ids": [],
+  "weak_item_ids": [
+    "food-science-b-generated-101",
+    "food-science-b-generated-102",
+    "food-science-b-generated-105"
+  ],
+  "missing_areas": [
+    "proteins_coagulation (underrepresented relative to source)",
+    "acidity_measurement (underrepresented relative to source)",
+    "experimental_analysis (underrepresented relative to source)"
+  ],
+  "issues": [
+    {
+      "type": "difficulty_mismatch",
+      "item_ids": [
+        "food-science-b-generated-101"
+      ],
+      "details": "Item 101 is tagged as difficulty 2 but presents a long, multi-bullet conceptual stem with multiple mechanisms (acid vs rennet) and requires integrating several statements. For Division B calibration, this is closer to a solid level-3 reasoning item than a straightforward level-2 application."
+    },
+    {
+      "type": "difficulty_mismatch",
+      "item_ids": [
+        "food-science-b-generated-102"
+      ],
+      "details": "Item 102 is tagged as difficulty 3 but is a direct, single-step titration calculation (moles = M×V, then mass, then scale to 100 mL) with all relationships explicitly given. This aligns more with a level-2 numeric item than a level-3 item in the historical set, which uses level-3 for more multi-step or conceptually layered questions."
+    },
+    {
+      "type": "difficulty_mismatch",
+      "item_ids": [
+        "food-science-b-generated-105"
+      ],
+      "details": "Item 105 is tagged as difficulty 3 but only requires computing log10(10^6/10^n) for four options and checking two simple thresholds. This is a quick, low-complexity screening task and fits better as level 2 than level 3 in the given calibration."
+    },
+    {
+      "type": "difficulty_distribution_off",
+      "item_ids": [],
+      "details": "Projected from historical counts (1:6, 2:10, 3:7) to a 5-item pilot, the expected distribution is approximately 1–2 level-1, 2–3 level-2, and 2 level-3 items. The generated set has 1 level-1, 2 level-2, and 2 level-3 items, which is numerically acceptable, but after correcting misclassified items (101→3, 102→2, 105→2), the effective distribution becomes 1×L1, 3×L2, 1×L3, underrepresenting level-3 reasoning. Because the instructions require the generated counts themselves to match within ±1 per level, the current labeling is considered off relative to the actual cognitive demand."
+    },
+    {
+      "type": "coverage_imbalance",
+      "item_ids": [
+        "food-science-b-generated-101",
+        "food-science-b-generated-102",
+        "food-science-b-generated-103",
+        "food-science-b-generated-104",
+        "food-science-b-generated-105"
+      ],
+      "details": "Topic tags are broadly present but not well balanced relative to the historical calibration. Milk_composition_nutrition appears on all 5 items, while proteins_coagulation (1/5), acidity_measurement (2/5), and experimental_analysis (1/5) are comparatively light given their prominence in the source. For a 5-item pilot, some skew is acceptable, but this set leans heavily toward general milk composition and safety at the expense of protein/coagulation and analytical skills."
+    },
+    {
+      "type": "overly_broad_tagging",
+      "item_ids": [
+        "food-science-b-generated-101"
+      ],
+      "details": "Item 101 is tagged with six topics, including safety_pasteurization and dairy_processing_products, but the actual skill focus is primarily proteins_coagulation and fermentation_cultures (acidification). Safety/pasteurization is only background context at best. Over-tagging obscures true coverage and makes topic balance appear better than it is."
+    },
+    {
+      "type": "overly_broad_tagging",
+      "item_ids": [
+        "food-science-b-generated-105"
+      ],
+      "details": "Item 105 is tagged with fermentation_cultures and milk_composition_nutrition, but the task is essentially a pasteurization/log-reduction and sensory-threshold selection problem. The extra tags inflate apparent coverage of fermentation and nutrition without distinct skills in those areas."
+    },
+    {
+      "type": "verbose_stem",
+      "item_ids": [
+        "food-science-b-generated-101"
+      ],
+      "details": "The stem uses multiple bullet points and explanatory sentences that restate mechanisms in detail. For Division B and a level-2 label, this is unnecessarily wordy; it could be tightened while preserving the conceptual comparison. The verbosity slightly inflates perceived difficulty and may not match the concise style of the calibration examples."
+    },
+    {
+      "type": "verbose_stem",
+      "item_ids": [
+        "food-science-b-generated-102",
+        "food-science-b-generated-105"
+      ],
+      "details": "Items 102 and 105 include multiple bullet points and narrative framing that go beyond what is needed to pose the calculation/selection task. While not egregious, they are more verbose than typical source items at similar difficulty, which tend to be more compact."
+    },
+    {
+      "type": "trivial_distractors",
+      "item_ids": [
+        "food-science-b-generated-103"
+      ],
+      "details": "In item 103, choices C (\"homogenization removes most of the fat\") and D (\"Sample U stays uniform while Sample H separates more because it is colder\") are implausible for competitors familiar with basic milk processing. This leaves the item effectively between A and B, reducing its discriminative value."
+    },
+    {
+      "type": "trivial_distractors",
+      "item_ids": [
+        "food-science-b-generated-104"
+      ],
+      "details": "In item 104, options C (160%) and D (0.60%) are extreme and easily dismissed once students plug into the given formula. The real decision is between A and B, making the item less discriminating than it could be while still being level-1."
+    },
+    {
+      "type": "minor_safety_phrasing",
+      "item_ids": [
+        "food-science-b-generated-105"
+      ],
+      "details": "The item correctly includes a disclaimer that the modeled thresholds do not replace validated processes, which is good. However, the phrase \"acceptable pasteurization trial\" combined with specific log-reduction and sensory thresholds could be misread as suggesting these numbers are realistic targets. A clearer statement that these values are arbitrary classroom-only parameters would better align with safety/accuracy expectations."
+    }
+  ]
+}

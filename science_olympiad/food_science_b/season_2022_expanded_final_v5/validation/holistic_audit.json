@@ -1,0 +1,13 @@
+{
+  "overall_good": true,
+  "mcq_good": true,
+  "frq_good": true,
+  "coverage_good": true,
+  "difficulty_good": true,
+  "repetition_good": true,
+  "competition_faithful": true,
+  "weak_item_ids": [],
+  "duplicate_or_near_duplicate_ids": [],
+  "missing_areas": [],
+  "issues": []
+}

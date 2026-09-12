@@ -1,0 +1,8 @@
+{"serial": 12, "anchor_id": "bullso-test-11", "topic": "pulleys", "error": "generation failed: prompt exceeds 90 words"}
+{"serial": 16, "anchor_id": "bullso-test-4", "topic": "mechanical_advantage", "error": "generation failed: prompt exceeds 90 words"}
+{"serial": 16, "anchor_id": "bullso-test-9", "topic": "efficiency_work_power", "error": "generation failed: machine efficiency must be between 0% and 100%"}
+{"serial": 19, "anchor_id": "berkeley-test-B3", "topic": "wheel_axle_screws", "error": "generation failed: prompt exceeds 90 words"}
+{"serial": 26, "anchor_id": "berkeley-test-B5", "topic": "wheel_axle_screws", "error": "plan failed audit: \nREJECTED: expression evaluates to 14.14, not 10.1. Recalculate and return a corrected complete plan."}
+{"serial": 28, "anchor_id": "bullso-test-9", "topic": "efficiency_work_power", "error": "generation failed: machine efficiency must be between 0% and 100%"}
+{"serial": 29, "anchor_id": "berkeley-test-B5", "topic": "wheel_axle_screws", "error": "plan failed audit: \nREJECTED: expression evaluates to 14.845299461620748, not 11.4. Recalculate and return a corrected complete plan."}
+{"serial": 29, "anchor_id": "bullso-test-9", "topic": "efficiency_work_power", "error": "generation failed: machine efficiency must be between 0% and 100%"}

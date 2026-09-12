@@ -1,0 +1,59 @@
+{
+  "overall_good": false,
+  "coverage_good": false,
+  "difficulty_distribution_good": false,
+  "repetition_good": true,
+  "competition_faithful": true,
+  "duplicate_or_near_duplicate_ids": [],
+  "weak_item_ids": [
+    "food-science-b-generated-002",
+    "food-science-b-generated-003",
+    "food-science-b-generated-004"
+  ],
+  "missing_areas": [
+    "acidity_measurement",
+    "experimental_analysis",
+    "dairy_processing_products"
+  ],
+  "issues": [
+    {
+      "type": "difficulty_mismatch",
+      "item_ids": [
+        "food-science-b-generated-003",
+        "food-science-b-generated-004"
+      ],
+      "details": "Projected from the historical distribution (6/10/7 at levels 1/2/3 over 23 items) to a 5-item pilot, the target is approximately 1–2 level-1, 2–3 level-2, and 1–2 level-3 items. Allowing a deviation of at most one item per level, the generated set (1 level-1, 2 level-2, 2 level-3) is borderline acceptable numerically, but several items are mis-labeled in difficulty. Item 003 is a straightforward application of a single stated assumption and reads more like an upper level-2 than a level-3. Item 004 is essentially the same conceptual pattern as the calibration pressure-canning question and is more interpretive than multi-step; it also fits better as level-2 than level-3. Mis-labeling compresses the mid-level difficulty band and weakens calibration against the source."
+    },
+    {
+      "type": "coverage_gap",
+      "item_ids": [],
+      "details": "Historical tags show substantial emphasis on acidity_measurement (6/23), proteins_coagulation (6/23), safety_pasteurization (5/23), milk_composition_nutrition (5/23), fats_emulsions (3/23), and experimental_analysis (4/23), with some dairy_processing_products. In the 5-item pilot, there is no coverage at all of acidity_measurement or experimental_analysis, and nothing explicitly on dairy_processing_products. Given proportional expectations and that this is a dairy-focused pilot, at least one item touching acidity/pH measurement or titration/indicator use, and at least one experimental/analysis-style question (e.g., interpreting a simple data table or experimental setup) should appear. Current coverage is too narrow (only composition, proteins, fermentation, safety, and emulsions) and omits key calibrated domains."
+    },
+    {
+      "type": "item_quality",
+      "item_ids": [
+        "food-science-b-generated-002"
+      ],
+      "details": "Item 002 is conceptually almost identical to a historical calibration item about which protein structure is not broken by normal cooking. The stem is verbose and adds yogurt vs. cheese context that does not change the underlying reasoning path (\"normal cooking does not break peptide bonds, so primary structure remains\"). This is effectively a cosmetic re-skin of the source item rather than a fresh application, and the extra context is not used in the reasoning, making the stem longer than necessary for Division B while not increasing depth."
+    },
+    {
+      "type": "item_quality",
+      "item_ids": [
+        "food-science-b-generated-003"
+      ],
+      "details": "Item 003 is overlong and narrative-heavy for the amount of reasoning required. The key assumption (species preferring warmer temperatures dominate at 42 °C) is explicitly given, and the desired flavor profile is directly matched to the description of Species A. The rest of the detail (multiple blends, four species, temperature ranges) is largely decorative. For a labeled level-3 item, the cognitive demand is low: it is a single-step matching task rather than a multi-step integration or interpretation. This makes the item feel like generic textbook filler dressed up with an extended scenario rather than a tightly targeted, higher-level competition question."
+    },
+    {
+      "type": "item_quality",
+      "item_ids": [
+        "food-science-b-generated-004"
+      ],
+      "details": "Item 004 closely parallels the historical high-temperature canning question: classify foods by pH into high-acid vs. low-acid, then name the pressurized device (pressure canner/autoclave/retort) and explain why it is needed to exceed 100 °C. The reasoning path is nearly the same, with dairy-specific context substituted. For a labeled level-3 item, the steps are limited: identify that the low-acid cream sauce (pH 6.6) requires pressure processing and recall the device name. The long stem restates basic physical principles already familiar from the calibration set and inflates apparent difficulty without adding genuine complexity. This makes the item weaker as a distinct, higher-level test of understanding."
+    },
+    {
+      "type": "response_type_distribution",
+      "item_ids": [],
+      "details": "The historical set mixes multiple_choice (10), short_answer (11), and numeric (2). For a 5-item pilot, a reasonable projection would include at least one numeric or clearly quantitative short-answer item (e.g., a pH, temperature, or wavelength value) to reflect that numeric component. The generated set has only multiple_choice (3) and short_answer (2), with no numeric-style question at all. While numeric items are a minority in the source, omitting them entirely in the pilot reduces fidelity to the calibrated response-type mix."
+    }
+  ]
+}

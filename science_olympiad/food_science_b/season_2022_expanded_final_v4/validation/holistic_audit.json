@@ -1,0 +1,107 @@
+{
+  "overall_good": false,
+  "mcq_good": true,
+  "frq_good": false,
+  "coverage_good": true,
+  "difficulty_good": true,
+  "repetition_good": true,
+  "competition_faithful": false,
+  "weak_item_ids": [
+    "food-science-b-frq-301",
+    "food-science-b-frq-303",
+    "food-science-b-frq-304",
+    "food-science-b-curated-frq-001",
+    "food-science-b-curated-frq-002",
+    "food-science-b-curated-frq-003",
+    "food-science-b-curated-frq-004",
+    "food-science-b-curated-frq-005"
+  ],
+  "duplicate_or_near_duplicate_ids": [],
+  "missing_areas": [],
+  "issues": [
+    {
+      "item_id": "food-science-b-frq-301",
+      "type": "rubric_quality",
+      "severity": "medium",
+      "details": "Rubric only accepts “fiber or dietary fiber” while the prompt asks for a carbohydrate; calibration items typically allow common equivalents (e.g., cellulose, insoluble fiber). Rubric should be broadened or prompt narrowed to match expected answers."
+    },
+    {
+      "item_id": "food-science-b-frq-301",
+      "type": "difficulty_misalignment",
+      "severity": "low",
+      "details": "Item is extremely basic definitional recall; still within range but on the easier side compared with many source FRQs that often require a bit more application or specificity."
+    },
+    {
+      "item_id": "food-science-b-frq-303",
+      "type": "stem_style",
+      "severity": "medium",
+      "details": "Omega-number conversion is acceptable given calibration (e.g., omega-3/omega-6 numeric items), but the stem is more tutorial than needed for this level; could be shortened to match the concise style of the alpha-linolenic/DHA examples."
+    },
+    {
+      "item_id": "food-science-b-frq-304",
+      "type": "multipart_structure",
+      "severity": "medium",
+      "details": "Two-point FRQ with two conceptual elements is acceptable, but the scenario is somewhat verbose relative to calibration short-answer items and edges toward explanation rather than concise identification. Could be tightened while preserving the two requested facts."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-001",
+      "type": "competition_faithfulness",
+      "severity": "high",
+      "details": "Three-point explanatory FRQ with multi-sentence mechanistic explanation is more elaborate than typical Division B 2022 calibration FRQs, which are usually single fact/number or very short conceptual descriptions. This reads more like an extended free-response than the short-answer style shown in the corpus."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-001",
+      "type": "rubric_granularity",
+      "severity": "medium",
+      "details": "Rubric breaks explanation into three subpoints for a single short-answer prompt; calibration rubrics for similar items (e.g., Biuret description) are simpler and less segmented. This level of granularity is not strictly source-faithful."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-002",
+      "type": "competition_faithfulness",
+      "severity": "high",
+      "details": "Four-point naming FRQ is heavier-weight than typical Division B 2022 short-answer items, which are usually 1–3 points and often numeric or single-concept. The multi-mark structure for simple recall is not well supported by calibration examples."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-002",
+      "type": "difficulty_misalignment",
+      "severity": "medium",
+      "details": "Assigning 4 points to straightforward vitamin-letter recall inflates its weight relative to its conceptual difficulty and compared with source FRQs of similar content."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-003",
+      "type": "competition_faithfulness",
+      "severity": "medium",
+      "details": "Concept and format are reasonable, but the explanatory style (label interpretation with narrative context) is slightly more wordy than most calibration numeric/short-answer label questions, which tend to be more direct. Still acceptable but could be more concise."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-004",
+      "type": "redundant_with_calibration",
+      "severity": "medium",
+      "details": "Very close in content and phrasing to calibration item uchicago-test-22 (Biuret reaction description). While not verbatim, it targets essentially the same explanation at similar difficulty, reducing novelty of the bank."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-004",
+      "type": "competition_faithfulness",
+      "severity": "medium",
+      "details": "Two-point mechanistic explanation is acceptable, but the rubric’s emphasis on detailed coordination-complex language is more advanced/chemistry-heavy than typical Division B expectations, edging toward Division C depth."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-005",
+      "type": "generic_arithmetic",
+      "severity": "high",
+      "details": "Density = mass/volume calculation with no food-specific twist is functionally identical to generic physics/chemistry practice and less contextual than the Troy calibration items, which use more realistic industrial volumes and unit conversions. This violates the instruction to avoid needless or purely decorative calculation."
+    },
+    {
+      "item_id": "food-science-b-curated-frq-005",
+      "type": "competition_faithfulness",
+      "severity": "high",
+      "details": "While density calculations appear in calibration, they are more involved (unit conversions, non-trivial context). This item is too trivial and decontextualized for the event’s style."
+    },
+    {
+      "item_id": "bank-wide-frq",
+      "type": "structural_style",
+      "severity": "high",
+      "details": "Several FRQs (e.g., curated-frq-001, -002, -004) adopt extended, multi-mark explanatory rubrics more reminiscent of long-form free-response than the concise, single-fact or short numeric answers seen in the 2022 Division B calibration set. Overall FRQ bank is not fully source-faithful in response length and rubric style."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "overall_good": false,
+  "coverage_good": true,
+  "difficulty_distribution_good": false,
+  "repetition_good": true,
+  "competition_faithful": false,
+  "duplicate_or_near_duplicate_ids": [],
+  "weak_item_ids": [
+    "food-science-b-generated-002",
+    "food-science-b-generated-007"
+  ],
+  "missing_areas": [],
+  "issues": [
+    {
+      "type": "difficulty_mismatch",
+      "item_ids": [],
+      "details": "Projected from the source distribution (24:60:22:5:0 over 111 items) to a 10-item pilot, the expected difficulty counts are approximately: level-1: 2, level-2: 5, level-3: 2, level-4: 1, level-5: 0. Allowing a deviation of at most one item per level, level-4 should have between 0 and 2 items; that is satisfied (0). Level-1 should be between 1 and 3 (generated has 2, OK). Level-3 should be between 1 and 3 (generated has 2, OK). Level-2 should be between 4 and 6, but the generated set has 6, which is at the upper bound and only acceptable if the others are also within bounds. However, because the total must be 10, the combination 2/6/2/0 forces the level-4 count to the minimum and slightly compresses the mid–high difficulty range relative to the calibration. This is judged marginally too skewed toward low–mid difficulty for a representative written-test pilot, so difficulty_distribution_good is set to false."
+    },
+    {
+      "type": "competition_faithfulness",
+      "item_ids": [
+        "food-science-b-generated-002",
+        "food-science-b-generated-007"
+      ],
+      "details": "Item 002 asks for a single optimal pH value for pepsin with no range or context. In the calibration corpus, numeric items at similar difficulty either specify a well-defined standard value (e.g., a specific wavelength) or provide enough context that a single numeric answer is clearly expected. Pepsin optimal pH is typically given as a range (~1.5–2.5) in many references, so demanding a single integer without tolerance is poorly posed for a Division B written test. Item 007 embeds an incorrect mechanistic explanation: it implies that gentle cooking preserves protease activity in the small intestine, but digestive proteases are secreted and activated in vivo, not pre-denatured or pre-activated by pan heat. The stem is also unusually long and mechanistic compared with calibration items, and the reasoning path is partially based on a flawed premise, reducing faithfulness to realistic Science Olympiad expectations."
+    },
+    {
+      "type": "weak_or_poorly_calibrated_items",
+      "item_ids": [
+        "food-science-b-generated-002",
+        "food-science-b-generated-007"
+      ],
+      "details": "Item 002 is weak because it requires recall of a somewhat variable textbook fact (pepsin optimal pH) as a single exact numeric value, which is not robustly defined at the middle-school level and is not clearly anchored in the event rules. This makes it more about memorizing a specific reference number than applying core Food Science concepts. Item 007 is weak because it mixes correct ideas about protein denaturation with an incorrect suggestion that pan heat could pre-activate pancreatic proteases, and it uses an overlong, narrative stem relative to the concise, targeted style in the calibration set. The best answer (Dish 2) is defensible on the basis of moderate denaturation improving digestibility, but the explanation text in the stem is partially misleading, which is not ideal for a calibration-aligned test."
+    }
+  ]
+}

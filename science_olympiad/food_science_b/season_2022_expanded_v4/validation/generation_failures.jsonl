@@ -1,0 +1,12 @@
+{"format": "mcq", "attempt": 8, "error": "target skill duplicates a prior experimental_analysis skill (0.912)"}
+{"format": "mcq", "attempt": 9, "error": "target skill duplicates a prior experimental_analysis skill (0.890)"}
+{"format": "mcq", "attempt": 10, "error": "target skill duplicates a prior experimental_analysis skill (0.907)"}
+{"format": "mcq", "attempt": 11, "error": "target skill duplicates a prior experimental_analysis skill (0.898)"}
+{"format": "mcq", "attempt": 12, "error": "target skill duplicates a prior experimental_analysis skill (0.907)"}
+{"format": "mcq", "attempt": 13, "error": "target skill duplicates a prior experimental_analysis skill (0.939)"}
+{"format": "mcq", "attempt": 14, "error": "target skill duplicates a prior experimental_analysis skill (0.958)"}
+{"format": "mcq", "attempt": 15, "error": "target skill duplicates a prior experimental_analysis skill (0.906)"}
+{"format": "mcq", "attempt": 16, "error": "target skill duplicates a prior experimental_analysis skill (0.906)"}
+{"format": "mcq", "attempt": 17, "error": "target skill duplicates a prior experimental_analysis skill (0.887)"}
+{"format": "frq", "attempt": 4, "error": "generation failed: independent judge failed: answer_agrees"}
+{"format": "frq", "attempt": 9, "error": "generation failed: prompt exceeds 110 words"}

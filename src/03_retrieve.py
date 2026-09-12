@@ -167,6 +167,14 @@ def main():
     )
     ap.add_argument("--min_seed_complexity", type=int, default=0)
     ap.add_argument("--min_sol_ex_complexity", type=int, default=0)
+    ap.add_argument(
+        "--min_source_difficulty", type=int, default=0,
+        help="Require the enrichment model's source difficulty for seeds and exemplars.",
+    )
+    ap.add_argument(
+        "--required_seed_ids", nargs="*", default=[],
+        help="Use these reviewed hard seeds in order instead of sampling by embedding distance.",
+    )
     ap.add_argument("-n","--num_bundles", type=int, default=25)
     ap.add_argument("--annulus_min", type=float, default=0.08)
     ap.add_argument("--annulus_max", type=float, default=0.40)
@@ -257,6 +265,15 @@ def main():
             return stem
         return ""
 
+    def source_difficulty_at_least(pid: str) -> bool:
+        if args.min_source_difficulty <= 0:
+            return True
+        analysis = (enriched_by_id.get(pid) or {}).get("analysis") or {}
+        try:
+            return int(analysis.get("difficulty") or 0) >= args.min_source_difficulty
+        except (TypeError, ValueError):
+            return False
+
     def sample_seed(aid: str, avec: np.ndarray, mode: str) -> Tuple[str,float]:
         sims=skel_mat @ avec
         dists=1.0 - sims
@@ -265,9 +282,13 @@ def main():
         else:
             mask=(dists>=args.tail_min)
         idxs=np.where(mask)[0].tolist()
+        idxs = [i for i in idxs if source_difficulty_at_least(skel_ids[i])]
         if not idxs:
             idxs=np.argsort(dists).tolist()
-            idxs=[i for i in idxs if skel_ids[i]!=aid][:160]
+            idxs=[
+                i for i in idxs
+                if skel_ids[i] != aid and source_difficulty_at_least(skel_ids[i])
+            ][:160]
         preferred, _ = split_preferred_indices(
             idxs, skel_ids, preferred_years, args.min_preferred_question_number
         )
@@ -275,6 +296,7 @@ def main():
             preferred = [
                 i for i in np.argsort(dists).tolist()
                 if skel_ids[i] != aid
+                and source_difficulty_at_least(skel_ids[i])
                 and source_year(skel_ids[i]) in preferred_years
                 and (
                     args.min_preferred_question_number <= 0
@@ -290,7 +312,7 @@ def main():
         qv=skel_mat[skel_index_by_id[seed_id]]
         sims = skel_mat @ qv
         idx = np.argsort(-sims).tolist()
-        idx = [i for i in idx if skel_ids[i] != seed_id][:220]
+        idx = [i for i in idx if skel_ids[i] != seed_id and source_difficulty_at_least(skel_ids[i])][:220]
         preferred, fallback = split_preferred_indices(
             idx, skel_ids, preferred_years, args.min_preferred_question_number
         )
@@ -320,7 +342,7 @@ def main():
         qv=q_mat[q_index_by_id[seed_id]] if seed_id in q_index_by_id else q_mat[random.randrange(len(q_mat))]
         sims = q_mat @ qv
         idx = np.argsort(-sims).tolist()
-        idx = [i for i in idx if q_ids[i] != seed_id][:220]
+        idx = [i for i in idx if q_ids[i] != seed_id and source_difficulty_at_least(q_ids[i])][:220]
         preferred, fallback = split_preferred_indices(
             idx, q_ids, preferred_years, args.min_preferred_question_number
         )
@@ -332,11 +354,19 @@ def main():
     bundles=[]
     used=set()
     attempts=0
+    missing_required = [seed_id for seed_id in args.required_seed_ids if seed_id not in skel_index_by_id]
+    if missing_required:
+        raise ValueError("required seed IDs are absent from this topic shard: " + ", ".join(missing_required))
     while len(bundles) < args.num_bundles and attempts < args.num_bundles*40:
         attempts += 1
         mode = "tail" if random.random() < args.tail_frac else "annulus"
         aid, avec = random.choice(anchor_vecs)
-        seed_id, adist = sample_seed(aid, avec, mode)
+        if args.required_seed_ids:
+            seed_id = args.required_seed_ids[len(bundles) % len(args.required_seed_ids)]
+            mode = "required_seed"
+            adist = float(1.0 - np.dot(skel_mat[skel_index_by_id[seed_id]], avec))
+        else:
+            seed_id, adist = sample_seed(aid, avec, mode)
 
         if seed_id in used:
             continue

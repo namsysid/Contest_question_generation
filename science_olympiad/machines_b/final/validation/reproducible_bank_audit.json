@@ -1,0 +1,57 @@
+{
+  "overall_good": true,
+  "checks": {
+    "all_items_independently_valid": true,
+    "deterministic_schema_and_scope": true,
+    "source_proportional_difficulty_within_one_item": true,
+    "covers_all_source_machine_topic_families": true,
+    "includes_mcq_and_constructed_response": true,
+    "within_style_word_caps": true,
+    "no_exact_target_skill_duplicates": true,
+    "pairwise_embedding_similarity_below_0_875": true,
+    "source_embedding_similarity_below_0_94": true
+  },
+  "item_count": 20,
+  "difficulty_counts": {
+    "1": 10,
+    "2": 6,
+    "3": 3,
+    "4": 1
+  },
+  "projected_source_counts": {
+    "1": 10.285714285714286,
+    "2": 6.285714285714286,
+    "3": 2.857142857142857,
+    "4": 0.38095238095238093,
+    "5": 0.19047619047619047
+  },
+  "topics": [
+    "efficiency_work_power",
+    "gears_compound",
+    "inclined_planes_wedges",
+    "levers_torque",
+    "mechanical_advantage",
+    "pulleys",
+    "wheel_axle_screws"
+  ],
+  "formats": [
+    "multiple_choice",
+    "numeric",
+    "short_answer"
+  ],
+  "maximum_pairwise_similarity": {
+    "score": 0.8261663913726807,
+    "ids": [
+      "machines-b-generated-157",
+      "machines-b-generated-129"
+    ]
+  },
+  "maximum_source_similarity": {
+    "score": 0.7894221544265747,
+    "generated_id": "machines-b-generated-118",
+    "source_id": "berkeley-test-B5"
+  },
+  "deterministic_errors": {},
+  "length_failures": {},
+  "exact_skill_duplicates": []
+}

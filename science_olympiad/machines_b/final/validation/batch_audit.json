@@ -1,0 +1,40 @@
+{
+  "overall_good": false,
+  "coverage_good": false,
+  "difficulty_distribution_good": false,
+  "repetition_good": false,
+  "competition_faithful": false,
+  "duplicate_or_near_duplicate_ids": [
+    "machines-b-generated-021",
+    "machines-b-generated-024"
+  ],
+  "weak_item_ids": [
+    "machines-b-generated-002",
+    "machines-b-generated-005",
+    "machines-b-generated-008",
+    "machines-b-generated-015",
+    "machines-b-generated-024"
+  ],
+  "missing_areas": [
+    "Experimental design/data analysis (e.g., interpreting graphs or data from machine experiments)",
+    "Non-ideal machine scenarios beyond friction (e.g., deformation, slippage, real-world failure modes)",
+    "Compound machine analysis (multi-step, multi-machine systems with more than one simple machine type)",
+    "Historical context or applications of machines",
+    "Advanced conceptual reasoning (e.g., why certain machines are chosen for specific tasks, trade-offs)"
+  ],
+  "issues": [
+    "Many items (e.g., 001 and 003) test the same lever IMA skill with only different numbers/objects.",
+    "Items 021 and 024 are near-duplicates, both asking about angle of sliding with mass change.",
+    "Several items (e.g., 002, 005, 008, 015) are generic mechanics questions with little or no Machines-specific content.",
+    "Difficulty labeling is inconsistent: many 'difficulty 1' items are nearly identical in skill and require only formula plugging.",
+    "Too many items focus on direct calculation of IMA/AMA/efficiency with no conceptual or experimental context.",
+    "Gears are overrepresented in higher-difficulty MC items (022, 023, 030), but all test the same basic gear ratio skill.",
+    "No items require students to interpret or analyze data from an experiment or real-world scenario.",
+    "No items require students to design, critique, or improve a machine setup.",
+    "Some distractors are trivial or implausible (e.g., 004, 005, 007).",
+    "No coverage of safety, failure, or practical limitations of machines.",
+    "No items on compound machines that combine different types (e.g., lever + pulley + inclined plane).",
+    "No items on historical or real-world applications of machines.",
+    "No items on interpreting diagrams or schematics, which is common in competition."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "input": "experiments/fma_gpt5mini_2024_2026/work/source_2024_2026_text_only.jsonl",
+  "rows": 26,
+  "text_only": 26,
+  "with_answer": 0,
+  "with_solution": 0,
+  "warning": "analysis/problem_graph is model metadata, not a verified solution or answer key"
+}

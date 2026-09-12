@@ -1,0 +1,3 @@
+{"serial": 5, "anchor_id": "birdso-test-34", "topic": "food_chemistry_reactions", "difficulty": 2, "error": "generation failed: independent judge failed: answer_agrees"}
+{"serial": 6, "anchor_id": "birdso-test-16", "topic": "analytical_tests", "difficulty": 2, "error": "generation failed: prompt exceeds 90 words"}
+{"serial": 7, "anchor_id": "soni-test-31", "topic": "carbohydrates_sweeteners", "difficulty": 3, "error": "generation failed: independent judge failed: answer_agrees"}

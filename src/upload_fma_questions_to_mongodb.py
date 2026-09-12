@@ -156,6 +156,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path)
     parser.add_argument("--reports", type=Path)
+    parser.add_argument("--ids", nargs="*", help="Process only these source record IDs")
     parser.add_argument("--out", type=Path, help="Write MongoDB-ready JSONL without uploading")
     parser.add_argument("--require-answer-agreement", action="store_true")
     parser.add_argument("--upload", action="store_true", help="Insert documents; never overwrites existing IDs")
@@ -163,8 +164,15 @@ def main() -> int:
     args = parser.parse_args()
 
     reports = report_by_id(args.reports)
+    records = read_jsonl(args.input)
+    if args.ids:
+        selected = set(args.ids)
+        records = [record for record in records if str(record.get("id")) in selected]
+        missing_ids = selected - {str(record.get("id")) for record in records}
+        if missing_ids:
+            raise RuntimeError(f"requested ids not found: {sorted(missing_ids)}")
     documents = prepare_documents(
-        read_jsonl(args.input), reports, require_answer_agreement=args.require_answer_agreement
+        records, reports, require_answer_agreement=args.require_answer_agreement
     )
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)

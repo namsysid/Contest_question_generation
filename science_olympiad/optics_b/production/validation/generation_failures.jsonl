@@ -1,0 +1,24 @@
+{"serial": 1, "anchor_id": "bullso-test-2", "topic": "reflection_mirrors", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 3, "anchor_id": "bullso-test-13", "topic": "human_eye_vision", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 3, "anchor_id": "bullso-test-11", "topic": "color_spectra", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 4, "anchor_id": "bullso-test-10", "topic": "optical_instruments", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 4, "anchor_id": "bullso-test-17", "topic": "light_photons", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 5, "anchor_id": "bullso-test-17", "topic": "refraction_tir", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 5, "anchor_id": "bullso-test-5", "topic": "lenses_images", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 5, "anchor_id": "bullso-test-20", "topic": "human_eye_vision", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 5, "anchor_id": "bullso-test-20", "topic": "color_spectra", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 6, "anchor_id": "usc-test-22", "topic": "optical_instruments", "difficulty": 2, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 6, "anchor_id": "bullso-test-17", "topic": "light_photons", "difficulty": 2, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 6, "anchor_id": "purdue-test-Mirrors and Lenses 3", "topic": "reflection_mirrors", "difficulty": 2, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 6, "anchor_id": "bullso-test-23", "topic": "refraction_tir", "difficulty": 2, "error": "plan failed audit: \nREJECTED: expression must contain numbers and arithmetic operators only. Return a fully corrected plan."}
+{"serial": 7, "anchor_id": "bullso-test-15", "topic": "human_eye_vision", "difficulty": 2, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 7, "anchor_id": "purdue-test-Absorption 2", "topic": "color_spectra", "difficulty": 2, "error": "plan failed audit: \nREJECTED: numeric verification requires both expression and expected_value. Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-10", "topic": "optical_instruments", "difficulty": 3, "error": "OpenAI request failed: [Errno 60] Operation timed out"}
+{"serial": 8, "anchor_id": "usc-test-12", "topic": "light_photons", "difficulty": 3, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-2", "topic": "reflection_mirrors", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-13", "topic": "human_eye_vision", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-11", "topic": "color_spectra", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-10", "topic": "optical_instruments", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-17", "topic": "light_photons", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-17", "topic": "refraction_tir", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}
+{"serial": 8, "anchor_id": "bullso-test-5", "topic": "lenses_images", "difficulty": 1, "error": "plan failed audit: \nREJECTED: invalid syntax (<unknown>, line 0). Return a fully corrected plan."}

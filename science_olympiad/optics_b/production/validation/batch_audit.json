@@ -1,0 +1,64 @@
+{
+  "overall_good": false,
+  "coverage_good": false,
+  "difficulty_distribution_good": false,
+  "repetition_good": true,
+  "competition_faithful": false,
+  "duplicate_or_near_duplicate_ids": [],
+  "weak_item_ids": [
+    "optics-b-generated-001",
+    "optics-b-generated-003",
+    "optics-b-generated-004",
+    "optics-b-generated-005",
+    "optics-b-generated-006",
+    "optics-b-generated-007"
+  ],
+  "missing_areas": [
+    "human_eye_vision",
+    "color_spectra",
+    "light_photons",
+    "quantum_transitions",
+    "applied_vision_corrections",
+    "numerical_refraction_snells_law",
+    "mirror_lens_calculations_with_sign_conventions",
+    "multi-step_diopter_power_calculations"
+  ],
+  "issues": [
+    {
+      "type": "difficulty_distribution_mismatch",
+      "detail": "Projected difficulty proportions from the real set (35:20:8 for levels 1:2:3) to a 7-item test give expected counts of approximately 4–5 level-1, 2–3 level-2, and 1 level-3 items. The generated set has {\"1\":4,\"2\":2,\"3\":1}, which is within one item per level and thus numerically acceptable, but several items are mis-leveled relative to their actual cognitive demand, so the effective difficulty distribution is skewed too easy overall."
+    },
+    {
+      "type": "misleveled_items",
+      "detail": "Items labeled as difficulty 2 or 3 often require only single-step recall or plug-and-chug reasoning typical of level 1–2. In particular, optics-b-generated-005 (conceptual description of a single polarizer) is closer to level 1–low 2; optics-b-generated-006 (thin lens with object at 2f) is a standard textbook example and should be level 1; optics-b-generated-007 (double-slit fringe spacing with proportional reasoning) is at most level 2, not 3."
+    },
+    {
+      "type": "coverage_gap",
+      "detail": "The generated set omits several major topic clusters present in the calibration examples and expected for a Division B Optics written test: human eye and vision (including myopia/hyperopia and corrective lenses), color and spectra, photon/quantum line spectra (e.g., Balmer/Rydberg), quantitative Snell’s law and critical angle/TIR calculations, and quantitative mirror/lens image-distance and magnification problems. Coverage is therefore not proportional to the source set."
+    },
+    {
+      "type": "overfocus_on_physical_optics",
+      "detail": "Three of seven items (003, 005, 007) are on physical optics (diffraction/interference/polarization), which is a heavier fraction than in the calibration set and crowds out geometric optics and eye/vision content."
+    },
+    {
+      "type": "generic_textbook_filler",
+      "detail": "Several items are generic, first-exposure textbook questions rather than competition-calibrated problems. For example, 001 (identify refraction at an interface), 002 (real/inverted image on a screen), and 004 (image distance in a plane mirror) are extremely standard and do not incorporate multi-step reasoning, parameter variation, or subtle misconceptions that would better match Science Olympiad style."
+    },
+    {
+      "type": "verbose_stems",
+      "detail": "Multiple stems are wordier than necessary for their cognitive level, especially 001, 003, 004, 006, and 007. They include narrative detail and repeated clarifications (e.g., sign-convention notes, restating that the setup is in air, or that the pattern is visible) that do not materially affect the physics. This is more verbose than typical for Division B written tests at these difficulty levels."
+    },
+    {
+      "type": "weak_distractors",
+      "detail": "Some multiple-choice items have distractors that are too obviously wrong for the intended level. For example, in 001, scattering is not a plausible alternative given the described sharp beam; in 002, a real image on a screen is almost always inverted, making the other options weak; in 004, 0.0 m and 0.4 m behind the mirror are easily eliminated by any student familiar with plane mirrors. This reduces discrimination and effective difficulty."
+    },
+    {
+      "type": "competition_faithfulness",
+      "detail": "The set lacks the breadth of quantitative and applied problems seen in the calibration examples (e.g., diopter/eye-power calculations, Snell’s law numerics, Brewster’s angle, Rydberg formula). Most items are single-concept recognition or simple proportional reasoning. As a result, the test does not faithfully reflect the style and rigor of a 2025 Division B Optics written test, even allowing for a short 7-item representative subset."
+    },
+    {
+      "type": "item_specific_weakness",
+      "detail": "optics-b-generated-001: Very basic identification of refraction with an overlong stem and weak distractors; better suited as an introductory worksheet item than a competition question.\noptics-b-generated-003: Conceptually fine but framed as a generic diffraction grating question; no quantitative or multi-step reasoning, and the long description adds little beyond “white light through many closely spaced lines.”\noptics-b-generated-004: Trivial plane-mirror distance question with unnecessary narrative detail and little challenge; difficulty is closer to 0–0.5.\noptics-b-generated-005: Good concept (Malus’s law / polarization) but only asks for a qualitative explanation; no numerical intensity fraction or angle dependence, so it underuses the topic’s potential for level-2/3 rigor.\noptics-b-generated-006: Classic 2f object distance for a converging lens; the answer (image at 2f, inverted) is standard and nearly rote for anyone who has seen lens diagrams. Marked as difficulty 2 but functions as difficulty 1.\noptics-b-generated-007: Uses the standard y ∝ 1/d relation for double-slit spacing; once students recall the proportionality, the arithmetic is trivial (6 mm × 0.20/0.30 = 4 mm). For Division B, this is more like a solid level-2 item than level 3 and does not match the multi-step or conceptual subtlety of the calibration level-3 questions."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "overall_good": false,
+  "coverage_good": false,
+  "difficulty_distribution_good": false,
+  "repetition_good": false,
+  "competition_faithful": false,
+  "duplicate_or_near_duplicate_ids": [
+    [
+      "optics-b-generated-003",
+      "optics-b-generated-007"
+    ]
+  ],
+  "weak_item_ids": [
+    "optics-b-generated-002",
+    "optics-b-generated-003",
+    "optics-b-generated-004",
+    "optics-b-generated-005",
+    "optics-b-generated-006",
+    "optics-b-generated-007",
+    "optics-b-generated-008",
+    "optics-b-generated-009"
+  ],
+  "missing_areas": [
+    "reflection_mirrors",
+    "refraction_tir",
+    "human_eye_vision (quantitative/diopter-style)",
+    "lenses_images (quantitative mirror/lens equation use)",
+    "physical_optics (beyond a single fringe-spacing proportionality plug-in)",
+    "light_photons (calibration-style spectral/series reasoning rather than threshold-only)"
+  ],
+  "issues": [
+    "Difficulty distribution is not faithful to the source proportions. Projecting the real counts (35:20:8 for levels 1:2:3) to a 9-item test gives approximate targets of 5–6 level-1, 3–4 level-2, and 1–2 level-3 questions. The generated set has {\"1\":3,\"2\":3,\"3\":3}, which is short by at least two level-1 items and has at least one extra level-3 item relative to the allowed ±1 deviation per level.",
+    "Coverage is too narrow relative to the calibration set. The generated test omits entire topical areas that appear in the real 2025 examples: no reflection/mirrors items, no refraction/critical-angle/TIR items, no numeric Snell’s-law style computation, no mirror/lens equation numeric image-distance/magnification problem, and no Rydberg/Balmer-style spectral line calculation. Human-eye content is limited to a single conceptual rods-vs-cones question and does not include any diopter/near-point style quantitative vision modeling present in the calibration.",
+    "Repetition of reasoning paths: items optics-b-generated-003 and optics-b-generated-007 both focus on Keplerian refracting telescopes with the same core relationships (M = f_obj / f_eye and L = f_obj + f_eye). 003 asks which eyepiece focal length gives larger magnification; 007 asks what happens when changing eyepiece focal length and tube length. These are near-duplicates in conceptual load and both sit in the same optical_instruments niche, reducing breadth.",
+    "Several stems are verbose and over-contextualized compared to the concise calibration style. Examples: 006, 007, and 008 include long narrative setups and repeated restatement of formulas and unit hints. The real items are generally tighter, with minimal prose and without didactic reminders like \"Shorter wavelength → higher photon energy\" or explicit unit conversions in the stem.",
+    "Multiple items lean toward generic textbook filler rather than competition-style calibration: 001 (parallel rays through a convex lens) and 002 (role of rods) are very standard conceptual questions with little event-specific nuance. While some such items are acceptable at level 1, the set overuses this style without balancing with more event-specific quantitative or multi-step reasoning.",
+    "Difficulty tagging is inconsistent with the calibration. For example: 003 is labeled difficulty 2 but is essentially a direct proportionality recall (M ∝ 1/f_eye) with no calculation, closer to level 1. 004 (image at 2f is same size, real, inverted) is also a standard textbook fact and fits level 1 more than level 2. 005 (magenta solution absorbs green) is a straightforward color-absorption concept and is easier than many level-2 calibration items that require Snell’s law or multi-part classification. Conversely, 006 and 008, while not extremely hard, are more computational than some labeled level-3 calibration items and might be borderline 2–3; the internal scale is not clearly aligned with the source.",
+    "Physical optics and light_photons coverage is shallow. 006 is a single proportionality use of Δy = λL/d with no explicit calculation required (just compare fringe spacings), and 008 is a threshold-energy check with heavy scaffolding (formula given, qualitative wavelength–energy relation spelled out, and only four close red wavelengths). The calibration examples for level 3 include more demanding tasks like Brewster-angle computation and Rydberg/Balmer wavelength calculation; the generated items do not reach that style of multi-step reasoning.",
+    "Distractors are often too transparent or qualitatively weak. Examples: in 003, option D directly contradicts the formula given in the stem; in 004, the only answer that matches the well-known 2f case is A, and the others mix virtual/inverted in ways that are easy to eliminate; in 005, once magenta is described as missing green, 520 nm is the only plausible choice. This reduces discrimination, especially at the higher labeled difficulties.",
+    "Competition faithfulness is weakened by the lack of numeric, equation-based problems that mirror the calibration: no Snell’s-law numeric refraction angle, no diopter/near-point calculation, no mirror equation computation, no Rydberg-series wavelength, and no multi-part classification short-answer. The generated set is entirely multiple choice and skews conceptual, whereas the calibration mix includes numeric and short-answer formats and more quantitative rigor.",
+    "Overall, the set is too small in scope, too conceptually repetitive in telescope/optical-instrument content, under-represents key Optics B topics (reflection, refraction/TIR, quantitative imaging, spectral lines), and misaligns difficulty labels and proportions relative to the real 2025 calibration."
+  ]
+}
