@@ -1,0 +1,24 @@
+{
+  "pipeline": "heredity_b_model_graph_rag",
+  "stages": {
+    "corpus": {
+      "complete": true,
+      "count": 62,
+      "source": "downloaded public paired tests and keys"
+    },
+    "real_embeddings": {
+      "complete": true,
+      "model": "text-embedding-3-small",
+      "question_count": 62,
+      "structure_count": 62,
+      "dimensions": 1536
+    },
+    "generation": {
+      "complete": false,
+      "accepted": 3,
+      "failures": 5,
+      "retry_cap": 12,
+      "current_serial": 4
+    }
+  }
+}

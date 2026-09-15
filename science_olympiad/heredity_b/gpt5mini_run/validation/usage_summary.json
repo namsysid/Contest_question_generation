@@ -1,0 +1,25 @@
+{
+  "generation_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "request_count": 78,
+  "totals": {
+    "input_tokens": 88275,
+    "output_tokens": 42269,
+    "total_tokens": 138033,
+    "prompt_tokens": 7489
+  },
+  "by_model": {
+    "gpt-5-mini": {
+      "requests": 56,
+      "input_tokens": 88275,
+      "output_tokens": 42269,
+      "total_tokens": 130544
+    },
+    "text-embedding-3-small": {
+      "requests": 22,
+      "prompt_tokens": 7489,
+      "total_tokens": 7489
+    }
+  },
+  "note": "Reused embedding requests are documented in checkpoints and are not double-counted here."
+}

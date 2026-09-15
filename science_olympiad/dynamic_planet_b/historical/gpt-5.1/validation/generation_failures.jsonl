@@ -1,0 +1,3 @@
+{"serial": 2, "topic": "stream_dynamics", "bundle_id": "dp-bundle-01", "error": "OpenAI Responses API output was incomplete (reason=max_output_tokens, output_tokens=2600)"}
+{"serial": 4, "topic": "lakes", "bundle_id": "dp-bundle-07", "error": "OpenAI Responses API output was incomplete (reason=max_output_tokens, output_tokens=2600)"}
+{"serial": 6, "topic": "water_quality", "bundle_id": "dp-bundle-07", "error": "OpenAI Responses API output was incomplete (reason=max_output_tokens, output_tokens=2600)"}

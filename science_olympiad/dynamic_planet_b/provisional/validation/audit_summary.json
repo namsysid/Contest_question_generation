@@ -1,0 +1,14 @@
+{
+  "source_pairs": 3,
+  "corpus_items": 184,
+  "paired_key_excerpts": 180,
+  "heuristically_enriched_items": 184,
+  "question_index_items": 184,
+  "graph_index_items": 184,
+  "retrieval_bundles": 10,
+  "generated_items": 10,
+  "deterministic_passed": 10,
+  "external_model_calls": 0,
+  "external_judge_calls": 0,
+  "validation_caveat": "Answer derivations are agent-authored and deterministically audited; no independent model judge was available."
+}

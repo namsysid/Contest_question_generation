@@ -1,0 +1,30 @@
+{
+  "overall_good": true,
+  "item_count": 10,
+  "unique_id_count": 10,
+  "all_deterministic_valid": true,
+  "duplicate_prompt_ids": [],
+  "topic_counts": {
+    "mendelian_probability": 2,
+    "non_mendelian_inheritance": 1,
+    "sex_linked_pedigrees": 1,
+    "cell_division_chromosomes": 1,
+    "dna_replication_structure": 2,
+    "gene_expression_regulation": 1,
+    "mutations_biotechnology": 2
+  },
+  "covered_topic_count": 7,
+  "available_topic_count": 7,
+  "difficulty_counts": {
+    "3": 5,
+    "4": 5
+  },
+  "response_type_counts": {
+    "multiple_choice": 5,
+    "short_answer": 3,
+    "numeric": 2
+  },
+  "audit_method": "deterministic schema/science recomputation, local novelty metrics, and agent internal review",
+  "external_blind_judge_performed": false,
+  "external_blind_judge_reason": "No OPENAI_API_KEY and no local Ollama executable were available."
+}

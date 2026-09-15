@@ -1,0 +1,17 @@
+{
+  "overall_good": true,
+  "coverage_good": true,
+  "difficulty_distribution_good": true,
+  "repetition_good": true,
+  "competition_faithful": true,
+  "all_topic_families_present": true,
+  "duplicate_or_near_duplicate_ids": [],
+  "weak_item_ids": [],
+  "missing_topic_families": [],
+  "issues": [],
+  "provenance": {
+    "model_generated": true,
+    "stage": "whole_bank_audit",
+    "generation_model": "gpt-5-mini"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "valid": true,
+  "embedding_model": "text-embedding-3-small",
+  "reports": [
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q010",
+      "source_similarity": 0.7178645730018616,
+      "prior_similarity": 0.3967798352241516,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q023",
+      "source_similarity": 0.5602924823760986,
+      "prior_similarity": 0.6315317153930664,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q013",
+      "source_similarity": 0.5164027214050293,
+      "prior_similarity": 0.37888404726982117,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q027",
+      "source_similarity": 0.6328126192092896,
+      "prior_similarity": 0.34337106347084045,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q014",
+      "source_similarity": 0.6151909828186035,
+      "prior_similarity": 0.3893471956253052,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q026",
+      "source_similarity": 0.536408543586731,
+      "prior_similarity": 0.5299398899078369,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q005",
+      "source_similarity": 0.5291770696640015,
+      "prior_similarity": 0.5343281626701355,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q023",
+      "source_similarity": 0.3576628565788269,
+      "prior_similarity": 0.45117104053497314,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q023",
+      "source_similarity": 0.5246492028236389,
+      "prior_similarity": 0.6184709072113037,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    },
+    {
+      "model": "text-embedding-3-small",
+      "nearest_source_id": "2021-ut-austin-q013",
+      "source_similarity": 0.44156414270401,
+      "prior_similarity": 0.6377122402191162,
+      "source_threshold": 0.9,
+      "prior_threshold": 0.86,
+      "pass": true
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "valid": true,
+  "item_count": 10,
+  "source_count": 68,
+  "unique_id_count": 10,
+  "unique_prompt_count": 10,
+  "topic_counts": {
+    "surveillance": 2,
+    "outbreak_investigation": 1,
+    "study_design": 1,
+    "data_interpretation": 2,
+    "measures_of_disease": 1,
+    "transmission_and_control": 1,
+    "epidemiology_foundations": 1,
+    "prevention": 1
+  },
+  "item_errors": {}
+}

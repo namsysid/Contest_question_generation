@@ -1,0 +1,42 @@
+{
+  "event_page": "https://www.soinc.org/disease-detectives-b",
+  "accessed_utc": "2026-09-15",
+  "rules_manual_used": false,
+  "rights_note": "Publicly accessible files linked by Science Olympiad were used for internal question-style calibration. No open-content license was stated on the event page, so no license is inferred and the generated bank must not be represented as endorsed by Science Olympiad.",
+  "sources": [
+    {
+      "file": "2017-sample-test.pdf",
+      "url": "https://www.soinc.org/sites/default/files/uploaded_files/4-17_DISEASE_SAMPLE_1.pdf",
+      "sha256": "3ce8e822b53b7d60f2bc8860f371af059ec8df9df8a55df82f2626f49520f682",
+      "bytes": 197835,
+      "contains_answer_key": true,
+      "extracted_items": 24
+    },
+    {
+      "file": "2018-foodborne-sample-test.pdf",
+      "url": "https://www.soinc.org/sites/default/files/uploaded_files/18_DD_SAMPLE3_FOODBORNE.pdf",
+      "sha256": "16eb9b5fba88b613edb49d75fd3d1589c3c272f149fc99a8fb22a2d66e426434",
+      "bytes": 302410,
+      "contains_answer_key": true,
+      "extracted_items": 16
+    },
+    {
+      "file": "2019-sample-test.pdf",
+      "url": "https://www.soinc.org/sites/default/files/uploaded_files/2019_DD_Science_Olympiad_SAMPLE_Test.pdf",
+      "sha256": "a1c5f211c5ffa24bb41c2da69deb0c07c3f7c3ab9726400c97a848cc7799656b",
+      "bytes": 310492,
+      "contains_answer_key": true,
+      "extracted_items": 28
+    },
+    {
+      "file": "2026-practice-and-sample-tournament.pdf",
+      "url": "https://www.soinc.org/sites/default/files/uploaded_files/DD_PRACTICE.pdf",
+      "sha256": "e6320ff1fda7c9631a90d1b386c47c03343221d1ffb76ad1d65fa242294858d7",
+      "bytes": 937167,
+      "contains_answer_key": true,
+      "extracted_items": 0,
+      "status": "downloaded_not_ingested_in_pilot",
+      "note": "Whole-document extraction exceeded the 16,000-output-token cap; checkpointed corpus was used rather than repeating the oversized call. Chunked ingestion is supported as a future improvement."
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import re
 
@@ -81,11 +82,16 @@ def main() -> None:
     args = parser.parse_args()
     novelty_corpus = read_jsonl(args.novelty_corpus) if args.novelty_corpus else []
     reports = []
-    for item in read_jsonl(args.input):
+    items = read_jsonl(args.input)
+    id_counts = Counter(str(item.get("id") or "") for item in items)
+    for item in items:
         generation = item.get("generation") or {}
         plan = generation.get("reasoning_plan") or {}
         bundle_stub = {"response_type": generation.get("source_response_type"), "topics": plan.get("topics")}
         deterministic = validate_item(item)
+        item_id = str(item.get("id") or "")
+        if item_id and id_counts[item_id] > 1:
+            deterministic.append(f"duplicate item id: {item_id}")
         if plan:
             deterministic += validate_against_plan(item, bundle_stub, plan)
         if novelty_corpus:

@@ -1,0 +1,38 @@
+{
+  "stages": [
+    {
+      "name": "download",
+      "complete": true
+    },
+    {
+      "name": "paired_ingest",
+      "complete": true,
+      "count": 63
+    },
+    {
+      "name": "reasoning_graphs",
+      "complete": true,
+      "count": 10
+    },
+    {
+      "name": "dual_retrieval",
+      "complete": true,
+      "count": 10
+    },
+    {
+      "name": "pilot_generation",
+      "complete": true,
+      "count": 10
+    },
+    {
+      "name": "deterministic_validation",
+      "complete": true
+    },
+    {
+      "name": "external_blind_judge",
+      "complete": false,
+      "blocked": true
+    }
+  ],
+  "resume_from": "external_blind_judge"
+}

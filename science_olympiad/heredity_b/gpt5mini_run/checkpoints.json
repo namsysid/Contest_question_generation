@@ -1,0 +1,59 @@
+{
+  "pipeline": "heredity_b_model_graph_rag",
+  "stages": {
+    "artifact_reuse": {
+      "complete": true,
+      "source_root": "science_olympiad/heredity_b/model_run",
+      "reused": [
+        "corpus",
+        "question_embeddings",
+        "structure_embeddings"
+      ],
+      "embedding_model": "text-embedding-3-small"
+    },
+    "corpus": {
+      "complete": true,
+      "count": 62,
+      "source": "downloaded public paired tests and keys"
+    },
+    "real_embeddings": {
+      "complete": true,
+      "model": "text-embedding-3-small",
+      "question_count": 62,
+      "structure_count": 62,
+      "dimensions": 1536
+    },
+    "generation": {
+      "complete": true,
+      "accepted": 10,
+      "failures": 1,
+      "retry_cap": 12,
+      "generation_model": "gpt-5-mini",
+      "embedding_model": "text-embedding-3-small",
+      "blind_judged": 10
+    },
+    "final_audits": {
+      "complete": true,
+      "holistic": true,
+      "deterministic": true,
+      "novelty": true
+    },
+    "usage": {
+      "complete": true,
+      "request_count": 78,
+      "totals": {
+        "input_tokens": 88275,
+        "output_tokens": 42269,
+        "total_tokens": 138033,
+        "prompt_tokens": 7489
+      }
+    },
+    "replacement": {
+      "complete": true,
+      "serial": 3,
+      "generation_model": "gpt-5-mini",
+      "blind_judged": true,
+      "failed_trials": 0
+    }
+  }
+}

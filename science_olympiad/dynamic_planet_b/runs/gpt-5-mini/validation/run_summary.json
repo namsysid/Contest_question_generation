@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "pipeline": "dynamic_planet_b_model_graph_rag_v1",
+  "generation_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "source_corpus_items": 184,
+  "model_enriched_items": 30,
+  "question_embedding_rows": 30,
+  "structure_embedding_rows": 30,
+  "retrieval_bundles": 10,
+  "generated_items": 10,
+  "passed_items": 10,
+  "all_topic_families_present": true,
+  "failed_serial_runs": 3,
+  "stage_models": {
+    "source_enrichment": "gpt-5-mini",
+    "reasoning_planning": "gpt-5-mini",
+    "item_generation": "gpt-5-mini",
+    "blind_judging": "gpt-5-mini",
+    "whole_bank_audit": "gpt-5-mini",
+    "embeddings": "text-embedding-3-small"
+  },
+  "usage": {
+    "calls": 143,
+    "models": {
+      "gpt-5-mini": 98,
+      "text-embedding-3-small": 45
+    },
+    "tokens": {
+      "input_tokens": 116259,
+      "output_tokens": 66066,
+      "total_tokens": 203104,
+      "prompt_tokens": 20779
+    }
+  },
+  "artifacts": {
+    "items": "science_olympiad/dynamic_planet_b/runs/gpt-5-mini/generated/items.jsonl",
+    "plans": "science_olympiad/dynamic_planet_b/runs/gpt-5-mini/generated/reasoning_plans.jsonl",
+    "reports": "science_olympiad/dynamic_planet_b/runs/gpt-5-mini/validation/item_reports.jsonl",
+    "usage": "science_olympiad/dynamic_planet_b/runs/gpt-5-mini/validation/model_usage.jsonl"
+  }
+}

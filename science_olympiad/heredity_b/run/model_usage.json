@@ -1,0 +1,9 @@
+{
+  "generation_mode": "agent_authored_pilot",
+  "external_generation_calls": 0,
+  "external_embedding_calls": 0,
+  "external_judge_calls": 0,
+  "billable_token_usage": null,
+  "estimated_cost_usd": 0,
+  "reason": "OPENAI_API_KEY was unavailable and no local Ollama executable was installed. Dual retrieval used deterministic local feature hashing. External blind judging remains a checkpoint rather than being simulated."
+}

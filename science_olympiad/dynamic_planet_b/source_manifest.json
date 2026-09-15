@@ -1,0 +1,37 @@
+{
+  "event_page": "https://www.soinc.org/dynamic-planet-b",
+  "season": 2027,
+  "division": "B",
+  "topic": "Earth's Fresh Waters",
+  "scope_note": "Only public current-topic practice tests linked by the event page are used. The official rules manual is deliberately excluded.",
+  "authoritative_references": [
+    "https://www.usgs.gov/water-science-school/science/aquifers-and-groundwater",
+    "https://www.usgs.gov/water-science-school/science/streamflow-and-water-cycle"
+  ],
+  "sources": [
+    {
+      "label": "2021 UT Austin Invitational",
+      "folder_url": "https://drive.google.com/drive/folders/15ULCkkv5WeCr8wdiou6wz3TPKSPd9FJe",
+      "test": "sources/2021-ut-austin-test.pdf",
+      "test_sha256": "0c490f9438e1dab6d84f778a7aa7abbff1a88d1a52a7ab7620e391424a8d70bc",
+      "key": "sources/2021-ut-austin-key.pdf",
+      "key_sha256": "d1e4c1e452357c027034aaf5142ea0c5542e0d0df47b9f17fedba0528f173fbc"
+    },
+    {
+      "label": "2022 UT Austin Invitational",
+      "folder_url": "https://drive.google.com/drive/folders/1OkYLWO7pbjUfGapzD1XPZTofhGQhVMAO",
+      "test": "sources/2022-ut-austin-test.pdf",
+      "test_sha256": "c9db0e15249cdfb56fa3e727c2a8a66e932bc442d8a978700b1f8e1562cda31e",
+      "key": "sources/2022-ut-austin-key.pdf",
+      "key_sha256": "cfbc68f0bb1ef1ae00f2a7ce8425d57954ae705b43d15b16be3ef1b33296828d"
+    },
+    {
+      "label": "2023 Sierra Vista Invitational",
+      "folder_url": "https://drive.google.com/drive/folders/1vJ88lApdXnhsjIZOdNrnKdGhfQoCHwnx",
+      "test": "sources/2023-sierra-vista-test.pdf",
+      "test_sha256": "bf3013c6162978ae5611a2efca4de09970df78ab00acc42feef9c35386af575d",
+      "key": "sources/2023-sierra-vista-key.pdf",
+      "key_sha256": "a84af783a5514c7280b0c76d7c0e443413c225445b8ebf32d9fcf83a6845aba4"
+    }
+  ]
+}

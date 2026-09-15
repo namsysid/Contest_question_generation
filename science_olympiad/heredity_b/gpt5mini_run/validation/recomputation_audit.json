@@ -1,0 +1,98 @@
+{
+  "valid": true,
+  "plan_count": 10,
+  "numeric_expression_count": 6,
+  "conceptual_derivation_count": 4,
+  "checks": [
+    {
+      "plan_id": "heredity-b-model-plan-001",
+      "mode": "numeric_expression",
+      "expression": "1/2",
+      "stored_expected_value": 0.5,
+      "recomputed_value": 0.5,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-002",
+      "mode": "numeric_expression",
+      "expression": "(1/2)",
+      "stored_expected_value": 0.5,
+      "recomputed_value": 0.5,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-003",
+      "mode": "numeric_expression",
+      "expression": "3*(1/4)*(3/4)**2",
+      "stored_expected_value": 0.421875,
+      "recomputed_value": 0.421875,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-004",
+      "mode": "numeric_expression",
+      "expression": "6+1",
+      "stored_expected_value": 7,
+      "recomputed_value": 7.0,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-005",
+      "mode": "conceptual_derivation",
+      "expression": null,
+      "stored_expected_value": null,
+      "recomputed_value": null,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-006",
+      "mode": "conceptual_derivation",
+      "expression": null,
+      "stored_expected_value": null,
+      "recomputed_value": null,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-007",
+      "mode": "numeric_expression",
+      "expression": "((2**5)*2 - 2) * 3000 * 2.0e-6",
+      "stored_expected_value": 0.372,
+      "recomputed_value": 0.372,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-008",
+      "mode": "numeric_expression",
+      "expression": "3/4",
+      "stored_expected_value": 0.75,
+      "recomputed_value": 0.75,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-009",
+      "mode": "conceptual_derivation",
+      "expression": null,
+      "stored_expected_value": null,
+      "recomputed_value": null,
+      "recomputed_valid": true,
+      "error": null
+    },
+    {
+      "plan_id": "heredity-b-model-plan-010",
+      "mode": "conceptual_derivation",
+      "expression": null,
+      "stored_expected_value": null,
+      "recomputed_value": null,
+      "recomputed_valid": true,
+      "error": null
+    }
+  ]
+}

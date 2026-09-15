@@ -1,0 +1,19 @@
+{
+  "valid": true,
+  "item_count": 10,
+  "unique_id_count": 10,
+  "unique_prompt_count": 10,
+  "topic_counts": {
+    "surface_water": 1,
+    "stream_dynamics": 2,
+    "groundwater": 2,
+    "lakes": 1,
+    "water_cycle": 1,
+    "water_quality": 1,
+    "maps_data": 1,
+    "karst_glacial": 1
+  },
+  "missing_topic_families": [],
+  "item_errors": {},
+  "all_model_generated": true
+}

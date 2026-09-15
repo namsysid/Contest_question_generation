@@ -1,0 +1,32 @@
+{
+  "generation_model": "gpt-5-mini",
+  "judge_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "item_count": 10,
+  "all_items_model_generated": true,
+  "all_items_blind_judged": true,
+  "deterministic_valid": true,
+  "coverage_valid": true,
+  "novelty_valid": true,
+  "batch_audit_overall_good": true,
+  "usage": {
+    "request_count": 135,
+    "totals": {
+      "input_tokens": 121638,
+      "output_tokens": 51712,
+      "total_tokens": 182263,
+      "prompt_tokens": 8913
+    },
+    "by_model": {
+      "gpt-5-mini": {
+        "input_tokens": 121638,
+        "output_tokens": 51712,
+        "total_tokens": 173350
+      },
+      "text-embedding-3-small": {
+        "prompt_tokens": 8913,
+        "total_tokens": 8913
+      }
+    }
+  }
+}

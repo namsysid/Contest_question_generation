@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "pipeline": "dynamic_planet_b_model_graph_rag_v1",
+  "generation_model": "gpt-5.1",
+  "embedding_model": "text-embedding-3-small",
+  "source_corpus_items": 184,
+  "model_enriched_items": 30,
+  "question_embedding_rows": 30,
+  "structure_embedding_rows": 30,
+  "retrieval_bundles": 10,
+  "generated_items": 10,
+  "passed_items": 10,
+  "all_topic_families_present": true,
+  "failed_serial_runs": 3,
+  "usage": {
+    "calls": 83,
+    "logged_api_responses": 83,
+    "initiated_api_requests": 85,
+    "interrupted_requests_without_returned_usage": 2,
+    "failed_before_connection": 1,
+    "response_statuses": {
+      "completed": 64,
+      "incomplete": 3,
+      "embedding_no_status_field": 16
+    },
+    "models": {
+      "gpt-5.1": 67,
+      "text-embedding-3-small": 16
+    },
+    "tokens": {
+      "input_tokens": 84918,
+      "output_tokens": 52623,
+      "total_tokens": 147288,
+      "prompt_tokens": 9747
+    }
+  },
+  "artifacts": {
+    "items": "science_olympiad/dynamic_planet_b/generated/items.jsonl",
+    "plans": "science_olympiad/dynamic_planet_b/generated/reasoning_plans.jsonl",
+    "reports": "science_olympiad/dynamic_planet_b/validation/item_reports.jsonl",
+    "usage": "science_olympiad/dynamic_planet_b/validation/model_usage.jsonl"
+  }
+}

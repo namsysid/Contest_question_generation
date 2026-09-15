@@ -1,0 +1,59 @@
+{
+  "event": "Heredity B",
+  "target_season": 2027,
+  "event_page": "https://www.soinc.org/heredity-b",
+  "retrieved_utc_date": "2026-09-14",
+  "season_note": "The official event page listed current-season resources as coming soon; public 2026 invitationals and official older samples were used only to calibrate scope, format, and reasoning depth.",
+  "rules_manual": {
+    "downloaded": false,
+    "used": false,
+    "reason": "Explicitly excluded because the manual prohibits AI training use."
+  },
+  "sources": [
+    {
+      "name": "2026 BullSO Invitational Heredity B",
+      "landing_url": "https://drive.google.com/drive/folders/1O1duR0PqVUilIS5VwtgkbmHq8Oo0fqv4?usp=sharing",
+      "test_file": "sources/bullso/bullso-test.pdf",
+      "key_file": "sources/bullso/bullso-key.pdf",
+      "test_sha256": "5af9b4d0b562e3834e6dee72cfa0eb8d82580493c8cf7b9141c4cd181c8ca983",
+      "key_sha256": "dae5df4d7e977d1ec347bce7752e25c2e4c1aaf7d9c51476dcec5fdc0f83ba7a",
+      "ingested_items": 50
+    },
+    {
+      "name": "2026 Berkeley Invitational Heredity B",
+      "landing_url": "https://drive.google.com/drive/folders/1MaQqY2djJaWI1ZJc_B2hxEJ7Dd-6PcYe?usp=sharing",
+      "test_file": "sources/berkeley/berkeley-test.pdf",
+      "key_file": "sources/berkeley/berkeley-key.pdf",
+      "test_sha256": "a456e523ce4b6f7cd7150d9c326127d70555f1f2557dd79b6b88eea65baf8206",
+      "key_sha256": "29e7ef94822a845c60f33339dc271961782a53daf185e33a3e59f8b2716ba7a4",
+      "ingested_items": 8,
+      "note": "Eight self-contained, text-safe constructed-response anchors were curated from the paired set."
+    },
+    {
+      "name": "2014 UT-Austin Regional sample exam and key",
+      "test_url": "https://www.soinc.org/sites/default/files/uploaded_files/2020_2014_Heredity_Test_0.pdf",
+      "key_url": "https://www.soinc.org/sites/default/files/uploaded_files/2020_2014_Heredity_Key_0.pdf",
+      "test_file": "sources/sample/2014-test.pdf",
+      "key_file": "sources/sample/2014-key.pdf",
+      "test_sha256": "34ddabd12718c7b016ace5af6396398ad8280ec08d2244895bfe49843786453a",
+      "key_sha256": "a27621edc1bdff5fe7dac08f7bc55b5784e97637f062702398e624227a09bb2f",
+      "ingested_items": 5,
+      "note": "Only self-contained A-D questions with unambiguous paired keys were retained."
+    },
+    {
+      "name": "Official Sample Heredity Tournament",
+      "url": "https://www.soinc.org/sites/default/files/uploaded_files/2020_HEREDITY_SAMPLE_0.pdf",
+      "file": "sources/sample/sample-tournament.pdf",
+      "sha256": "c998ab486a70f716e9928443d0535d88f1f727bc4f79360b02dd54320bcd1760",
+      "ingested_items": 0,
+      "note": "Downloaded and reviewed, but excluded from machine ingestion because test/key pages are interleaved and many questions require diagrams; retained for later visual-aware extraction."
+    },
+    {
+      "name": "2026 Pembroke Hill Invitational",
+      "landing_url": "https://drive.google.com/drive/folders/18_JSo5INjEBEKjrAcYtpdyQOgxTrPj3E?usp=sharing",
+      "downloaded": false,
+      "note": "The public Drive folder listing returned no file inventory during this run."
+    }
+  ],
+  "corpus_item_count": 63
+}

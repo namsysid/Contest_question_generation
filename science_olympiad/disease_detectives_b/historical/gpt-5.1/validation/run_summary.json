@@ -1,0 +1,24 @@
+{
+  "final_item_count": 10,
+  "valid_source_item_count": 65,
+  "extracted_source_item_count": 68,
+  "downloaded_pdf_count": 4,
+  "fully_ingested_pdf_count": 3,
+  "models": ["gpt-5.1", "text-embedding-3-small"],
+  "api_log_records": 125,
+  "response_calls_completed": 76,
+  "response_calls_incomplete": 3,
+  "embedding_calls_completed": 46,
+  "input_tokens": 234247,
+  "output_tokens": 105050,
+  "total_tokens_reported": 366202,
+  "usd_cost": null,
+  "cost_note": "The shared client logs API token usage, not billed dollars. No historical price assumption was applied.",
+  "validation": {
+    "deterministic_final": true,
+    "blind_item_reports_valid": "10/10",
+    "embedding_novelty_final": true,
+    "holistic_batch_final": true
+  },
+  "bounded_failure_note": "The 2026 workbook whole-document extractor exhausted its 16000-token output allowance. The retry path produced three incomplete response records before the run was interrupted and resumed from the 68-item checkpoint; it should be page-chunked before future ingestion."
+}

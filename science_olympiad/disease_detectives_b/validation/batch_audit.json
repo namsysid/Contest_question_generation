@@ -1,0 +1,23 @@
+{
+  "overall_good": false,
+  "coverage_good": true,
+  "difficulty_distribution_good": true,
+  "repetition_good": false,
+  "competition_faithful": true,
+  "duplicate_or_near_duplicate_ids": [
+    "disease-detectives-b-generated-004",
+    "disease-detectives-b-generated-006"
+  ],
+  "weak_item_ids": [],
+  "missing_areas": [],
+  "issues": [
+    {
+      "type": "repetition",
+      "item_ids": [
+        "disease-detectives-b-generated-004",
+        "disease-detectives-b-generated-006"
+      ],
+      "description": "Both items require the same reasoning pattern: identify the most likely implicated food solely by picking the highest odds ratio (>1) from a small set. Scenarios differ but the cognitive/epidemiologic task is essentially identical, reducing breadth of skills tested in a 10-item pilot."
+    }
+  ]
+}

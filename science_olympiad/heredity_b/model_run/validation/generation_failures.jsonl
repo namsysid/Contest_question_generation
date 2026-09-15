@@ -1,0 +1,5 @@
+{"serial": 1, "anchor_id": "bullso-2026-003", "topic": "mendelian_probability", "error": "OpenAI Responses API output was incomplete (reason=max_output_tokens, output_tokens=3000)"}
+{"serial": 1, "anchor_id": "berkeley-2026-005", "topic": "non_mendelian_inheritance", "error": "OpenAI Responses API output was incomplete (reason=max_output_tokens, output_tokens=3000)"}
+{"serial": 1, "anchor_id": "bullso-2026-011", "topic": "sex_linked_pedigrees", "error": "OpenAI Responses API output was incomplete (reason=max_output_tokens, output_tokens=4500)"}
+{"serial": 2, "anchor_id": "berkeley-2026-020", "topic": "dna_replication_structure", "error": "item retry cap reached: prompt exceeds 220 words"}
+{"serial": 4, "anchor_id": "bullso-2026-011", "topic": "sex_linked_pedigrees", "error": "item retry cap reached: prompt has 142 words; maximum is 140"}

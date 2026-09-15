@@ -1,0 +1,16 @@
+{
+  "overall_good": true,
+  "coverage_good": true,
+  "difficulty_distribution_good": true,
+  "repetition_good": true,
+  "competition_faithful": true,
+  "duplicate_or_near_duplicate_ids": [],
+  "weak_item_ids": [],
+  "missing_areas": [],
+  "issues": [],
+  "deterministic_valid": true,
+  "embedding_novelty_valid": true,
+  "all_item_blind_judges_valid": true,
+  "model_generated_item_count": 10,
+  "valid": true
+}
