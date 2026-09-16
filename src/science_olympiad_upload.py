@@ -9,17 +9,42 @@ from typing import Any, Callable
 from dotenv import load_dotenv
 
 from src.circuit_lab.common import read_jsonl
+from src.disease_detectives.common import validate_item as validate_disease_detectives_item
+from src.dynamic_planet.model_pipeline import validate_item as validate_dynamic_planet_item
 from src.food_science.common import validate_item as validate_food_science_item
+from src.heredity.common import validate_item as validate_heredity_item
 from src.machines.common import validate_item as validate_machines_item
 from src.optics.common import validate_item as validate_optics_item
 
 
 EVENTS: dict[str, dict[str, Any]] = {
+    "disease_detectives_b": {
+        "event": "Disease Detectives",
+        "division": "B",
+        "season": 2027,
+        "validator": validate_disease_detectives_item,
+    },
+    "dynamic_planet_b": {
+        "event": "Dynamic Planet",
+        "division": "B",
+        "season": 2027,
+        "validator": lambda item: validate_dynamic_planet_item(
+            item,
+            str((item.get("topics") or [""])[0]),
+            str(item.get("response_type") or ""),
+        ),
+    },
     "food_science_b": {
         "event": "Food Science",
         "division": "B",
         "season": 2022,
         "validator": validate_food_science_item,
+    },
+    "heredity_b": {
+        "event": "Heredity",
+        "division": "B",
+        "season": 2027,
+        "validator": validate_heredity_item,
     },
     "machines_b": {
         "event": "Machines",
@@ -66,18 +91,26 @@ def database_document(
         "answer": item.get("answer"),
         "solution": item.get("solution"),
     }
+    # Standalone constructed-response items keep their grading contract at the
+    # item level.  Do not discard it merely because there is no ``parts`` list.
+    if item.get("rubric") is not None:
+        answer_key["rubric"] = item.get("rubric")
+    if item.get("solution_steps") is not None:
+        answer_key["solution_steps"] = item.get("solution_steps")
     if item.get("parts"):
         answer_key["parts"] = [
             {
                 key: part.get(key)
-                for key in ("label", "answer", "solution", "rubric", "points")
+                for key in (
+                    "label", "answer", "solution", "solution_steps", "rubric", "points"
+                )
                 if part.get(key) is not None
             }
             for part in item["parts"]
         ]
 
     generation = item.get("generation") or {}
-    judge = report.get("judge") or {}
+    judge = report.get("judge") or report.get("blind_judge") or {}
     quality_checks = {
         key: value
         for key, value in judge.items()
@@ -111,6 +144,11 @@ def database_document(
             "pipeline": generation.get("pipeline") or f"{event_key}_graph_rag",
             "anchor_id": generation.get("anchor_id"),
             "candidate_origin": item.get("candidate_origin"),
+            "model_generated": generation.get("model_generated", True),
+            "generation_model": generation.get("generation_model") or generation.get("model"),
+            "embedding_model": generation.get("embedding_model"),
+            "provider": generation.get("provider") or item.get("provider"),
+            "blind_model_judged": generation.get("blind_model_judged") or bool(judge),
         },
         "created_at": datetime.now(timezone.utc),
     }
@@ -120,6 +158,8 @@ def prepare_documents(
     input_path: str | Path,
     reports_paths: list[str | Path],
     event_key: str,
+    *,
+    require_exact_model: str | None = None,
 ) -> list[dict[str, Any]]:
     validator: Callable[[dict[str, Any]], list[str]] = EVENTS[event_key]["validator"]
     reports: dict[str, dict[str, Any]] = {}
@@ -130,6 +170,8 @@ def prepare_documents(
     for item in read_jsonl(input_path):
         report = reports.get(item.get("id")) or {}
         errors = validator(item)
+        if require_exact_model:
+            errors.extend(exact_model_evidence_errors(item, report, require_exact_model))
         if errors or report.get("valid") is not True:
             raise RuntimeError(
                 f"Refusing to upload unvalidated item {item.get('id')}: "
@@ -143,6 +185,60 @@ def prepare_documents(
     if not documents:
         raise RuntimeError("No validated documents to upload")
     return documents
+
+
+def exact_model_evidence_errors(
+    item: dict[str, Any], report: dict[str, Any], required_model: str = "gpt-5-mini"
+) -> list[str]:
+    """Return fail-closed provenance and blind-validation errors for replacements.
+
+    Existing insertion flows remain backwards compatible.  Stable-ID repair uses
+    this stricter contract so absent evidence is never interpreted as success.
+    """
+    errors: list[str] = []
+    generation = item.get("generation") if isinstance(item.get("generation"), dict) else {}
+    judge = report.get("judge")
+    if not isinstance(judge, dict):
+        judge = report.get("blind_judge")
+    if not isinstance(judge, dict):
+        judge = {}
+
+    if generation.get("model_generated") is not True:
+        errors.append("generation.model_generated must be explicitly true")
+    if generation.get("generation_model") != required_model:
+        errors.append(f"generation model must be exactly {required_model}")
+    if report.get("valid") is not True:
+        errors.append("validation report must be valid")
+    if report.get("deterministic_errors"):
+        errors.append("deterministic validation errors are present")
+
+    for key in (
+        "solvable",
+        "answer_agrees",
+        "science_correct",
+        "division_b_appropriate",
+        "event_relevant",
+        "difficulty_match",
+        "competition_faithful",
+        "novel",
+    ):
+        if judge.get(key) is not True:
+            errors.append(f"blind judge must explicitly pass {key}")
+    if not str(judge.get("independent_answer") or "").strip():
+        errors.append("blind judge must provide an independent answer")
+    if judge.get("issues"):
+        errors.append("blind judge reported issues")
+
+    judge_provenance = judge.get("provenance") if isinstance(judge.get("provenance"), dict) else {}
+    judge_model = (
+        report.get("judge_model")
+        or report.get("blind_judge_model")
+        or judge_provenance.get("generation_model")
+        or generation.get("judge_model")
+    )
+    if judge_model != required_model:
+        errors.append(f"blind judge model must be exactly {required_model}")
+    return errors
 
 
 def main() -> None:

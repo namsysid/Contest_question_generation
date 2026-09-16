@@ -11,7 +11,10 @@ from typing import Any, Iterable
 TOPICS = {
     "epidemiology_foundations": ("epidemiology", "determinant", "distribution", "agent", "host", "environment"),
     "surveillance": ("surveillance", "reporting", "baseline", "notifiable", "case definition", "line list"),
-    "outbreak_investigation": ("outbreak", "hypothesis", "epidemic curve", "epi curve", "cluster", "investigation"),
+    "outbreak_investigation": (
+        "outbreak", "hypothesis", "epidemic curve", "epi curve", "cluster", "investigation",
+        "incubation", "exposure window", "symptom onset",
+    ),
     "study_design": ("cohort", "case-control", "case control", "cross-sectional", "experimental", "bias"),
     "measures_of_disease": ("attack rate", "incidence", "prevalence", "mortality", "relative risk", "odds ratio"),
     "data_interpretation": ("table", "graph", "curve", "calculate", "rate", "ratio", "risk"),

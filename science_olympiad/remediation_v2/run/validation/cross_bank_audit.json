@@ -1,0 +1,17 @@
+{
+  "overall_good": true,
+  "coverage_good": true,
+  "difficulty_distribution_good": true,
+  "reasoning_diversity_good": true,
+  "cross_bank_repetition_good": true,
+  "competition_faithful": true,
+  "weak_item_ids": [],
+  "duplicate_or_near_duplicate_ids": [],
+  "issues": [],
+  "model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "deterministic_item_count": 30,
+  "deterministic_unique_id_count": 30,
+  "cross_bank_close_pairs": [],
+  "valid": true
+}

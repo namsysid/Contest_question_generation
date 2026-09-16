@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "generation_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "item_count": 30,
+  "preserved_id_count": 30,
+  "action_counts": {
+    "keep": 8,
+    "polish": 12,
+    "rewrite": 10
+  },
+  "usage": {
+    "valid": true,
+    "request_count": 1346,
+    "models": {
+      "gpt-5-mini": 1154,
+      "text-embedding-3-small": 192
+    },
+    "tokens": {
+      "input_tokens": 2038173,
+      "output_tokens": 859764,
+      "total_tokens": 3073788,
+      "prompt_tokens": 175851
+    },
+    "bad_model_records": []
+  },
+  "artifacts": {
+    "items": "/Users/namansiddheshwar/RAG/Contest_question_generation/science_olympiad/remediation_v2/run/final/items.jsonl",
+    "reports": "/Users/namansiddheshwar/RAG/Contest_question_generation/science_olympiad/remediation_v2/run/final/reports.jsonl",
+    "cross_bank_audit": "/Users/namansiddheshwar/RAG/Contest_question_generation/science_olympiad/remediation_v2/run/validation/cross_bank_audit.json",
+    "trial_ledger": "/Users/namansiddheshwar/RAG/Contest_question_generation/science_olympiad/remediation_v2/run/validation/trial_ledger.jsonl"
+  }
+}
