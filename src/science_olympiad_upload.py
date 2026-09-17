@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -241,18 +243,76 @@ def exact_model_evidence_errors(
     return errors
 
 
+def _stable_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _stable_value(value[key]) for key in sorted(value)}
+    if isinstance(value, (list, tuple)):
+        return [_stable_value(row) for row in value]
+    if isinstance(value, datetime):
+        normalized = value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        normalized = normalized.astimezone(timezone.utc)
+        normalized = normalized.replace(microsecond=(normalized.microsecond // 1000) * 1000)
+        return normalized.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return value
+
+
+def document_hash(document: dict[str, Any]) -> str:
+    payload = json.dumps(
+        _stable_value(document), ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+        default=str,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def append_bundle_transactionally(collection: Any, client: Any, documents: list[dict[str, Any]]) -> int:
+    """Insert a bundle atomically and verify both new payloads and the baseline."""
+    ids = [str(row.get("_id") or "") for row in documents]
+    if not ids or "" in ids or len(ids) != len(set(ids)):
+        raise RuntimeError("bundle must contain unique nonempty IDs")
+    expected = {row["_id"]: document_hash(row) for row in documents}
+    with client.start_session() as session:
+        with session.start_transaction():
+            baseline = list(collection.find({}, session=session))
+            baseline_hashes = {row["_id"]: document_hash(row) for row in baseline}
+            collisions = sorted(set(ids) & set(baseline_hashes))
+            if collisions:
+                raise RuntimeError("Refusing to overwrite existing records: " + ", ".join(collisions))
+            collection.insert_many(documents, ordered=True, session=session)
+            inserted = list(collection.find({"_id": {"$in": ids}}, session=session))
+            actual = {row["_id"]: document_hash(row) for row in inserted}
+            if actual != expected:
+                raise RuntimeError("Inserted payload verification failed")
+            current_baseline = list(
+                collection.find({"_id": {"$in": list(baseline_hashes)}}, session=session)
+            ) if baseline_hashes else []
+            if {row["_id"]: document_hash(row) for row in current_baseline} != baseline_hashes:
+                raise RuntimeError("Preexisting Science Olympiad records changed")
+            if collection.count_documents({}, session=session) != len(baseline) + len(documents):
+                raise RuntimeError("Collection count verification failed inside transaction")
+        final_rows = list(collection.find({"_id": {"$in": ids}}))
+        if {row["_id"]: document_hash(row) for row in final_rows} != expected:
+            raise RuntimeError("Post-commit payload verification failed")
+        if collection.count_documents({}) != len(baseline) + len(documents):
+            raise RuntimeError("Post-commit collection count verification failed")
+    return len(baseline) + len(documents)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Upload one validated Science Olympiad event bank to MongoDB"
     )
-    parser.add_argument("--event", required=True, choices=sorted(EVENTS))
-    parser.add_argument("--input", required=True)
+    parser.add_argument("--event", choices=sorted(EVENTS))
+    parser.add_argument("--input")
     parser.add_argument(
         "--reports",
-        required=True,
         action="append",
         help="Validation report JSONL; repeat for banks assembled from multiple runs",
     )
+    parser.add_argument(
+        "--bundle", nargs=3, action="append", metavar=("EVENT", "INPUT", "REPORTS"),
+        help="Atomic bundle entry; repeat once per event",
+    )
+    parser.add_argument("--model", help="Require exact generation and judge model")
     parser.add_argument("--env-file", default=".env")
     parser.add_argument(
         "--skip-existing",
@@ -261,7 +321,35 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    documents = prepare_documents(args.input, args.reports, args.event)
+    if args.bundle:
+        if args.event or args.input or args.reports or args.skip_existing:
+            raise RuntimeError("--bundle cannot be combined with legacy single-event arguments")
+        documents = []
+        event_counts: dict[str, int] = {}
+        for event_key, input_path, reports_path in args.bundle:
+            if event_key not in EVENTS:
+                raise RuntimeError(f"unknown event: {event_key}")
+            prepared = prepare_documents(
+                input_path, [reports_path], event_key, require_exact_model=args.model,
+            )
+            documents.extend(prepared)
+            event_counts[event_key] = event_counts.get(event_key, 0) + len(prepared)
+        ids = [row["_id"] for row in documents]
+        if len(ids) != len(set(ids)):
+            raise RuntimeError("duplicate IDs across bundle inputs")
+        if len(documents) != 15 or event_counts != {
+            "disease_detectives_b": 5, "dynamic_planet_b": 5, "heredity_b": 5,
+        }:
+            raise RuntimeError("difficult tranche bundle must contain five items from each event")
+        difficulty_counts = {level: sum(row.get("difficulty") == level for row in documents) for level in (3, 4)}
+        if difficulty_counts != {3: 9, 4: 6}:
+            raise RuntimeError("difficult tranche bundle must contain nine D3 and six D4 items")
+    else:
+        if not args.event or not args.input or not args.reports:
+            parser.error("legacy mode requires --event, --input, and --reports")
+        documents = prepare_documents(
+            args.input, args.reports, args.event, require_exact_model=args.model,
+        )
     load_dotenv(args.env_file)
     uri = os.getenv("MONGODB_URI", "").strip()
     database_name = os.getenv("SCIOLY_DB_NAME", "").strip()
@@ -279,6 +367,10 @@ def main() -> None:
     client = MongoClient(uri, serverSelectionTimeoutMS=15000)
     try:
         collection = client[database_name][collection_name]
+        if args.bundle:
+            final_count = append_bundle_transactionally(collection, client, documents)
+            print(f"Inserted and verified {len(documents)} records atomically; collection count={final_count}")
+            return
         ids = [document["_id"] for document in documents]
         existing = {
             row["_id"]

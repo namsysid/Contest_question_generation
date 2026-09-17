@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "item_count": 15,
+  "difficulty_counts": {
+    "3": 9,
+    "4": 6
+  },
+  "generation_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "existing_bank_hashes_unchanged": true,
+  "usage": {
+    "valid": true,
+    "request_count": 2451,
+    "models": {
+      "text-embedding-3-small": 429,
+      "gpt-5-mini": 2022
+    },
+    "tokens": {
+      "prompt_tokens": 1580852,
+      "total_tokens": 9425562,
+      "input_tokens": 5417304,
+      "output_tokens": 2427406
+    },
+    "bad_model_records": []
+  }
+}

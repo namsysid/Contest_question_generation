@@ -1,0 +1,20 @@
+{
+  "overall_good": true,
+  "difficulty_honest": true,
+  "coverage_good": true,
+  "reasoning_diversity_good": true,
+  "competition_faithful": true,
+  "weak_item_ids": [],
+  "duplicate_or_near_duplicate_ids": [],
+  "issues": [],
+  "model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "new_item_count": 15,
+  "new_unique_id_count": 15,
+  "difficulty_counts": {
+    "3": 9,
+    "4": 6
+  },
+  "close_pairs_against_existing_or_new": [],
+  "valid": true
+}

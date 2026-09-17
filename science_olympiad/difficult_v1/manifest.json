@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "generation_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "items_per_event": 5,
+  "events": {
+    "disease_detectives_b": {
+      "corpus": "science_olympiad/disease_detectives_b/corpus/items.jsonl",
+      "items": [
+        {
+          "id": "disease-detectives-b-generated-011",
+          "topic": "study_design",
+          "response_type": "short_answer",
+          "points": 6,
+          "target_difficulty": 3,
+          "guidance": "Create a self-contained Division B retrospective-cohort item about two correlated food exposures. Fixed joint groups after one meal: both X and Y, 50 attendees and 30 cases; X only, 10 and 6; Y only, 10 and 1; neither, 50 and 5. State that all 120 attendees were enumerated and followed identically, so attack rates and risk ratios are natural. Present Analyst 1 using marginal food-specific RRs and Analyst 2 using the four joint groups. Ask which complete report should guide selection between the foods, require the supporting marginal and conditional RRs, distinguish confounding from effect modification using explicit supplied definitions, and give a bounded non-causal trace-back priority. Exact results: crude X RR=6.0, crude Y RR=31/11≈2.82; conditional Y RRs=1.0 and 1.0; conditional X RRs=6.0 and 6.0. Therefore Analyst 2 is defensible; Y is confounded by correlated X without effect modification; X persists; prioritize X without claiming causation. Difficulty must be exactly 3."
+        },
+        {
+          "id": "disease-detectives-b-generated-012",
+          "topic": "surveillance",
+          "response_type": "short_answer",
+          "points": 6,
+          "target_difficulty": 4,
+          "guidance": "Create one compact self-contained Division B surveillance short-answer problem with exactly three sites and two periods. Site A reports both periods with the same definition and complete reporting, but its age composition reverses: Period 1 young 2,000/20 cases and older 8,000/320; Period 2 young 8,000/120 and older 2,000/100. Site B is absent in Period 1 and reports Period 2 population 5,000 with 50 old-definition cases. Site C reports both periods with population 5,000: Period 1 has 25 old-definition cases; Period 2 has 30 old-definition cases plus 60 explicitly labeled new-only cases after broadening its definition. The prompt must include these Site C Period-1 and new-only counts. Provide, only as available reference information, a fixed direct-standardization population of 50% young and 50% older; do not instruct the solver to standardize or name a preferred representation. Ask the solver to evaluate a director's claim that incidence declined network-wide, show the calculations the data warrant, state the strongest supported temporal conclusion, and recommend one next surveillance action. The unique answer must independently exclude B for no baseline; retain C only through its harmonized old-definition subset, whose rate rises from 25/5,000=0.5% to 30/5,000=0.6%, excluding the 60 new-only cases; calculate A's crude rates as 3.4% then 2.2%; recognize both A age-specific rates rose; choose direct standardization and obtain 2.5% then 3.25%; identify A's crude decline as a composition artifact; reject the network-wide decline; conclude only that both longitudinally comparable site-specific trends rise, without extrapolating to B or calculating an invalid pooled adjusted network rate; and recommend common definitions, age-stratified reporting, and baseline participation. The 6-point rubric must separately score comparability/subsetting, A's crude paradox, age-specific evidence, standardized calculation, bounded inference across A and C, and action. Formula recall alone is insufficient; difficulty must be exactly 4."
+        },
+        {
+          "id": "disease-detectives-b-generated-013",
+          "topic": "measures_of_disease",
+          "response_type": "short_answer",
+          "points": 4,
+          "target_difficulty": 3,
+          "guidance": "Create one self-contained Division B case-control analysis problem. All 40 outbreak cases are enrolled: 30 ate Food X and 10 did not. Two possible control groups each contain 80 noncases. Community-registry controls were sampled independently from the population that produced the cases: 20 ate X and 60 did not. Clinic controls were sampled from patients treated for an unrelated condition associated with eating X: 50 ate X and 30 did not. No population denominators or sampling fractions are known. State only Analyst 1's proposal: use clinic controls and divide sampled case exposure proportion by sampled control exposure proportion to report a risk ratio. Do not tell the student which control group or association measure a defensible Analyst 2 should use, and do not provide an odds-ratio formula. Ask the student to construct the defensible alternative analysis, evaluate Analyst 1, and give a bounded interpretation. Require all three calculations in the answer: community OR=(30×60)/(10×20)=9.0; clinic OR=(30×30)/(10×50)=1.8; Analyst 1 ratio=(30/40)/(50/80)=1.2. Identify 1.2 as not a population RR, explain why true RR is unidentifiable, and identify clinic-control selection bias toward the null. Require two independent decisions: choose controls representing the cases' source population, then choose OR rather than RR because sampling fixes case/control totals. Formula recall alone is insufficient; difficulty exactly 3."
+        },
+        {
+          "id": "disease-detectives-b-generated-014",
+          "topic": "outbreak_investigation",
+          "response_type": "short_answer",
+          "points": 6,
+          "target_difficulty": 4,
+          "guidance": "Create one compact self-contained Division B evidence memo from exactly these data. School population 100. Common-source incubation 2–5 whole days inclusive; secondary onset 3–5 whole days after documented close contact with a symptomatic case. First-wave onsets: Day7=4, Day8=14, Day9=8, Day10=2, Day11=0. A one-day fair occurred Day5; one cafeteria item was served Days3–8. Among 28 first-wave cases, fair attendance: 24/40 attendees became cases versus 4/60 nonattendees; cafeteria item: 15/50 consumers versus 13/50 nonconsumers. Of 72 non-first-wave students, 20 had documented close contact with a symptomatic first-wave case on Day9 and 10 became ill later; among 52 without contact, 1 became ill later. Later onsets: Day12=2, Day13=7, Day14=2, then zero. Day arithmetic is exact; no other shared exposure is known. Ask the solver to choose among three plausible unified models without telling which calculations decide it: A, Day5 point source followed by limited secondary spread; B, one continuous cafeteria-source outbreak with no secondary spread; C, two unrelated point-source outbreaks. Require evidence that rules out the alternatives and a bounded conclusion. Exact work: reverse-incubation ranges for first-wave onsets are Day2–5, Day3–6, Day4–7, Day5–8, whose intersection is Day5. Fair attack rates 24/40=60.0% and 4/60=6.67%, RR=9.0. Cafeteria rates 15/50=30.0% and 13/50=26.0%, RR=15/13≈1.15. Later-wave contact risks 10/20=50.0% and 1/52≈1.92%, RR=26.0; Day9 contact to Day12–14 onset matches 3–5 days. Therefore A is uniquely best supported. B is weakened by cafeteria RR≈1.15 and contact-linked later cases; C by the 26-fold contact association and exact secondary timing. Prioritize Day5 fair trace-back without claiming causation. Rubric: separately score intersection, both exposure RRs plus why timing alone cannot choose, contact RR plus generation timing, and model selection with distinct rejection of B/C. Difficulty exactly 4; indispensable decisions are integrating the exposure-date intersection with association evidence and distinguishing secondary propagation from a second source using timing plus contact-stratified risk. Do not label waves primary/secondary in advance or turn the prompt into a checklist."
+        },
+        {
+          "id": "disease-detectives-b-generated-015",
+          "topic": "prevention",
+          "response_type": "short_answer",
+          "points": 4,
+          "target_difficulty": 3,
+          "guidance": "Create a self-contained toxin-mediated foodborne outbreak response problem with two correlated candidate foods. At a 60-person luncheon give only this raw chicken-salad/dessert cross-tab: both foods 30 people with 18 ill; chicken only 10 with 6 ill; dessert only 10 with 2 ill; neither 10 with 0 ill. Do not put derived values in the student prompt. Give vomiting-predominant illness 1–3 hours after the meal, available foods/records/roster, no known symptomatic handler, and public-health statutory authority. Ask students to choose one food using crude and bidirectional stratified evidence, then construct and prioritize an authority-bounded control/evidence/follow-up package. Do not enumerate actions or categories in the prompt. Exact solution must report every contrast: chicken crude 24/40=60% versus 2/20=10%, RR=6.0; dessert crude 20/40=50% versus 6/20=30%, RR≈1.67; within dessert eaters chicken 18/30=60% versus 2/10=20%, RR=3; within non-dessert eaters chicken 6/10=60% versus 0/10=0%, RD=60 points and RR undefined; within chicken eaters dessert 18/30=60% versus 6/10=60%, RR=1; within non-chicken eaters dessert 2/10=20% versus 0/10=0%, RD=20 points and RR undefined. Describe dessert evidence as heterogeneous and sparse, not as fully disappearing. Prioritize chicken because its association persists in both dessert strata, without claiming causation. The plan must stop access without discarding/redistributing, preserve evidence/records with chain of custody, notify/defer to public health, and prioritize lab confirmation, handler history/interviews, and trace-back. Require two decisions and at least four deductions; formula recall insufficient; difficulty exactly 3."
+        }
+      ]
+    },
+    "dynamic_planet_b": {
+      "corpus": "science_olympiad/dynamic_planet_b/corpus/items.jsonl",
+      "items": [
+        {
+          "id": "dynamic-planet-b-model-011",
+          "topic": "stream_dynamics",
+          "response_type": "short_answer",
+          "points": 5,
+          "target_difficulty": 3,
+          "guidance_version": 2,
+          "guidance": "Create a compact D3 student problem about separate experimental stream channels A and B receiving identical hydrographs in two trials. Tagged grains 8, 16, 32, and 64 mm are reset; 8, 16, and 32 mm move every time, while 64 mm never moves. Total trapped masses are A: 5.0 kg then 18.0 kg and B: 6.0 kg then 6.0 kg. Before Trial 2, extra untagged bed sediment is placed only upstream of A. Ask for the operational competence observation, defensible interval for the true threshold, supply limitation in A Trial 1, whether the mass rise implies greater competence, and the bounded conclusion about transport capacity. Exact solution: largest tested mobile size 32 mm, true threshold 32 mm <= Dc < 64 mm and unchanged; A Trial 1 was supply-limited; rise is supply-driven; Trial 2 proves capacity was at least 18 kg over that hydrograph but not its maximum. Use separate channels. Difficulty exactly 3."
+        },
+        {
+          "id": "dynamic-planet-b-model-012",
+          "topic": "groundwater",
+          "response_type": "short_answer",
+          "points": 5,
+          "target_difficulty": 4,
+          "guidance_version": 2,
+          "guidance": "Create a D4 groundwater evidence problem. At D-near beside an old borehole, pre-pumping shallow/deep heads are 101.0/101.4 m; during pumping 100.6/99.2 m. At D-far they are 102.0/101.0 then 101.4/100.5 m. Shallow nitrate is 15.0 mg/L with a young-water tracer; both deep wells initially have 0.5 mg/L and no tracer. During pumping D-near deep becomes 8.0 mg/L with tracer, D-far deep 0.6 without tracer. Nitrate is conservative over the observation interval and the two end members are 15.0 and 0.5 mg/L. Ask for gradient directions/magnitudes, local-versus-regional model discrimination, the shallow-water mixing fraction in D-near deep, contamination risk, and choice between ON/OFF borehole flowmeter versus repeat chemistry with a discriminating prediction. Exact: near reverses from upward 0.4 m to downward 1.4 m; far stays downward 1.0 then .9 m; spatial evidence supports local advective leakage through the old borehole; mixing fraction=(8.0-.5)/(15.0-.5)=.517 or 51.7%; high risk; choose flowmeter, predicting no/weak upward flow OFF and strong downward flow ON. Do not claim rapid arrival without timing. Rubric must match the answer. Difficulty exactly 4 through coupled hydraulic, mixing, spatial-model, and experimental-test reasoning."
+        },
+        {
+          "id": "dynamic-planet-b-model-013",
+          "topic": "lakes",
+          "response_type": "short_answer",
+          "points": 6,
+          "target_difficulty": 4,
+          "guidance_version": 2,
+          "guidance": "Create a compact D4 lake memo. Layer fractions upper 0.50, middle 0.30, deep 0.20. Day0 mixed: all DO=9.5 mg/L and soluble P=0.020 mg/L. Day20: upper DO=8.5,P=.020; middle DO=6.5,P=.040; deep DO=.20,P=.500. Day22 after wind mixing: all DO=6.0,P=.122. Continuous inflow sampling found no external P-flux increase, chloride was unchanged, and duplicate P analyses agreed. Rivals: Model 1 external P pulse; Model 2 deep accumulation during stratification then turnover redistribution; Model 3 analytical error. Ask for deep and whole-lake Day0-20 DO depletion rates, Day20 weighted P, relevant oxygen representation, best model, limitation, and decisive follow-up. Exact: deep .465 mg/L/day; weighted DO 6.24 and rate .163; weighted P .122. Deep DO is relevant because whole-lake mean masks near-anoxic bottom water. Model 2 is best supported but unproved; confirm with benthic flux or sediment porewater/redox. Difficulty exactly 4."
+        },
+        {
+          "id": "dynamic-planet-b-model-014",
+          "topic": "water_cycle",
+          "response_type": "short_answer",
+          "points": 4,
+          "target_difficulty": 3,
+          "guidance_version": 2,
+          "guidance": "Create a finished student-facing D3 runoff problem. Watershed area=6.00 km^2; hourly Q at t=0..8 is [1.0,1.2,1.4,3.6,6.8,6.0,3.2,2.4,2.6] m^3/s. Rain began after t=2, ended before t=5, and the hydrograph rejoined background at t=7. Candidate baseflows are constant 1.4 or linear 1.0+0.20t. G1 represents upper 40% and records 30.0 mm; G2 represents lower 60% and records 20.0 mm. An unweighted outlet gauge logs 45.0 mm two hours after radar and G1/G2 show rain ended; its work order says a technician cycled its bucket 45 times without disabling the logger. Ask students to select and justify baseflow and rainfall records, then calculate runoff volume, weighted rainfall, and coefficient. Exact: linear baseline; outlet record is maintenance artifact; excess t2-7=[0,2,5,4,1,0], volume 43,200 m^3; weighted rain 24.0 mm and volume 144,000 m^3; coefficient .300. Difficulty exactly 3."
+        },
+        {
+          "id": "dynamic-planet-b-model-015",
+          "topic": "karst_glacial",
+          "response_type": "short_answer",
+          "points": 6,
+          "target_difficulty": 3,
+          "guidance_version": 2,
+          "guidance": "Create an honest D3 karst tracer problem. Inject 30,000 mg; sample six 1-hour bins. Backgrounds mg/L A=2.0,B=1.0,C=1.5; discharges L/h A=50,B=500,C=100; measured mg/L A=[2,2,2.5,4,10,42], B=[26,12,6,4,2,1], C=[1.5,1.5,1.5,2,3,5]. Storm evidence: A no turbidity pulse,+0.2 C; B +50 NTU,-2.0 C bin1; C +5 NTU bins3-4. Define Analyst 1: A is strongest/direct because it has the largest raw concentration peak. Define Analyst 2: B is strongest/direct based on integrated background-corrected mass flux plus storm-synchronous timing, turbidity, and temperature. Ask students to evaluate both, calculate each mass/percent, identify the best-supported connection, classify responses, and for it report arrival, peak, and contiguous width strictly above 10% of corrected peak. Exact: A 2525 mg=8.42%; B 22500=75.00%; C 550=1.83%; Analyst2/B; B arrival/peak1,width bins1-4,direct; A/C storage-influenced. Difficulty exactly 3, not D4."
+        }
+      ]
+    },
+    "heredity_b": {
+      "corpus": "science_olympiad/heredity_b/gpt5mini_run/corpus/items.jsonl",
+      "items": [
+        {
+          "id": "heredity-b-model-generated-011",
+          "topic": "mendelian_probability",
+          "response_type": "short_answer",
+          "points": 5,
+          "target_difficulty": 3,
+          "guidance_version": 3,
+          "guidance": "Create a compact D3 two-locus testcross. An AaBb double heterozygote of unknown phase is testcrossed to ab/ab. Adult offspring labeled by the heterozygote gamete are AB=420,ab=420,Ab=8,aB=8. An equal-seeding control shows Ab and aB offspring each have 10.0% survival while AB and ab have 100%; survival acts after fertilization and gamete production is unaffected. Hypotheses: H1 independent assortment and H2 linkage. Ask which counts represent meiotic output, supported hypothesis, inferred phase, recombination/map distance, and preselection probability another offspring is aabb. Exact: correct Ab/aB to 80 each,N=1000; H2 because r=.16 not .50; infer coupling AB/ab from largest corrected classes; 16 cM; P(aabb)=P(ab gamete)=.420. Reject raw 16/856=1.87%. Never state phase in the stem. Difficulty exactly 3."
+        },
+        {
+          "id": "heredity-b-model-generated-012",
+          "topic": "non_mendelian_inheritance",
+          "response_type": "multiple_choice",
+          "points": 6,
+          "target_difficulty": 4,
+          "guidance_version": 2,
+          "guidance": "Create a D4 multiple-choice integrated epistasis, viability, and linkage problem. AaBb x AaBb adult survivors W=810,I=225,M=200; post-fertilization survival .90,.75,.50. Rival rules without ratios: R W=A_B_,I=aaB_,M=__bb; S W=A___,I=aaB_,M=aabb. Reconstruct embryos and derive ratios. A Wild adult testcrossed to aabb yields survivors 90,75,100; infer genotype. This same adult is L/l with B linked to L; its embryo-stage B-L testcross gives BL=400,bl=400,Bl=100,bL=100. Cross this adult to AAbb ll; ask adult W:I:M and fraction of all adult survivors both Wild and L-bearing. Exact: embryos 900,300,400; R=9:3:4; adult AaBb; phase BL/bl,r=.20. All final offspring receive A from AAbb; maternal B gives W and b gives M, embryo .5:.5; survivor weights .45:.25, normalized 9/14:0:5/14. Wild-and-L embryos are maternal BL=.4, survivor weight .4*.9=.36; total survivor weight .70; fraction=.36/.70=18/35. Solution must show this exact derivation and must not claim only half receive A or calculate .4 as .2. Choice A combines all. Difficulty exactly 4."
+        },
+        {
+          "id": "heredity-b-model-generated-013",
+          "topic": "sex_linked_pedigrees",
+          "response_type": "short_answer",
+          "points": 6,
+          "target_difficulty": 4,
+          "guidance_version": 9,
+          "guidance": "Create a D4 short-answer X-linked linkage/Bayes problem. Fully penetrant XLR D is linked to marker M. II-1 is an obligate D/d carrier and M1/M2, but phase and theta are unknown. Her 40 sons are affected-M1=18,unaffected-M1=2,affected-M2=2,unaffected-M2=18; assume theta<.5. Daughter III-1 inherited maternal M1. A direct D test on III-1 has sensitivity=.80,specificity=1.00 and is negative. Analysts: A says negative makes risk zero; B says update the marker-conditioned prior with Bayes. Ask which analyst, infer ML phase and theta from sons, derive III-1 prior, posterior, phase if carrier, and overall risk for future child known male and known to inherit III-1 maternal M1. Exact: phase D-M1/d-M2; theta=4/40=.10; prior=.90; Analyst B; posterior=(.9*.2)/(.9*.2+.1)=9/14; if carrier D-M1; second transmission=.90; risk=81/140. No 1/2 factors. Difficulty exactly 4 with phase-model choice and negative-test model choice."
+        },
+        {
+          "id": "heredity-b-model-generated-014",
+          "topic": "cell_division_chromosomes",
+          "response_type": "multiple_choice",
+          "points": 4,
+          "target_difficulty": 3,
+          "guidance": "Create a fixed D3 two-marker nondisjunction problem. A diploid parent has homolog haplotypes C-D and c-d. Marker C/c is at the centromere; D/d is distal. A copy-number assay of all four products from one meiosis finds two nullisomic products and two disomic products: product 1 contains chromatids C-D and c-D (centromere Cc, distal DD); product 2 contains C-d and c-d (centromere Cc, distal dd). The assay distinguishes copy number and homolog origin. Ask which meiotic stage failed, whether a crossover between centromere and D/d is required, and the allele dosages after product 1 is fertilized by a normal c-d sperm. Exact solution: Cc in both disomes proves homologs traveled together at meiosis I (heterodisomy), not meiosis-II sister failure; reciprocal distal DD versus dd requires one crossover between C/c and D/d before the MI nondisjunction; fertilization gives centromere dosage C:1,c:2 and distal dosage D:2,d:1. Correct option combines MI nondisjunction, one crossover, and both dosage ratios. Distractors independently change stage, crossover conclusion, or dosage. Difficulty exactly 3 with three coupled deductions and two independent mechanism choices."
+        },
+        {
+          "id": "heredity-b-model-generated-015",
+          "topic": "gene_expression_regulation",
+          "response_type": "multiple_choice",
+          "points": 4,
+          "target_difficulty": 3,
+          "guidance_version": 6,
+          "guidance": "Create an honest D3 multiple-choice gene-expression evidence-integration problem. GENX G1/G2 have equal run-on transcription. Correctly spliced mature units G1=20,G2=80; half-lives and ribosome occupancy per mature transcript equal; protein 20:80. Intron-3-retaining RNA G1:G2=9:1 and is nuclear. Shared-extract minigenes differing only in a 25-nt boundary reproduce retention; reciprocal boundary swaps transfer it; doubling a general spliceosome factor changes neither ratio. UPF1 inhibition does not raise cytoplasmic G1 RNA/protein. An intronless G1 rescue adds 40 mature-equivalent G1 units. Ask for mechanism, retained-RNA fate, causal chain, and rescue ratio. Correct A: cis boundary defect plus nuclear retention; intronless bypass gives 60:80=3:4. Distractors use promoter, global spliceosome, or NMD/decay models. Difficulty exactly 3."
+        }
+      ]
+    }
+  }
+}
