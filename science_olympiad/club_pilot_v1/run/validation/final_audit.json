@@ -1,0 +1,19 @@
+{
+  "overall_good": true,
+  "coverage_good": true,
+  "difficulty_ceiling_respected": true,
+  "reasoning_diversity_good": true,
+  "competition_faithful": true,
+  "middle_school_club_ready": true,
+  "weak_item_ids": [],
+  "issues": [],
+  "model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "item_count": 15,
+  "difficulty_counts": {
+    "1": 3,
+    "2": 12
+  },
+  "close_pairs": [],
+  "valid": true
+}

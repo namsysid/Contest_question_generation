@@ -19,7 +19,50 @@ from src.machines.common import validate_item as validate_machines_item
 from src.optics.common import validate_item as validate_optics_item
 
 
+def validate_club_pilot_item(item: dict[str, Any]) -> list[str]:
+    """Fail-closed structural contract for the cross-event club pilot."""
+    errors: list[str] = []
+    response_type = item.get("response_type")
+    if response_type not in {"multiple_choice", "short_answer", "numeric"}:
+        errors.append("unsupported club-pilot response_type")
+    if not str(item.get("id") or "").strip():
+        errors.append("missing item id")
+    for field in ("prompt", "answer", "solution"):
+        if not str(item.get(field) or "").strip():
+            errors.append(f"missing {field}")
+    difficulty = item.get("difficulty")
+    if isinstance(difficulty, bool) or not isinstance(difficulty, int) or difficulty not in {1, 2, 3}:
+        errors.append("club-pilot difficulty must be an integer from 1 through 3")
+    if isinstance(item.get("points"), bool) or not isinstance(item.get("points"), int) or item["points"] < 1:
+        errors.append("points must be a positive integer")
+    if not item.get("topics"):
+        errors.append("at least one topic is required")
+    if response_type == "multiple_choice":
+        choices = item.get("choices") or {}
+        if set(choices) != set("ABCD"):
+            errors.append("multiple choice item must contain exactly A-D")
+        if str(item.get("answer") or "").strip().upper() not in set("ABCD"):
+            errors.append("multiple choice answer must be A-D")
+    elif not item.get("rubric"):
+        errors.append("constructed response requires a rubric")
+    return errors
+
+
 EVENTS: dict[str, dict[str, Any]] = {
+    "anatomy_physiology_b": {
+        "event": "Anatomy & Physiology",
+        "division": "B",
+        "season": 2027,
+        "validator": validate_club_pilot_item,
+        "id_prefix": "apb-2027-pilot-",
+    },
+    "crime_busters_b": {
+        "event": "Crime Busters",
+        "division": "B",
+        "season": 2027,
+        "validator": validate_club_pilot_item,
+        "id_prefix": "crime-busters-b-2027-pilot-",
+    },
     "disease_detectives_b": {
         "event": "Disease Detectives",
         "division": "B",
@@ -53,6 +96,13 @@ EVENTS: dict[str, dict[str, Any]] = {
         "division": "B",
         "season": 2026,
         "validator": validate_machines_item,
+    },
+    "meteorology_b": {
+        "event": "Meteorology",
+        "division": "B",
+        "season": 2027,
+        "validator": validate_club_pilot_item,
+        "id_prefix": "meteorology-b-2027-spec-",
     },
     "optics_b": {
         "event": "Optics",
@@ -172,6 +222,11 @@ def prepare_documents(
     for item in read_jsonl(input_path):
         report = reports.get(item.get("id")) or {}
         errors = validator(item)
+        expected_prefix = EVENTS[event_key].get("id_prefix")
+        if expected_prefix and not str(item.get("id") or "").startswith(expected_prefix):
+            errors.append(f"item id is not bound to event {event_key}")
+        if report.get("deterministic_errors"):
+            errors.append("validation report contains deterministic validation errors")
         if require_exact_model:
             errors.extend(exact_model_evidence_errors(item, report, require_exact_model))
         if errors or report.get("valid") is not True:
@@ -312,6 +367,10 @@ def main() -> None:
         "--bundle", nargs=3, action="append", metavar=("EVENT", "INPUT", "REPORTS"),
         help="Atomic bundle entry; repeat once per event",
     )
+    parser.add_argument(
+        "--bundle-profile", choices=("difficult", "club-pilot"), default="difficult",
+        help="Validation contract for an atomic multi-event bundle",
+    )
     parser.add_argument("--model", help="Require exact generation and judge model")
     parser.add_argument("--env-file", default=".env")
     parser.add_argument(
@@ -337,13 +396,32 @@ def main() -> None:
         ids = [row["_id"] for row in documents]
         if len(ids) != len(set(ids)):
             raise RuntimeError("duplicate IDs across bundle inputs")
-        if len(documents) != 15 or event_counts != {
-            "disease_detectives_b": 5, "dynamic_planet_b": 5, "heredity_b": 5,
-        }:
-            raise RuntimeError("difficult tranche bundle must contain five items from each event")
-        difficulty_counts = {level: sum(row.get("difficulty") == level for row in documents) for level in (3, 4)}
-        if difficulty_counts != {3: 9, 4: 6}:
-            raise RuntimeError("difficult tranche bundle must contain nine D3 and six D4 items")
+        if args.bundle_profile == "difficult":
+            if len(documents) != 15 or event_counts != {
+                "disease_detectives_b": 5, "dynamic_planet_b": 5, "heredity_b": 5,
+            }:
+                raise RuntimeError("difficult tranche bundle must contain five items from each event")
+            difficulty_counts = {
+                level: sum(row.get("difficulty") == level for row in documents) for level in (3, 4)
+            }
+            if difficulty_counts != {3: 9, 4: 6}:
+                raise RuntimeError("difficult tranche bundle must contain nine D3 and six D4 items")
+        else:
+            if len(documents) != 15 or event_counts != {
+                "anatomy_physiology_b": 5, "crime_busters_b": 5, "meteorology_b": 5,
+            }:
+                raise RuntimeError("club pilot bundle must contain five items from each event")
+            difficulty_counts = {
+                level: sum(row.get("difficulty") == level for row in documents) for level in (1, 2, 3)
+            }
+            if (
+                any(row.get("difficulty") not in {1, 2, 3} for row in documents)
+                or difficulty_counts[1] < 3
+                or difficulty_counts[2] < 6
+            ):
+                raise RuntimeError(
+                    "club pilot bundle must stay within D1-D3 and contain at least three D1 and six D2 items"
+                )
     else:
         if not args.event or not args.input or not args.reports:
             parser.error("legacy mode requires --event, --input, and --reports")
@@ -360,11 +438,12 @@ def main() -> None:
         )
 
     try:
+        import certifi
         from pymongo import MongoClient
     except ModuleNotFoundError as exc:
-        raise RuntimeError("pymongo is required: pip install pymongo") from exc
+        raise RuntimeError("pymongo and certifi are required") from exc
 
-    client = MongoClient(uri, serverSelectionTimeoutMS=15000)
+    client = MongoClient(uri, serverSelectionTimeoutMS=15000, tlsCAFile=certifi.where())
     try:
         collection = client[database_name][collection_name]
         if args.bundle:

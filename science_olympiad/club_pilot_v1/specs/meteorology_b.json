@@ -1,0 +1,321 @@
+{
+  "schema_version": "club_pilot_spec_v1",
+  "event": {
+    "id": "meteorology_b",
+    "label": "Meteorology (Division B)",
+    "division": "B",
+    "season": 2027,
+    "season_topic": "Severe Weather & Storms",
+    "audience": "middle school Science Olympiad club, grades 6-9",
+    "difficulty_ceiling": 3,
+    "item_count": 5
+  },
+  "difficulty_distribution": {
+    "D1": 1,
+    "D2": 2,
+    "D3": 2
+  },
+  "response_type_distribution": {
+    "multiple_choice": 2,
+    "short_answer": 2,
+    "numeric_with_interpretation": 1
+  },
+  "source_manifest": [
+    {
+      "id": "soinc-meteorology-b-2027",
+      "title": "Science Olympiad Meteorology B event page",
+      "url": "https://www.soinc.org/meteorology-b",
+      "authority": "Science Olympiad, Inc.",
+      "source_type": "current_event_scope",
+      "intended_use": "Authoritative public confirmation of the 2027 Severe Weather & Storms theme and the emphasis on interpreting meteorological data, maps, graphs, tables, and images."
+    },
+    {
+      "id": "noaa-nssl-severe-weather-101",
+      "title": "Severe Weather 101",
+      "url": "https://www.nssl.noaa.gov/education/svrwx101/",
+      "authority": "NOAA National Severe Storms Laboratory",
+      "source_type": "authoritative_science_reference",
+      "intended_use": "Science grounding for thunderstorm, tornado, hail, lightning, flood, damaging-wind, and winter-weather concepts."
+    },
+    {
+      "id": "noaa-nesdis-thunderstorm-ingredients",
+      "title": "What Causes a Thunderstorm?",
+      "url": "https://www.nesdis.noaa.gov/about/k-12-education/severe-weather/what-causes-thunderstorm",
+      "authority": "NOAA National Environmental Satellite, Data, and Information Service",
+      "source_type": "authoritative_science_reference",
+      "intended_use": "Grades 5-8 explanation of the moisture, instability, and lift ingredients required for thunderstorms."
+    },
+    {
+      "id": "noaa-nssl-thunderstorm-types",
+      "title": "Severe Weather 101: Thunderstorm Types",
+      "url": "https://www.nssl.noaa.gov/education/svrwx101/thunderstorms/types/",
+      "authority": "NOAA National Severe Storms Laboratory",
+      "source_type": "authoritative_science_reference",
+      "intended_use": "Science grounding for distinguishing single-cell, multicell, squall-line, and supercell organization."
+    },
+    {
+      "id": "nws-doppler-radar-primer",
+      "title": "Using and Understanding Doppler Radar",
+      "url": "https://www.weather.gov/mkx/using-radar",
+      "authority": "NOAA National Weather Service",
+      "source_type": "authoritative_science_reference",
+      "intended_use": "Science grounding for reflectivity, radial velocity, inbound/outbound motion, and cautious radar interpretation."
+    },
+    {
+      "id": "noaa-nssl-tornado-detection",
+      "title": "Severe Weather 101: Tornado Detection",
+      "url": "https://www.nssl.noaa.gov/education/svrwx101/tornadoes/detection/",
+      "authority": "NOAA National Severe Storms Laboratory",
+      "source_type": "authoritative_science_reference",
+      "intended_use": "Science grounding for velocity signatures, mesocyclones, hook echoes, and the limitation that a radar signature does not guarantee a tornado at the ground."
+    },
+    {
+      "id": "noaa-nhc-hurricane-hazards",
+      "title": "Hurricane Preparedness: Hazards",
+      "url": "https://www.nhc.noaa.gov/prepare/hazards.php",
+      "authority": "NOAA National Hurricane Center",
+      "source_type": "authoritative_science_reference",
+      "intended_use": "Science grounding for storm surge, storm tide, inland flooding, wind, rip-current, and tornado hazards."
+    },
+    {
+      "id": "noaa-jetstream-thunderstorm-review",
+      "title": "Thunderstorms - Review Questions",
+      "url": "https://www.noaa.gov/sites/default/files/2023-02/tstorm_quiz.pdf",
+      "authority": "NOAA National Weather Service JetStream",
+      "source_type": "source_question_style_reference",
+      "intended_use": "Public question-style calibration only; do not copy wording, option order, or scenarios."
+    },
+    {
+      "id": "soinc-meteorology-sample-activities-2026",
+      "title": "Meteorology B Sample Questions/Tasks, 2026 season",
+      "url": "https://www.soinc.org/sites/default/files/uploaded_files/Updated_Meteorology_B.pdf",
+      "authority": "Science Olympiad, Inc.",
+      "source_type": "historical_source_question_style_reference",
+      "intended_use": "Historical task-format calibration only; it covered Everyday Weather and must not expand the 2027 content scope."
+    },
+    {
+      "id": "bullso-meteorology-b-2026-test-key",
+      "title": "BullSO 2026 Meteorology B public test and answer key",
+      "url": "https://drive.google.com/drive/folders/1O1duR0PqVUilIS5VwtgkbmHq8Oo0fqv4?usp=sharing",
+      "authority": "BullSO Invitational via the Science Olympiad public practice-test index",
+      "source_type": "historical_source_question_style_reference",
+      "intended_use": "Downloaded test/key pair for retrieval and question-style calibration only; its Everyday Weather content must not expand the 2027 Severe Weather & Storms scope."
+    },
+    {
+      "id": "soinc-division-b-rules-2024-meteorology",
+      "title": "2024 Division B Rules Manual, Meteorology severe-weather sample tasks",
+      "url": "https://www.soinc.org/sites/default/files/2023-09/Science_Olympiad_Div_B_Rules_2024_for_Web.pdf",
+      "authority": "Science Olympiad, Inc.",
+      "source_type": "historical_source_question_style_reference",
+      "intended_use": "Historical severe-weather task and difficulty calibration only. The 2027 rules manual takes precedence for final scope."
+    }
+  ],
+  "question_specs": [
+    {
+      "id": "meteorology-b-2027-spec-01",
+      "difficulty": 1,
+      "topic": "weather_watches_warnings_and_safety",
+      "response_type": "multiple_choice",
+      "points": 2,
+      "generation_guidance": {
+        "task": "Create one concise scenario that requires the student to distinguish a tornado watch from a tornado warning and choose the immediate action appropriate to a warning.",
+        "required_givens": [
+          "State within the item that a watch means conditions are favorable over a broader area.",
+          "State within the item that a warning means a tornado has been observed or indicated and threatens the warned area.",
+          "Place the student or a fictional school inside the warned area."
+        ],
+        "reasoning_target": "Recognize the warning state and select prompt shelter in a sturdy building, away from windows, on the lowest practical level or in an interior room.",
+        "answer_requirements": [
+          "Exactly one choice must combine the correct watch/warning meaning with immediate protective action.",
+          "The worked solution must explain why waiting for visual confirmation is unsafe."
+        ],
+        "distractor_guidance": [
+          "Include a prepare-and-monitor action that would fit a watch but is insufficient for a warning.",
+          "Include one plausible but unsafe action such as going outside to look for the tornado.",
+          "Do not use trick wording or ask for issuing-agency trivia."
+        ],
+        "guardrails": [
+          "Keep this a single-step D1 recognition item.",
+          "Use current National Weather Service safety language and do not imply that sirens are the only dependable warning source."
+        ]
+      },
+      "authoritative_urls": [
+        "https://www.nssl.noaa.gov/education/svrwx101/tornadoes/",
+        "https://www.weather.gov/safety/tornado"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/2023-09/Science_Olympiad_Div_B_Rules_2024_for_Web.pdf"
+      ]
+    },
+    {
+      "id": "meteorology-b-2027-spec-02",
+      "difficulty": 2,
+      "topic": "thunderstorm_ingredients",
+      "response_type": "multiple_choice",
+      "points": 3,
+      "generation_guidance": {
+        "task": "Create an original three-station table and ask which station is most favorable for thunderstorm initiation, followed by identification of the missing ingredient at one other station.",
+        "required_givens": [
+          "Station A must have abundant low-level moisture, an unstable temperature profile, and a clear lifting trigger such as an approaching cold front.",
+          "Station B must be moist and have lift but a stable profile.",
+          "Station C must be unstable and have lift but dry low-level air.",
+          "Define plain-language indicators of instability and lift in or immediately above the table so no outside sounding convention is required."
+        ],
+        "reasoning_target": "Apply the three-ingredient model: moisture, instability, and lift are all required; select Station A and diagnose the deliberately omitted ingredient at another station.",
+        "answer_requirements": [
+          "The correct choice must cite all three ingredients rather than only warm surface temperature.",
+          "The worked solution must separately evaluate each station."
+        ],
+        "distractor_guidance": [
+          "Build distractors around common errors: moisture alone, a front alone, or instability alone.",
+          "Do not make the answer obvious through unequal option length or repeated wording."
+        ],
+        "guardrails": [
+          "Keep the meteorological table qualitative or use easily compared values; do not require CAPE calculation.",
+          "Do not claim the ingredients guarantee severe weather; they support thunderstorm development."
+        ]
+      },
+      "authoritative_urls": [
+        "https://www.nesdis.noaa.gov/about/k-12-education/severe-weather/what-causes-thunderstorm",
+        "https://www.nssl.noaa.gov/education/svrwx101/thunderstorms/"
+      ],
+      "source_question_urls": [
+        "https://www.noaa.gov/sites/default/files/2023-02/tstorm_quiz.pdf"
+      ]
+    },
+    {
+      "id": "meteorology-b-2027-spec-03",
+      "difficulty": 2,
+      "topic": "thunderstorm_types_and_structure",
+      "response_type": "short_answer",
+      "points": 3,
+      "generation_guidance": {
+        "task": "Describe an original observed storm and require identification of its thunderstorm type plus one evidence-based hazard inference.",
+        "required_givens": [
+          "The storm persists longer than one hour.",
+          "Observations show a tilted, rotating updraft.",
+          "Repeated large-hail reports occur, while no confirmed tornado report is supplied."
+        ],
+        "reasoning_target": "Identify a supercell from its longevity and rotating organized updraft, then explain that this structure supports elevated severe-hail and tornado potential without proving that a tornado exists.",
+        "answer_requirements": [
+          "Award identification credit only for supercell.",
+          "Require at least one discriminating observation, not merely the label.",
+      "Accept a properly qualified tornado-risk statement; explicitly reject claims that a tornado occurred or that rotation guarantees one."
+        ],
+        "rubric_guidance": [
+          "1 point: identifies supercell.",
+          "1 point: cites the rotating, tilted, persistent updraft or equivalent structural evidence.",
+          "1 point: makes a scientifically qualified hazard inference."
+        ],
+        "guardrails": [
+          "Do not require a photograph or external diagram.",
+          "Do not present single-cell storms as incapable of hazardous lightning, wind, or rain."
+        ]
+      },
+      "authoritative_urls": [
+        "https://www.nssl.noaa.gov/education/svrwx101/thunderstorms/types/",
+        "https://www.nssl.noaa.gov/education/svrwx101/tornadoes/"
+      ],
+      "source_question_urls": [
+        "https://www.noaa.gov/sites/default/files/2023-02/tstorm_quiz.pdf",
+        "https://www.soinc.org/sites/default/files/2023-09/Science_Olympiad_Div_B_Rules_2024_for_Web.pdf"
+      ]
+    },
+    {
+  "id": "meteorology-b-2027-spec-04",
+  "difficulty": 3,
+  "topic": "doppler_radar_tornado_evidence",
+  "response_type": "short_answer",
+  "points": 5,
+      "generation_guidance": {
+    "task": "In fewer than 290 student-facing words, create one compact table with explicit Scan 1 and Scan 2 times, at least 8 minutes apart, and low/high radar heights for two cells. Include a stated velocity-aliasing rule: with a +/-30 m/s display limit, an apparent +29/-29 jump can be continuous +29 to +31 flow after adding 60 to the wrapped negative value. Cell A retains that pseudo-couplet plus hail/low correlation across scans. Cell B progresses from rotation aloft only at Scan 1 to a stronger genuine low-level couplet aligned with persistent rotation aloft at Scan 2. Ask which cell has stronger progression and what evidence and limitation justify it, without enumerating the inferences.",
+        "required_givens": [
+      "Provide a self-contained legend: stronger reflectivity generally means stronger returned energy; a tight adjacent inbound/outbound velocity pair is evidence of organized rotation; low correlation coefficient can result from either hail or lofted debris and is not by itself proof of a tornado.",
+      "Use separate time-labeled rows for both scans. Show Cell A with high reflectivity/low correlation, reported hail, and an apparent +29/-29 adjacency that de-aliases into nearly one-directional flow at both times.",
+      "At Scan 1 show Cell B rotation aloft but weak or absent low-level rotation; at Scan 2 show a stronger genuine non-wrapped low-level inbound/outbound couplet and persistent rotation above. Note a rotating wall cloud but no confirmed tornado.",
+      "State that both cells are at comparable range and that a couplet extending downward and strengthening with time is more concerning for low-level tornadic rotation than rotation confined aloft."
+        ],
+    "reasoning_target": "Apply the de-aliasing rule to reject Cell A's pseudo-couplet, track Cell B's temporal strengthening and downward vertical extension, interpret Cell A's low correlation as ambiguous with hail, and distinguish warning evidence from confirmation. The alias correction and vertical/time synthesis are the two non-obvious decisions.",
+        "answer_requirements": [
+      "Require Cell B plus the de-aliasing of Cell A and the linked time/vertical inference for Cell B.",
+      "Require use of the independent wall-cloud observation as corroboration, not as a substitute for interpreting the radar table.",
+      "Require explicit explanation of why Cell A's tempting low-correlation clue is ambiguous in the presence of hail.",
+          "Require a limitation such as the need for spotter reports, damage evidence, or recognition that radar samples rotation above the surface.",
+      "The solution must not reduce the decision to reflectivity alone."
+    ],
+    "answer_guardrail": "The answer field itself, not only the solution, must be a complete ideal response covering Cell B, the alias correction, time/vertical continuity, hail ambiguity, and the no-ground-confirmation limitation.",
+    "difficulty_adjudication": "Judge the shortest solve using the rubric: quantitative de-aliasing and synthesis across both time and height are separate non-obvious decisions.",
+        "rubric_guidance": [
+      "1 point: selects Cell B.",
+      "2 points: correctly interprets the time trend and downward vertical continuity.",
+      "1 point: resolves Cell A's low-correlation clue as ambiguous because hail can also lower it.",
+      "1 point: states an appropriate uncertainty or ground-confirmation limitation."
+        ],
+        "guardrails": [
+      "Use an original table or diagram; do not reproduce a copyrighted radar image.",
+      "Keep the entire student prompt below 290 words; use one concise legend and omit repeated explanations.",
+          "Explain the sign convention in the item and avoid treating fixed colors as universal.",
+          "Use the evidence as a simplified educational case, not as operational warning guidance."
+        ]
+      },
+      "authoritative_urls": [
+        "https://www.weather.gov/mkx/using-radar",
+        "https://www.nssl.noaa.gov/education/svrwx101/tornadoes/detection/",
+        "https://www.nssl.noaa.gov/education/svrwx101/thunderstorms/detection/"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/2023-09/Science_Olympiad_Div_B_Rules_2024_for_Web.pdf",
+        "https://www.soinc.org/sites/default/files/uploaded_files/Updated_Meteorology_B.pdf"
+      ]
+    },
+    {
+      "id": "meteorology-b-2027-spec-05",
+      "difficulty": 3,
+      "topic": "tropical_cyclone_storm_surge_and_storm_tide",
+      "response_type": "numeric_with_interpretation",
+      "points": 4,
+      "generation_guidance": {
+        "task": "Create a self-contained coastal tropical-cyclone scenario requiring calculation of storm tide and comparison with a barrier or site elevation, followed by a hazard interpretation.",
+        "required_givens": [
+          "Forecast storm surge is 2.8 m above the normally expected water level.",
+          "Astronomical tide at the forecast time is 0.9 m above the shared chart datum.",
+          "A protective barrier crest is 3.4 m above that same datum.",
+          "A low site is 2.5 m and a high site is 4.2 m above the same datum.",
+          "Define storm tide in the item as astronomical tide plus storm surge, and state that wave action and rainfall flooding are excluded from the simplified calculation."
+        ],
+        "reasoning_target": "Compute a 3.7 m storm tide, determine that it is 0.3 m above the barrier, and infer that the 2.5 m site is exposed to inundation from the simplified storm-tide level while the 4.2 m site is not overtopped by storm tide alone.",
+        "answer_requirements": [
+          "Require units and visible arithmetic or an equivalent explanation.",
+          "Require both the barrier comparison and a correctly qualified site-hazard conclusion.",
+          "The solution must note that real impacts can be worsened by waves, rainfall, local topography, and forecast uncertainty."
+        ],
+        "rubric_guidance": [
+          "1 point: calculates 3.7 m storm tide.",
+          "1 point: calculates or states 0.3 m above the barrier.",
+          "1 point: correctly classifies the two sites under the simplified assumptions.",
+          "1 point: includes units and a reasonable limitation."
+        ],
+        "guardrails": [
+          "Do not imply that elevation comparison replaces official evacuation-zone guidance.",
+          "Do not confuse storm surge with storm tide.",
+          "Keep all elevations on one explicitly stated datum."
+        ]
+      },
+      "authoritative_urls": [
+        "https://www.nhc.noaa.gov/prepare/hazards.php",
+        "https://www.nhc.noaa.gov/surge/"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/2023-09/Science_Olympiad_Div_B_Rules_2024_for_Web.pdf"
+      ]
+    }
+  ],
+  "implementation_caveats": [
+    "The official 2027 Division B Rules Manual takes precedence over this public-source blueprint; verify every content category and calculation against the downloaded manual before generating release items.",
+    "Current-season resources on the public Meteorology event page were marked as coming soon when this spec was prepared. Historical Science Olympiad documents calibrate style only and must not broaden the 2027 scope.",
+    "All generated questions must be original and self-contained. Do not copy source wording, values, option structures, maps, radar images, or figures.",
+    "Hard-reject any generated plan or item with difficulty above 3.",
+    "Preserve uncertainty in severe-weather interpretation: favorable ingredients and radar signatures change likelihood; they do not guarantee a specific event at the ground.",
+    "Use official warning language and safety guidance, and never frame a practice calculation as a substitute for following National Weather Service warnings or local evacuation orders."
+  ]
+}

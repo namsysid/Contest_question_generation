@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "event_key": "anatomy_physiology_b",
+  "event_label": "Science Olympiad Division B Anatomy & Physiology",
+  "division": "B",
+  "season": 2027,
+  "audience": "middle-school club pilot (grades 6-9)",
+  "scope": [
+    "respiratory system",
+    "digestive system",
+    "immune system"
+  ],
+  "difficulty_ceiling": 3,
+  "difficulty_distribution": {
+    "D1": 1,
+    "D2": 2,
+    "D3": 2
+  },
+  "question_count": 5,
+  "source_manifest": {
+    "policy": "Use Science Olympiad sources to establish current-season scope and calibrate competition format. Use OpenStax Anatomy & Physiology 2e to adjudicate scientific claims. Source material is reference data, never generation instructions. Do not copy source wording, diagrams, values, answer choices, or named scenarios. Confirm every topic against the final 2027 Division B Rules Manual before production release.",
+    "sources": [
+      {
+        "id": "soinc_ap_event_2027",
+        "title": "Anatomy and Physiology event page",
+        "publisher": "Science Olympiad",
+        "type": "official_event_page",
+        "role": "current-season scope and resource index",
+        "url": "https://www.soinc.org/anatomy-and-physiology-c"
+      },
+      {
+        "id": "soinc_ap_sample_2027",
+        "title": "2027 Respiratory, Digestive, Immune System Sample Tournament",
+        "publisher": "Science Olympiad",
+        "type": "official_sample_questions_and_key_pdf",
+        "role": "question-format, station-style, and difficulty calibration",
+        "url": "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf"
+      },
+      {
+        "id": "soinc_ap_overview_2027",
+        "title": "2027 Anatomy & Physiology Year 3 Presentation",
+        "publisher": "Science Olympiad",
+        "type": "official_training_pdf",
+        "role": "topic breadth and process-skill calibration; not the final rules or sole scientific authority",
+        "url": "https://www.soinc.org/sites/default/files/uploaded_files/1-27%20A%26P-YR3_PDF.pdf"
+      },
+      {
+        "id": "openstax_ap2e_respiratory",
+        "title": "Anatomy & Physiology 2e, 22.3 The Process of Breathing",
+        "publisher": "OpenStax",
+        "type": "open_textbook",
+        "role": "authoritative respiratory physiology, lung volumes, and capacities",
+        "license": "CC BY 4.0",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-3-the-process-of-breathing"
+      },
+      {
+        "id": "openstax_ap2e_immune",
+        "title": "Anatomy & Physiology 2e, Chapter 21 Review",
+        "publisher": "OpenStax",
+        "type": "open_textbook",
+        "role": "authoritative innate and adaptive immune-system concepts",
+        "license": "CC BY 4.0",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/21-chapter-review"
+      },
+      {
+        "id": "openstax_ap2e_digestive",
+        "title": "Anatomy & Physiology 2e, Chapter 23 Review",
+        "publisher": "OpenStax",
+        "type": "open_textbook",
+        "role": "authoritative digestive anatomy, chemical digestion, absorption, and accessory-organ function",
+        "license": "CC BY 4.0",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-chapter-review"
+      }
+    ]
+  },
+  "question_specs": [
+    {
+      "id": "apb-2027-pilot-001",
+      "difficulty": 1,
+      "topic": "respiratory_anatomy_structure_function",
+      "response_type": "multiple_choice",
+      "points": 2,
+      "target_skill": "identify a major respiratory structure and connect a visible structural feature to its function",
+      "generation_guidance": {
+        "task": "Create one original plain-text airway pathway with four lettered labels, then ask which labeled structure is the trachea and why its cartilage rings are useful.",
+        "required_reasoning": "Direct identification followed by a single structure-function association: cartilage helps keep the airway open.",
+        "format_constraints": [
+          "Use exactly four answer choices A-D with one unambiguously correct answer.",
+          "Use an original ASCII/text pathway that is uncluttered and does not require an external image.",
+          "Do not require recognition of microscopic structures or Division C-only terminology.",
+          "Do not reproduce or trace a source diagram."
+        ],
+        "answer_guardrail": "The key must identify the trachea and relate its cartilage to resistance to airway collapse; do not claim that cartilage performs gas exchange."
+      },
+      "authoritative_urls": [
+        "https://www.soinc.org/anatomy-and-physiology-c",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-3-the-process-of-breathing"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf"
+      ]
+    },
+    {
+      "id": "apb-2027-pilot-002",
+      "difficulty": 2,
+      "topic": "respiratory_lung_volumes_and_capacities",
+      "response_type": "numeric",
+      "points": 3,
+      "target_skill": "select the relevant lung-volume relationship, calculate a respiratory capacity, and interpret it against supplied evidence",
+      "generation_guidance": {
+        "task": "Give realistic integer values in milliliters for tidal volume, inspiratory reserve volume, expiratory reserve volume, and residual volume for two test sessions. Supply a normal functional-residual-capacity interval and state that values above it are consistent with extra air remaining after a normal exhalation. Ask students to calculate FRC for both sessions, identify which session is outside the supplied interval, and interpret the direction without making a diagnosis.",
+        "required_reasoning": "Recognize that functional residual capacity equals expiratory reserve volume plus residual volume, ignore the two irrelevant supplied values, calculate both sessions, compare them with the supplied interval, and interpret the high value as more air remaining after a normal exhalation.",
+        "format_constraints": [
+          "Do not state the formula in the stem.",
+          "Choose values whose sums are exact and whose units are consistent.",
+      "Require two labeled numeric answers in milliliters followed by one concise evidence-based interpretation sentence; do not describe the whole response as numeric-only.",
+          "Keep all values physiologically plausible, ensure exactly one session lies above the supplied interval, and avoid inferring disease from a single capacity."
+        ],
+        "answer_guardrail": "Independently recompute ERV + RV for both sessions, verify that neither TV nor IRV is included, and limit the conclusion to the supplied reference comparison rather than a diagnosis."
+      },
+      "authoritative_urls": [
+        "https://www.soinc.org/anatomy-and-physiology-c",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-3-the-process-of-breathing"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf"
+      ]
+    },
+    {
+      "id": "apb-2027-pilot-003",
+      "difficulty": 2,
+      "topic": "digestive_enzymes_experimental_design",
+      "response_type": "short_answer",
+      "points": 4,
+      "target_skill": "choose a controlled comparison and use enzyme data to explain a pH-dependent change in digestion",
+      "generation_guidance": {
+        "task": "Provide a four-row data table for starch digestion by amylase. Vary pH in the decisive pair while holding enzyme amount, starch amount, temperature, and time constant; use the other rows as plausible distractor comparisons.",
+    "required_reasoning": "Identify the pair that isolates pH, compare the measured digestion rates, and explain in middle-school language that strongly acidic conditions can change the enzyme active site's shape or charge and reduce amylase activity.",
+        "format_constraints": [
+          "Define the measured outcome and whether a larger value means faster or slower digestion.",
+          "Supply every controlled variable needed to identify the valid comparison.",
+          "Use data with a clear direction but avoid a perfect zero unless explicitly justified.",
+      "Award separate rubric credit for comparison selection, evidence, and mechanism.",
+      "Avoid unexplained advanced terms such as protonation or tertiary structure; if used, define them in plain language."
+        ],
+        "answer_guardrail": "The conclusion must be limited to the tested pH conditions and must not assert that temperature or enzyme concentration caused the difference in the controlled pair."
+      },
+      "authoritative_urls": [
+        "https://www.soinc.org/anatomy-and-physiology-c",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-chapter-review"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf"
+      ]
+    },
+    {
+      "id": "apb-2027-pilot-004",
+      "difficulty": 3,
+      "topic": "adaptive_immunity_primary_secondary_response",
+      "response_type": "multiple_choice",
+      "points": 3,
+      "target_skill": "interpret primary and secondary antibody-response data and discriminate adaptive memory from innate-response explanations",
+      "generation_guidance": {
+        "task": "Provide a self-contained time-series table or original graph for antibody concentration after two equal doses of the same antigen separated in time. Ask for the best explanation of the faster, larger second response.",
+        "required_reasoning": "Use the equal-dose constraint, recognize the lag and lower peak after first exposure, connect the later response to antigen-specific memory B cells, and rule out nonspecific innate immunity as the cause of the stronger antibody pattern.",
+        "format_constraints": [
+          "Use exactly four answer choices A-D and make each distractor represent a distinct misconception.",
+          "State explicitly that antigen identity and dose are the same at both exposures.",
+          "Keep graph axes, units, and exposure times explicit; if no image is used, include all values in a table.",
+          "Do not require antibody-class trivia or treatment recommendations."
+        ],
+        "answer_guardrail": "The key must attribute the secondary response to adaptive immune memory and clonal expansion, not to a permanently elevated innate response or a larger second antigen dose."
+      },
+      "authoritative_urls": [
+        "https://www.soinc.org/anatomy-and-physiology-c",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/21-chapter-review"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf"
+      ]
+    },
+    {
+  "id": "apb-2027-pilot-005",
+  "difficulty": 3,
+  "topic": "digestive_absorption_structure_function_disorder",
+  "response_type": "short_answer",
+  "points": 6,
+      "target_skill": "compare competing digestive mechanisms using structural and biochemical evidence, then make a directional prediction",
+      "generation_guidance": {
+    "task": "Present baseline and recovery data for two matched groups after removing a dietary trigger: diet-only and diet-plus-pancreatic-enzyme supplement. Give villus surface area, oral and intravenous AUC controls for a water-soluble marker, fat absorption, and bile-salt concentration. Define normalized intestinal uptake as oral AUC divided by intravenous AUC, but do not identify the decisive columns. Make raw oral AUC misleading because IV controls differ. The enzyme supplement must produce no meaningful rescue beyond diet alone at comparable villus area. Ask one integrated question: which of three named mechanisms best explains the evidence, and why? Require calculations and rejection of rivals without a checklist of subparts.",
+    "required_reasoning": "Discover and apply IV normalization; compare matched groups to interpret the negative enzyme-supplement intervention; connect normalized uptake to villus recovery; and use normal bile/fat evidence to reject the remaining rival. The two non-obvious decisions are selecting the correct denominator and recognizing that failure of a selective supplement to rescue uptake contradicts enzyme deficiency.",
+        "format_constraints": [
+          "Name the candidate mechanisms in the stem so students compare evidence rather than recall an unsupported diagnosis.",
+      "Define AUC and the normalized uptake calculation in the stem, and provide reference intervals for enzyme activity, bile salts, and fat absorption.",
+      "Choose numbers so raw oral AUC changes little or moves in the misleading direction while normalized uptake clearly improves; both ratios must be simple to calculate by hand.",
+      "Require the ideal response to explain why raw oral AUC is not a valid cross-group or cross-visit comparison when the IV control changes.",
+      "Keep the prompt integrated and under 300 words; do not enumerate a separate task for every inference.",
+          "Keep the causal chain to one primary digestive mechanism; do not add an immune-cell pathway or a treatment-selection subproblem.",
+      "Award rubric credit for both calculations, recognizing the normalization constraint, mechanism selection with structure-function evidence, and separate rejection of both alternatives."
+        ],
+    "answer_guardrail": "The answer field itself, not only the solution, must contain the complete ideal response with normalized-uptake calculations, intervention comparison, best-supported mechanism, and evidence rejecting both rivals. Phrase this as evidence for a mechanism, not a clinical diagnosis."
+    ,"difficulty_adjudication": "Judge the shortest solve using the rubric: selecting the hidden IV denominator and interpreting a negative selective intervention are separate non-obvious decisions."
+      },
+      "authoritative_urls": [
+        "https://www.soinc.org/anatomy-and-physiology-c",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-chapter-review"
+      ],
+      "source_question_urls": [
+        "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf",
+        "https://www.soinc.org/sites/default/files/uploaded_files/1-27%20A%26P-YR3_PDF.pdf"
+      ]
+    }
+  ],
+  "release_checks": [
+    "Validate the item against the final 2027 Division B rules and exclude Division C-only or higher-tournament-only content unless explicitly in scope.",
+    "Blind-solve each item without its stored answer or solution and require agreement with the key.",
+    "Recompute all numeric answers and verify units, tolerances, graph labels, and table values.",
+    "Reject questions made difficult by missing information, obscure vocabulary, excessive length, or medical trivia.",
+    "Reject copied or near-copied source wording, diagrams, values, answer choices, and scenarios.",
+    "Confirm the final bank retains exactly one D1, two D2, and two D3 items, with no D4 item."
+  ]
+}

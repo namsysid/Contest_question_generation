@@ -1,0 +1,93 @@
+{
+  "valid": true,
+  "item_count": 15,
+  "events": {
+    "anatomy_physiology_b": 5,
+    "crime_busters_b": 5,
+    "meteorology_b": 5
+  },
+  "difficulty_counts": {
+    "1": 3,
+    "2": 12
+  },
+  "generation_model": "gpt-5-mini",
+  "embedding_model": "text-embedding-3-small",
+  "source_files": {
+    "anatomy_physiology_b": [
+      {
+        "path": "sources/anatomy_physiology_b/official_2027_sample.pdf",
+        "kind": "questions",
+        "url": "https://www.soinc.org/sites/default/files/uploaded_files/5-%2027-A%26P-SAMPLE-YR3.pdf"
+      },
+      {
+        "path": "sources/anatomy_physiology_b/openstax_breathing.html",
+        "kind": "authority",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-3-the-process-of-breathing"
+      },
+      {
+        "path": "sources/anatomy_physiology_b/openstax_immunity.html",
+        "kind": "authority",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/21-chapter-review"
+      },
+      {
+        "path": "sources/anatomy_physiology_b/openstax_digestive.html",
+        "kind": "authority",
+        "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-chapter-review"
+      }
+    ],
+    "crime_busters_b": [
+      {
+        "path": "sources/crime_busters_b/bullso_2026_test.pdf",
+        "kind": "questions",
+        "url": "https://drive.google.com/drive/folders/1O1duR0PqVUilIS5VwtgkbmHq8Oo0fqv4?usp=sharing"
+      },
+      {
+        "path": "sources/crime_busters_b/bullso_2026_key.pdf",
+        "kind": "questions_key",
+        "url": "https://drive.google.com/drive/folders/1O1duR0PqVUilIS5VwtgkbmHq8Oo0fqv4?usp=sharing"
+      },
+      {
+        "path": "sources/crime_busters_b/official_lab_expectations.pdf",
+        "kind": "authority",
+        "url": "https://www.soinc.org/sites/default/files/uploaded_files/Lab_Expections_B26.pdf"
+      },
+      {
+        "path": "sources/crime_busters_b/nist_chromatography.html",
+        "kind": "authority",
+        "url": "https://www.nist.gov/publications/what-chromatography-all-about"
+      },
+      {
+        "path": "sources/crime_busters_b/nist_density.pdf",
+        "kind": "authority",
+        "url": "https://www.nist.gov/system/files/documents/2017/05/09/2012Week-1sm.pdf"
+      }
+    ],
+    "meteorology_b": [
+      {
+        "path": "sources/meteorology_b/bullso_2026_test.pdf",
+        "kind": "questions",
+        "url": "https://drive.google.com/drive/folders/1O1duR0PqVUilIS5VwtgkbmHq8Oo0fqv4?usp=sharing"
+      },
+      {
+        "path": "sources/meteorology_b/bullso_2026_key.pdf",
+        "kind": "questions_key",
+        "url": "https://drive.google.com/drive/folders/1O1duR0PqVUilIS5VwtgkbmHq8Oo0fqv4?usp=sharing"
+      },
+      {
+        "path": "sources/meteorology_b/noaa_thunderstorm_ingredients.html",
+        "kind": "authority",
+        "url": "https://www.nesdis.noaa.gov/about/k-12-education/severe-weather/what-causes-thunderstorm"
+      },
+      {
+        "path": "sources/meteorology_b/nws_radar.html",
+        "kind": "authority",
+        "url": "https://www.weather.gov/mkx/using-radar"
+      },
+      {
+        "path": "sources/meteorology_b/noaa_hurricane_hazards.html",
+        "kind": "authority",
+        "url": "https://www.nhc.noaa.gov/prepare/hazards.php"
+      }
+    ]
+  }
+}

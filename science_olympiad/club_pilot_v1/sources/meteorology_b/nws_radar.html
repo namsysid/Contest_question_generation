@@ -1,0 +1,902 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<title>Using and Understanding Doppler Radar</title>
+<meta name="DC.title" content="Using and Understanding Doppler Radar" />
+<meta name="DC.description" content="NOAAs National Weather Service, Milwaukee/Sullivan, WI" />
+<meta name="DC.creator" content="US Department of Commerce, NOAA, National Weather Service" />
+<meta name="DC.date.created" scheme="ISO8601" content="December 18th 2018 1:16 AM" />
+<meta name="DC.language" scheme="DCTERMS.RFC1766" content="EN-US" />
+<meta name="DC.keywords" content="NWS, MKX, news, mkx, kmke, Milwaukee, Madison, Sullivan, wi, Wisconsin" />
+<meta name="DC.publisher" content="NOAA's National Weather Service" />
+<meta name="DC.contributor" content="National Weather Service" />
+<meta name="DC.rights" content="/disclaimer.php" />
+<meta name="rating" content="General" />
+<meta name="robots" content="index,follow" />
+
+
+        <link href="/css/weatherstyle.css" rel="stylesheet" type="text/css" />
+        <link href="/css/template.css" rel="stylesheet" type="text/css" />
+        <link href="/css/myfcst.css" rel="stylesheet" type="text/css" />
+        <link href="/css/ForecastSearch.css" rel="stylesheet" type="text/css" />
+        <link href="/css/pointforecast.css" rel="stylesheet" type="text/css" />
+        <link href="/css/jqueryui10_3_1custom/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="/js/jquery-1.10.2.min.js"></script>        <script type="text/javascript" src="/js/jquery-ui-1.10.3.custom.min.js"></script>        <script type="text/javascript" src="/js/jquery.hoverIntent.minified.js"></script>        <script type="text/javascript" src="/js/ForecastSearch.js"></script>        <script type="text/javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&sub-agency=NOAA&yt=true&pga4=G-736JJ6NL0V"></script>        <script type="text/javascript" src="/js/topNavMenu.js"></script>        <script type="text/javascript" src="/js/NidsESRI.js"></script>        <script type="text/javascript" src="/js/nwsexit.js"></script>
+
+
+        <link href="/css/widgets.css" rel="stylesheet" type="text/css" />
+        <link href="/css/colorbox/colorbox.css" rel="stylesheet" type="text/css" />
+        
+        <script type="text/javascript" src="/js/widgets.js"></script>
+        <script type="text/javascript" src="/js/jquery.cycle2.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.colorbox-min.js"></script>
+        <script type="text/javascript" src="/js/nwsexit.js"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-736JJ6NL0V"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+            gtag('config', 'G-736JJ6NL0V');
+            gtag('config', 'UA-60219664-1');
+    </script>
+
+<script>
+$(document).ready(function() {
+  $('img.nocache').each(function () {
+      var $this = $(this);
+      $this.attr('src', noCache($this.attr('src')));
+  });
+});
+function noCache(url) {
+  return url + (url.indexOf('?') >= 0 ? '&nocache=' : '?') + $.now();
+}
+</script>
+
+    </head>
+    <body> 
+        
+
+        <div class="header">
+    <div class="header-content">
+        <a href="https://www.weather.gov" class="header-nws"><img src="/bundles/templating/images/header/header.png" alt="National Weather Service"/></a>
+        <a href="http://www.commerce.gov" class="header-doc"><img src="/bundles/templating/images/header/header_doc.png" alt="United States Department of Commerce"/></a>
+        <a href="http://www.noaa.gov" class="header-noaa" title="National Oceanic and Atmospheric Administration"></a>
+    </div>
+    <div style="clear:both"></div>
+</div>
+<div class="header-shadow">
+    <div class="header-shadow-content"></div>
+</div>
+<script>
+    var domains = {
+        weather: "https://www.weather.gov",
+        forecast: "https://forecast.weather.gov",
+        airquality: "https://airquality.weather.gov",
+        aviation: "https://aviationweather.gov",
+        water: "https://water.weather.gov",
+        graphical: "https://graphical.weather.gov",
+        api: "https://api.weather.gov",
+        radar: "https://radar.weather.gov",
+        esriGeocode: "https://geocode.arcgis.com"
+    }
+</script>
+
+
+        <div class="center">
+
+            <div class="content">
+    <div class="topnav">
+        <ul id="topnav">
+            <li>
+                <script type="text/javascript">
+                    function goBack() {
+                        if (document.referrer.toLowerCase().indexOf("weather.gov") != -1) {
+                            history.back();
+                        } else {
+                            document.location.href = "https://www.weather.gov";
+                        }
+                    }
+                </script>
+                <div class="topMenuNavList home">
+                    <a href="#" onclick="goBack();">HOME</a>
+                </div>
+            </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/forecastmaps/">FORECAST</a>
+                    </div>
+                                                                        <div style="opacity: 0;" class="sub">
+                                <ul>
+                                                                            <li>
+                                            <a href="https://www.weather.gov">Local</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://digital.weather.gov">Graphical</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://aviationweather.gov">Aviation</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/marine/">Marine</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://water.noaa.gov">Rivers and Lakes</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.nhc.noaa.gov">Hurricanes</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.spc.noaa.gov">Severe Weather</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/fire/">Fire Weather</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://gml.noaa.gov/grad/solcalc/">Sunrise/Sunset</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.cpc.ncep.noaa.gov">Long Range Forecasts</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.cpc.ncep.noaa.gov">Climate Prediction</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.swpc.noaa.gov">Space Weather</a>
+                                        </li>
+                                                                    </ul>
+                            </div>
+                                                            </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/wrh/climate">PAST WEATHER</a>
+                    </div>
+                                                                        <div style="opacity: 0;" class="sub">
+                                <ul>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/wrh/climate">Past Weather</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://gml.noaa.gov/grad/solcalc/">Astronomical Data</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.climate.gov/maps-data/dataset/past-weather-zip-code-data-table">Certified Weather Data</a>
+                                        </li>
+                                                                    </ul>
+                            </div>
+                                                            </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/safety/">SAFETY</a>
+                    </div>
+                                                                                </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/informationcenter">INFORMATION</a>
+                    </div>
+                                                                        <div style="opacity: 0;" class="sub">
+                                <ul>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/wrn/wea">Wireless Emergency Alerts</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/wrn/">Weather-Ready Nation</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/owlie/publication_brochures">Brochures</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/coop/">Cooperative Observers</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/briefing/">Daily Briefing</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/hazstat">Damage/Fatality/Injury Statistics</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="http://mag.ncep.noaa.gov">Forecast Models</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/gis/">GIS Data Portal</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/nwr">NOAA Weather Radio</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/publications/">Publications</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/skywarn/">SKYWARN Storm Spotters</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/stormready">StormReady</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/tsunamiready/">TsunamiReady</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/notification/">Service Change Notices</a>
+                                        </li>
+                                                                    </ul>
+                            </div>
+                                                            </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/education/">EDUCATION</a>
+                    </div>
+                                                                                </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/news">NEWS</a>
+                    </div>
+                                                                                </li>
+                            <li>
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/search/">SEARCH</a>
+                    </div>
+                                            <div style="opacity: 0;" class="sub">
+                            <ul class="no-links">
+                            <li><!-- Begin search code -->
+                                <div id="site-search">
+                                    <form method="get" action="https://search.usa.gov/search" style="margin-bottom: 0; margin-top: 0;">
+                                        <input type="hidden" name="v:project" value="firstgov" />
+                                        <label for="query">Search For</label>
+                                        <input type="text" name="query" id="query" size="12" />
+                                        <input type="submit" value="Go" />
+                                        <p>
+                                            <input type="radio" name="affiliate" checked="checked" value="nws.noaa.gov" id="nws" />
+                                            <label for="nws" class="search-scope">NWS</label>
+                                            <input type="radio" name="affiliate" value="noaa.gov" id="noaa" />
+                                            <label for="noaa" class="search-scope">All NOAA</label>
+                                        </p>
+                                    </form>
+                                </div>
+                            </li>
+                            </ul>
+                        </div>
+                                    </li>
+                            <li class="last">
+                    <div class="topMenuNavList section-link">
+                        <a href="https://www.weather.gov/about/">ABOUT</a>
+                    </div>
+                                                                        <div style="opacity: 0;" class="sub">
+                                <ul>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/about/">About NWS</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/organization">Organization</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://sites.google.com/a/noaa.gov/nws-insider/">For NWS Employees</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/ncep/">National Centers</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.noaa.gov/nws-careers">Careers</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/contact">Contact Us</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://forecast.weather.gov/glossary.php">Glossary</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.weather.gov/socialmedia">Social Media</a>
+                                        </li>
+                                                                            <li>
+                                            <a href="https://www.noaa.gov/NWStransformation">NWS Transformation</a>
+                                        </li>
+                                                                    </ul>
+                            </div>
+                                                            </li>
+                    </ul>
+    </div>
+</div>
+
+
+            <div class="center-content">
+                <div id="zipcity_news">
+                    <div class="one-sixth-first">
+    <div id="forecast-lookup">
+        <form name="getForecast" id="getForecast" action="https://forecast.weather.gov/zipcity.php" method="get">
+            <label for="inputstring">Local forecast by <br />"City, St" or ZIP code</label>
+            <input id="inputstring" name="inputstring" type="text" value="Enter location ..." onclick="this.value=''" />
+            <input name="btnSearch" id="btnSearch" type="submit" value="Go" />
+            <div id="txtError">
+                <div id="errorNoResults" style="display:none;">Sorry, the location you searched for was not found. Please try another search.</div>
+                <div id="errorMultipleResults" style="display:none">Multiple locations were found. Please select one of the following:</div>
+                <div id="errorChoices" style="display:none"></div>
+                <input id="btnCloseError" type="button" value="Close" style="display:none" />
+            </div>
+            <div id="txtHelp"><a style="text-decoration: underline;" href="javascript:void(window.open('https://www.weather.gov/ForecastSearchHelp.html','locsearchhelp','status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=1,scrollbars=1,height=500,width=530').focus());">Location Help</a></div>
+        </form>
+    </div>
+</div>
+
+                        <div class="five-sixth-last">
+                    <style type="text/css">
+                #topnews.important {
+                    background-color: #d2d2d2;
+                    height: 100%;
+                    margin-bottom: 5px;
+                    position: relative;
+                }
+
+                #topnews .icon {
+                    display: none;
+                }
+
+                #topnews.important .icon {
+                    background-color: #135997;
+                    display: table-cell;
+                    height: 100%;
+                    text-align: center;
+                    vertical-align: middle;
+                    width: 80px;
+                }
+
+                #topnews.important .body {
+                    color: #141414;
+                    display: table-cell;
+                    padding: 10px;
+                }
+            </style>
+            <div id="topnews">
+                <div class="icon"><img src="/bundles/templating/images/top_news/important.png"></div>
+                <div class="body">
+                    <h1 style="font-size: 11pt;">Dangerous Heat and Heavy Rainfall into the Weekend</h1>
+                    <p>
+                        Hot temperatures and high humidity are forecast to continue across the mid-Mississippi Valley into this weekend. Heat Advisories remain in effect. Heavy to excessive rainfall occurring at times through the weekend could bring areas of flooding to parts of the northern Rockies, upper Midwest, central Great Lakes, and southern New England.
+                                                                            <a href="http://www.wpc.ncep.noaa.gov/discussions/hpcdiscussions.php?disc=pmdspd" target="_blank">Read More &gt;</a>
+                                            </p>
+                </div>
+            </div>
+            </div>
+
+                </div>
+                <div class="full-width-bordertop">
+                    <div class="div-full">
+
+                        <!-- area for the myforecast widget and wwamap data -->
+                        <div class="one-sixth-first" id="sidebar">
+                            <script type="text/javascript" src="/js/jquery-cookie.js"></script>
+<script type="text/javascript" src="/js/MyForecastWidget.js"></script>
+<div id="myfcst-widget">
+    <div id="myfcst">
+        <form id='myfcst-form' action='/widgets/MyForecastWidget.php'>
+            <span id="myfcst-title">Customize Your <strong>Weather.gov</strong></span>
+            <div id="myfcst-input-block">
+                <input type="text" name="myfcst-location-input" id="myfcst-location-input" value="City, ST" />
+                <label for="myfcst-location-input">Enter Your City, ST or ZIP Code</label><br />
+                <input type="checkbox" name="myfcst-remember" id="myfcst-remember" />
+                <label for="myfcst-remember">Remember Me</label>
+            </div>
+            <div class="myfcst-footer">
+                <input type="submit" value="Get Weather" id="myfcst-submit" />
+                <p class="myfcst-policy"><a href="/privacy.php">Privacy Policy</a></p>
+            </div>
+        </form>
+        <div id="myfcst-fcst"></div>
+        <div id="myfcst-multi-result"></div>
+        <div id="myfcst-loading">LOADING...</div>
+    </div>
+</div>
+
+                            
+                        </div><!-- end of <div class="one-sixth-first"> -->
+
+                        <div class="five-sixth-first" id="pagebody">
+                            <div class="div-full breadcrumb">
+    <div class="sitename">
+        <p class="sitename-name">Milwaukee/Sullivan, WI</p>
+        <p class="sitename-class">Weather Forecast Office</p>
+    </div>
+    <div class="location">
+        <h1 class='location-pagetitle'>Using and Understanding Doppler Radar</h1>
+        <div class='location-breadcrumb'>
+            <a href="https://www.weather.gov">Weather.gov</a>
+                                                &gt; <a href="https://www.weather.gov/mkx">Milwaukee/Sullivan, WI</a>
+                                &gt; Using and Understanding Doppler Radar
+                    </div>
+    </div>
+</div>
+
+                            <div class="div-full">
+    <div class="subMenuNav">
+        <ul id="subMenuNav">
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="https://forecast.weather.gov/product.php?site=NWS&amp;issuedby=MKX&amp;product=HWO">Current Hazards</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/erh/ghwo?wfo=mkx"> Experimental Graphical Hazardous Weather Outlook</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://forecast.weather.gov/product.php?site=MKX&amp;issuedby=MKX&amp;product=LSR&amp;format=CI&amp;version=1&amp;glossary=1"> Storm and Precipitation Reports</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://www.weather.gov/crh/outlooks"> Outlooks</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/crh/stormreports?sid=mkx"> Submit a Storm Report</a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="/">Current Conditions</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="https://www.star.nesdis.noaa.gov/GOES/wfo.php?wfo=mkx"> Satellite</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://www.weather.gov/source/crh/snowmap.html?sid=mkx"> Local Snowfall Reports</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://www.weather.gov/source/crh/icemap.html?sid=mkx"> Local Ice Accumulation Reports</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://water.noaa.gov/precip/"> Observed Precipitation</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/crh/snowfall"> Snowfall Analysis</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/wrh/hazards?obs=true&amp;wfo=mkx"> Observations</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://www.weather.gov/source/crh/lsrmap.html?sid=mkx"> Local Storm Reports</a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="https://radar.weather.gov">Radar</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="https://radar.weather.gov/?settings=v1_eyJhZ2VuZGEiOnsiaWQiOiJsb2NhbCIsImNlbnRlciI6Wy04OC41NTEsNDIuOTY4XSwiem9vbSI6OC4xMjY4NzU3MjE4MDM4MiwiZmlsdGVyIjoiV1NSLTg4RCIsImxheWVyIjoiYnJlZl9yYXciLCJzdGF0aW9uIjoiS01LWCIsInRyYW5zcGFyZW50Ijp0cnVlLCJhbGVydHNPdmVybGF5Ijp0cnVlLCJzdGF0aW9uSWNvbnNPdmVybGF5Ijp0cnVlfSwiYmFzZSI6InN0YW5kYXJkIiwiY291bnR5IjpmYWxzZSwiY3dhIjpmYWxzZSwic3RhdGUiOmZhbHNlLCJtZW51Ijp0cnVlLCJzaG9ydEZ1c2VkT25seSI6dHJ1ZX0%3D#/"> Local Enhanced Radar</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/radarliteloop?radarid=KMKX"> Local Standard Radar (low bandwidth)</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://radar.weather.gov/region/centgrlakes/standard"> Regional Standard Radar (low bandwidth) </a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="#">Forecasts</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/crh/pqpf?sid=mkx"> Experimental Probabilistic Quantitative Precipitation Forecast</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.wpc.ncep.noaa.gov/heatrisk/?wfo=mkx"> Experimental Heat Risk</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/fire"> Fire Weather</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/winter"> Winter Weather</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://forecast.weather.gov/product.php?site=MKX&amp;issuedby=MKX&amp;product=AFD&amp;format=CI&amp;version=1&amp;glossary=1"> Forecast Discussion</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://forecast.weather.gov/gridpoint.php?site=mkx&amp;TypeDefault=graphical"> Hourly Forecasts</a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="https://water.noaa.gov/wfo/mkx">Rivers and Lakes</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="https://water.noaa.gov/wfo/mkx"> National Water Prediction Service (NWPS)</a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="https://www.weather.gov/wrh/climate?wfo=mkx">Climate and Past Weather</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="/mkx/events"> Event Summaries</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/wrh/climate?wfo=mkx"> Local</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.climate.gov/"> NOAA Climate Service</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="http://www.drought.gov/drought/"> Drought</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/mkx/Climate_Data"> Climate Stats for Southern Wisconsin</a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                            <li>
+                    <div class="subMenuNavList section-link">
+                        <a href="/mkx/">Local Programs</a>
+                    </div>
+                                            <div class="sub">
+                            <ul>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/crh/publications"> Publications</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/blog"> Blog</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/observations"> Current Conditions</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/summer-information"> Summer Weather</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/winter"> Winter Weather</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/local-marine"> Marine Forecasts</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/mkx/SwimmingSafelyOnTheGreatLakes"> Beach Hazards </a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/aviation"> Aviation Forecasts</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/drought"> Drought Information for Wisconsin</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/Climate_Data"> Climate Data - New Page</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/Climate_Maps"> Local Climate Graphics/Data</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/crh/pqpf?sid=mkx"> Probabilistic QPF</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://www.weather.gov/erh/ghwo?wfo=mkx"> Experimental Graphical Hazardous Weather Outlook</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/tp"> List of Text Products</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/nwr"> NOAA Weather Radio</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="/mkx/local-page"> More Local Information</a>
+                                    </li>
+                                                                    <li>
+                                        <a href="https://storymaps.arcgis.com/collections/6bbf3d019b2843df93567659a75ba728"> About Our Office</a>
+                                    </li>
+                                                            </ul>
+                        </div>
+                                    </li>
+                    </ul>
+    </div>
+</div>
+
+
+                            
+                            
+                            
+                            <div class="div-full">
+<div class="cms-content"><table border="0" cellpadding="10">
+	<tbody>
+		<tr>
+			<td valign="middle"><img align="left" alt="picture of our office" src="/images/mkx/images/radar/office3.jpg" /></td>
+			<td valign="middle"><strong><font color="#003366" size="5"><u>Using and Understanding<br />
+			Doppler Weather Radar</u></font></strong></td>
+		</tr>
+	</tbody>
+</table>
+
+<table width="450">
+	<tbody>
+		<tr>
+			<td>
+			<p><font color="#ff0000" face="Comic Sans MS" size="4"><strong>Radar basics and the doppler shift</strong></font></p>
+
+			<p><strong><font size="2">NEXRAD (Next Generation Radar) obtains weather information (precipitation and wind) based upon returned energy. The radar emits a burst of energy (green in the animated image). If the energy strikes an object (rain drop, snowflake, hail, bug, bird, etc), the energy is scattered in all directions (blue). Note: it&#39;s a small fraction of the emitted energy that is&nbsp;scattered&nbsp;directly back toward the radar.</font></strong></p>
+
+			<p><a href="https://www.weather.gov/jetstream/doppler_intro"><strong><font face="Comic Sans MS" size="4">Learn about the Radar Beam here</font></strong></a></p>
+
+			<p><img align="right" alt="radar animation" src="/images/mkx/images/radar/radarops.gif" /><strong><font size="2">This reflected signal is then received by the radar during its listening period. Computers analyze the strength of the returned pulse, time it took to travel to the object and back, and phase, or doppler&nbsp;shift of the pulse. This process of emitting a signal, listening for any returned signal, then emitting the next signal, takes place very fast, up to around 1300 times each second!</font></strong></p>
+
+			<p><strong><font size="2">NEXRAD spends the vast amount of time &quot;listening&quot; for returning signals it sent. When the time of all the pulses each hour are totaled (the time the radar is actually transmitting), the radar is &quot;on&quot; for about 7 seconds each hour. The remaining 59 minutes and 53 seconds are spent listening for any returned signals.</font></strong></p>
+
+			<p><strong><font face="Comic Sans MS" size="4"><a href="https://www.weather.gov/jetstream/vcp_max">Learn about the different scanning modes of the Radar here</a></font></strong></p>
+
+			<p><strong><font size="2">The ability to detect the &quot;shift in the phase&quot; of the pulse of energy makes NEXRAD a Doppler radar. The phase of the returning signal typically changes based upon the motion of the raindrops (or bugs, dust, etc.). This Doppler effect was named after the Austrian physicist, Christian Doppler, who discovered it. You have most likely experienced the &quot;Doppler effect&quot; around trains.</font></strong></p>
+
+			<p><strong><font size="2">As a train passes your location, you may have noticed the pitch in the train&#39;s whistle changing from high to low. As the train approaches, the sound waves that make up the whistle are compressed making the pitch higher than if the train was stationary. Likewise, as the train moves away from you, the sound waves are stretched, lowering the pitch of the whistle. The faster the train moves, the greater the change in the whistle&#39;s pitch as it passes your location.</font></strong></p>
+
+			<p><strong><font size="2">The same effect takes place in the atmosphere as a pulse of energy from NEXRAD strikes an object and is reflected back toward the radar. The radar&#39;s computers measure the phase change of the reflected pulse of energy which then convert that change to a velocity of the object, either toward or from the radar. Information on the movement of objects either toward or away from the radar can be used to estimate the speed of the wind. This ability to &quot;see&quot; the wind is what enables the National Weather Service to detect the formation of tornados which, in turn, allows us to issue tornado warnings with more advanced notice.</font></strong></p>
+
+			<table border="0">
+				<tbody>
+					<tr>
+						<td>
+						<p><img alt="image of doppler shift" src="/images/mkx/images/radar/dopplershift.jpg" /><br />
+						In the image above, the grey line is the transmitted signal. You can see how<br />
+						the returned energy changes its wavelength characteristics when it hits<br />
+						a target moving away or toward the radar (red and&nbsp;green line, respectively)</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p>&nbsp;</p>
+
+			<hr />&nbsp;&nbsp;<font size="4"><font color="#ff0000" face="Comic Sans MS"><strong>Now, let&#39;s look at the radar data</strong></font></font>
+
+			<p>&nbsp;</p>
+
+			<center><a href="/images/mkx/images/radar/reflvel.jpg"><img alt="image of reflectity and velocity data" border="no" src="/images/mkx/images/radar/reflvel-sml.jpg" /></a>
+
+			<p><strong><font size="2"><font color="#0000ff">There are two main types of data, Velocity and Reflectivity.</font> </font></strong></p>
+			</center>
+
+			<p><strong><font size="2">Reflectivity data shows us the strength of the energy that is returned to the radar after it bounces off precipitation targets. Other non-precipitation targets will return energy, but for now, we will only deal with the precipitation. In general, the stronger the returned energy, the heavier the precipitation.&nbsp; <a href="https://www.weather.gov/jetstream/refl"><font face="Comic Sans MS" size="4">Learn more about Reflectivity here</font></a>.</font></strong></p>
+
+			<p><strong><font size="2">Velocity data is derived from the phase, or doppler shift of the returned energy. The radar&#39;s computers will calculate the shift and determine whether the precipitation is moving toward or away from the radar, and how fast, then apply a corresponding color to those directions and speeds. Red is typically a target moving away from the radar, while green is applied to targets moving toward the radar. The intensity of these colors determines its estimated speed.&nbsp; <a href="https://www.weather.gov/jetstream/vel"><font face="Comic Sans MS" size="4">Learn more about Velocity here</font></a>.</font></strong></p>
+
+			<p><strong><font size="2">In the image above, you can see the velocity data that is&nbsp;associated with a strong storm depicted in the reflectivity data.&nbsp; This is a great example of what a tornado looks like in the velocity display.&nbsp; Click on the image for better detail. The radar is located to the southeast, or to the bottom right of the computer screen.&nbsp;&nbsp; Note the&nbsp;bright red, or strong outbound velocities right next to the bright green, or inbound velocities.&nbsp;&nbsp;This indicates a strongly rotating column of air.&nbsp; When coupled with a reflectivity pattern that exhibits a hook signature, as in this case, there is often a tornado occurring or about to occur.&nbsp;&nbsp;</font></strong>&nbsp;</p>
+
+			<p><strong><font color="#ff0000" face="Comic Sans MS" size="4">Sometimes the WSR-88D Doppler Radar sees non-precipitation targets</font></strong></p>
+
+			<p><strong>If there is a &quot;target&quot; out there and it reflects radar energy back to the radar, the radar will display it as if it was precipitation.&nbsp; The radar does have some logic built in to help it&nbsp;discriminate between&nbsp;precipitation and non-precipitation targets.&nbsp; But, sometimes we see curious things on our radar display.&nbsp;&nbsp;Here are a few:</strong></p>
+
+			<p><a href="/images/mkx/images/radar/birdanimation.gif"><img align="left" alt="image of bird roost rings" border="no" src="/images/mkx/images/radar/birdanimation-sml.gif" /></a><font size="3"><strong><font color="#993300">Bird Roost Rings</font>.&nbsp; These are most common in the fall around bodies of water that typically have temperatures&nbsp;warmer than the surrounding land at night.&nbsp; It is also the time birds are gathering for the seasonal migration.&nbsp; At night, birds rest/nest in and around the lakes.&nbsp;&nbsp;Just before&nbsp;sunrise, there is often a coordinated lift off&nbsp;and dispersion&nbsp;of the birds out into the surrounding fields for feeding during the day.&nbsp; Click on the image to the left for a quick animation of the bird rings.</strong></font></p>
+
+			<p>&nbsp;</p>
+
+			<hr />&nbsp;
+			<table border="0">
+				<tbody>
+					<tr>
+						<td align="center"><a href="/images/mkx/images/radar/ap.jpg"><img alt="anomalous propagation image" border="no" src="/images/mkx/images/radar/ap-sml.jpg" /></a><br />
+						Anomalous Propagation</td>
+						<td align="center"><a href="/images/mkx/images/radar/terrain.jpg"><img alt="image of terrain" border="no" src="/images/mkx/images/radar/terrain-sml.jpg" /></a><br />
+						Terrain</td>
+						<td align="center"><a href="/images/mkx/images/radar/ap-terrain.jpg"><img alt="image of AP and Terrain Together" border="no" src="/images/mkx/images/radar/ap-terrain-sml.jpg" /></a><br />
+						AP &amp; Terrain</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<p>&nbsp;</p>
+			<font color="#993300" size="3"><strong>Anomalous Propagation</strong></font>. <strong><font size="3">Based on our understanding of </font></strong><a href="https://www.weather.gov/jetstream/beam_max"><strong><font size="3">Radar Beam Characteristics</font></strong></a><strong><font size="3">, we expect the radar beam to leave the radar and propagate through the atmosphere in a standard way.&nbsp; Sometimes though, the atmosphere will cause the beam to superrefract or duct through the atmosphere.&nbsp; When this happens, the beam will sometimes bend downward causing some of the radar energy to hit the ground and return energy back to the radar, generating Anomalous Propagation (AP).&nbsp; The three images above show an interesting case.&nbsp; In the first image on the left, the circled area shows isolated AP.&nbsp; The middle image is a terrain map of southern Wisconsin.&nbsp; The image on the right shows the AP overlaid on the terrain map.&nbsp; Note how the high terrain of the Baraboo hills is highlighted by the radar.&nbsp; We know this is AP since we confirmed through satellite and other observations that skies were clear.</font></strong>
+
+			<hr />
+			<p><a href="/images/mkx/images/radar/windfarm.jpg"><img align="left" alt="image of wind farm on radar" border="no" src="/images/mkx/images/radar/windfarm-sml.jpg" /></a><font size="3"><strong><font color="#993300">Wind Farm Interference</font>. Wind farms can impact Doppler radars in three ways if the turbine blades are moving and they are within the radar&rsquo;s line of sight. If close enough (within a few kilometers) they can partially block a significant percentage of the beam and attenuate data down range of the wind farm. They can also reflect energy back to the radar and appear as clutter (AP) on the radar image and contaminate the base reflectivity data. The reflectivity data is used by radar algorithms to estimate rainfall and to detect certain storm characteristics. Finally, they can impact the velocity data, which are also used by radar operators and by a variety of algorithms in the radar&rsquo;s data processors to detect certain storm characteristics, such as mesocyclones, relative storm motion, turbulence, etc.&nbsp; <a href="/mkx/windfarm"><font color="#ff0000">Learn more here</font></a>.</strong></font></p>
+
+			<hr />
+			<p><a href="/images/mkx/images/radar/sunsetspike.gif"><img align="left" alt="image of sun spike on radar" border="no" src="/images/mkx/images/radar/sunsetspike-sml.gif" /></a><font size="3"><strong><font color="#993300">Sun&nbsp;Interference</font>. Twice a day, at sunrise and sunset, the radar experiences interference from the electromagnetic energy emitted by the sun.&nbsp;&nbsp; There is a point at sunrise and sunset where the radar dish points directly at the sun and is hit with this energy.&nbsp; This is then displayed as a spike of returned energy on our display.&nbsp; It is brief, typically only occurring during one volume scan.&nbsp; Notice in the image to the left that&nbsp;sunset is slightly south of due west.&nbsp; The date is March 11, 2009.&nbsp; In less than 2 weeks, we will be at the Spring Equinox.&nbsp; The sun will set due west of the radar.&nbsp; </strong></font></p>
+
+			<p>&nbsp;</p>
+
+			<hr />
+			<p><a href="/images/mkx/images/radar/smokeanimation.gif"><img align="left" alt="image of smoke plumes on radar" border="no" src="/images/mkx/images/radar/smokeplumes_sml.gif" /></a><font color="#993300" size="3"><strong>Smoke Plumes</strong></font>. <strong><font size="3">During dry periods, when there is controlled burning or uncontained wildfires going on, our radar will detect smoke plumes associated with the fires. Many of the big smoke plumes are from prescribed, or controlled burns. These are fires intentionally set by Federal/State/Local officials for land management purposes. Other fires may be on private lands. The two plumes in this example (click on image for an animation) were prescribed burns by the Wisconsin DNR. </font></strong></p>
+
+			<p>&nbsp;</p>
+
+			<hr /></td>
+		</tr>
+	</tbody>
+</table>
+
+</div>
+</div>
+<div style="clear:both"></div>
+                        </div>
+
+                    </div><!-- end of <div class="partial-width-borderbottom"> -->
+   
+                </div><!-- <div class="full-width-border"> -->
+           
+                <!-- area for features, frontpage thumbs, and custom page -->
+                
+                
+                <!-- end of <div class="partial-width-borderbottom feature-block"> -->
+                
+                <div class="full-width-bordertop">
+                    <div class="full-width-first communication-links">
+        <div class ="one-sixth-first divs">
+        <div class="myforecast-current">
+            <a style="text-decoration:none;" href="https://www.twitter.com/NWSMilwaukee" target="_blank">
+                <img src="/bundles/templating/images/social/x.png" width="16" alt="Follow us on X" height="16" />&nbsp;&nbsp;Follow us on X
+            </a>
+        </div>
+    </div>
+        <div class ="one-sixth-first divs">
+        <div class="myforecast-current">
+            <a style="text-decoration:none;" href="https://www.facebook.com/NWSMilwaukee" target="_blank">
+                <img src="/bundles/templating/images/social/facebook.png" width="16" alt="Follow us on Facebook" height="16" />&nbsp;&nbsp;Follow us on Facebook
+            </a>
+        </div>
+    </div>
+        <div class ="one-sixth-first divs">
+        <div class="myforecast-current">
+            <a style="text-decoration:none;" href="https://www.youtube.com/user/NWSMilwaukee" target="_blank">
+                <img src="/bundles/templating/images/social/youtube.png" width="16" alt="Follow us on YouTube" height="16" />&nbsp;&nbsp;Follow us on YouTube
+            </a>
+        </div>
+    </div>
+    <div class ="one-half-last nopad">
+        <span class="txt-rt myforecast-current">
+            <div class="myforecast-current">
+                <a href="/rss_page.php?site_name=mkx" target="_blank" style="text-decoration:none;font-size:11px;">
+                    <img src="/bundles/templating/images/social/rss.png" width="16" height="16" alt="MKX RSS Feed" />&nbsp;&nbsp;MKX RSS Feed
+                </a>
+            </div>
+        </span>
+    </div>
+</div>
+<div style="clear:both;"></div>
+
+
+                </div>
+
+
+                <div style="clear:both;"></div>
+
+            </div><!-- <div class="center-content"> -->
+
+        </div><!-- end of <div class="center"> -->
+
+        <!-- sitemap area -->
+        <div class="footer">
+            <style type="text/css">
+    .footer-column-head a:link, .footer-column-head a:visited {
+        color: #ED7A08;
+    }
+</style>
+<div class="footer-content">
+            <div class="footer-column" style="padding:10px 10px;">
+                                                            <p>
+                        <span class="footer-column-head">
+                            <a href="http://forecast.weather.gov/hazards/?wfo=mkx">Hazards</a>
+                        </span><br />
+                                                    <a href="http://www.weather.gov/briefing/">National Briefing</a><br />
+                                                    <a href="http://forecast.weather.gov/product.php?site=MKX&amp;product=HWO&amp;issuedby=MKX">Hazardous Weather Outlook</a><br />
+                                                    <a href="/mkx/skywarn-spotters">Skywarn</a><br />
+                                                    <a href="http://forecast.weather.gov/product.php?site=MKX&amp;issuedby=MKX&amp;product=LSR&amp;format=CI&amp;version=1&amp;glossary=1">View Local Storm Reports</a><br />
+                                                    <a href="https://www.weather.gov/crh/stormreports?sid=mkx">Submit A Storm Report</a><br />
+                                                    <a href="/mkx/winter-weather">Winter Weather</a><br />
+                                                    <a href="/mkx/summer-information">Summer Weather</a><br />
+                                                    <a href="https://www.weather.gov/greatlakes/beachhazards#mkx">Beach Hazards</a><br />
+                                            </p>
+                                    </div>
+            <div class="footer-column" style="padding:10px 10px;">
+                                                            <p>
+                        <span class="footer-column-head">
+                            <a href="/mkx/observations">Current Conditions</a>
+                        </span><br />
+                                                    <a href="/mkx/observations">Local Conditions</a><br />
+                                                    <a href="/mkx/tp">Local Text Products</a><br />
+                                            </p>
+                                    </div>
+            <div class="footer-column" style="padding:10px 10px;">
+                                                            <p>
+                        <span class="footer-column-head">
+                            <a href="/mkx">Local Forecasts</a>
+                        </span><br />
+                                                    <a href="/mkx/local-marine">Marine</a><br />
+                                                    <a href="/mkx/aviation">Aviation</a><br />
+                                                    <a href="/mkx/fire">Fire</a><br />
+                                                    <a href="/mkx/tp">Local Text Products</a><br />
+                                                    <a href="/mkx/rain-snow_forecast-graphics">Local Precip Forecast</a><br />
+                                                    <a href="http://graphical.weather.gov/sectors/mkxHourlyDay.php#tabs">Hourly Forecast Graphics</a><br />
+                                                    <a href="https://forecast.weather.gov/product.php?issuedby=MKX&amp;product=AFD&amp;site=mkx">Forecast Discussion</a><br />
+                                            </p>
+                                    </div>
+            <div class="footer-column" style="padding:10px 10px;">
+                                                            <p>
+                        <span class="footer-column-head">
+                            <a href="http://www.weather.gov/climate/index.php?wfo=mkx">Climate</a>
+                        </span><br />
+                                                    <a href="http://www.cocorahs.org/">CoCoRaHS</a><br />
+                                                    <a href="/mkx/events">Historic Events For Srn WI</a><br />
+                                                    <a href="https://www.weather.gov/mkx/lightning">Lightning Plot Archive</a><br />
+                                                    <a href="/mkx/Climate_Maps">Daily Climate Graphics</a><br />
+                                                    <a href="/mkx/Climate_Data">Local Climate Products</a><br />
+                                                    <a href="/mkx/Climate_Records">Normals/Records MKE/MSN</a><br />
+                                            </p>
+                                    </div>
+            <div class="footer-column" style="padding:10px 10px;">
+                                                            <p>
+                        <span class="footer-column-head">
+                            <a href="https://www.weather.gov/mkx/">DSS Programs</a>
+                        </span><br />
+                                                    <a href="https://www.weather.gov/mkx/CoolingShelterProbs">Milwaukee Extreme Heat Chances</a><br />
+                                                    <a href="https://www.weather.gov/mkx/WarmingShelterProbs">Warming Shelter DSS page</a><br />
+                                                    <a href="https://www.weather.gov/mkx/inland-lake-waves">In-land Lake Forecasts</a><br />
+                                                    <a href="https://www.weather.gov/greatlakes/beachhazards#mkx">Lake Michigan Beach Hazards</a><br />
+                                            </p>
+                                    </div>
+            <div class="footer-column" style="padding:10px 10px;">
+                                                            <p>
+                        <span class="footer-column-head">
+                            <a href="https://storymaps.arcgis.com/collections/6bbf3d019b2843df93567659a75ba728">About Us</a>
+                        </span><br />
+                                                    <a href="https://storymaps.arcgis.com/collections/6bbf3d019b2843df93567659a75ba728">Office Information</a><br />
+                                            </p>
+                                    </div>
+    </div>
+
+        </div><!-- end of <div class="footer"> -->
+
+        <!-- legal footer area -->
+        <div class="footer-legal">
+            <div class="footer-legal">
+    <div class="footer-legal-content">
+
+        <div class="one-sixth-first" id="footer_legal_gov">
+            <a href="http://www.usa.gov"><img src="/bundles/templating/images/footer/usa_gov.png" alt="usa.gov" width="110" height="30" /></a>
+        </div>
+
+        <div class="one-half-first" id="footer_legal_info">
+            <p>
+                <a href="http://www.commerce.gov">US Dept of Commerce</a><br />
+                <a href="http://www.noaa.gov">National Oceanic and Atmospheric Administration</a><br />
+                <a href="https://www.weather.gov">National Weather Service</a><br />
+                Milwaukee/Sullivan, WI<br />                N3533 Hardscrabble Road<br />
+                                Dousman, WI 53118
+                <br />262-965-2074<br />
+                <br /><a href="mailto:nws.milwaukee@noaa.gov">Comments? Questions? Please Contact Us.</a>
+            </p>
+        </div>
+
+        <div class="one-third-last" id="footer_required_links">
+            <div class="div-half">
+                <a href="https://www.weather.gov/disclaimer">Disclaimer</a><br />
+                <a href="http://www.cio.noaa.gov/services_programs/info_quality.html">Information Quality</a><br />
+                <a href="https://www.weather.gov/help">Help</a><br />
+                <a href="/glossary">Glossary</a>
+            </div>
+
+            <div class="div-half">
+                <a href="https://www.weather.gov/privacy">Privacy Policy</a><br />
+                <a href="https://www.noaa.gov/foia-freedom-of-information-act">Freedom of Information Act (FOIA)</a><br />
+                <a href="https://www.weather.gov/about">About Us</a><br />
+                <a href="https://www.weather.gov/careers">Career Opportunities</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div><!-- end of <div class="footer-legal"> -->
+
+        <script type="text/javascript" src="//www.weather.gov/js/govshutdown.js"></script>
+    </body>
+</html>
